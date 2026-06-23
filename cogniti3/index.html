@@ -739,102 +739,128 @@ html, body {
   pointer-events: none;
 }
 
-.m-st {
-  position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 76%;
-  max-width: 860px;
-  text-align: center;
+#manifesto-label {
+  position: fixed;
+  top: 0; left: 0;
+  font-size: clamp(56px, 9vw, 140px);
+  font-weight: 200;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  color: var(--text);
   opacity: 0;
-  font-weight: 300;
-  font-size: clamp(22px, 3vw, 48px);
-  line-height: 1.35;
-  letter-spacing: -.02em;
-  color: var(--muted);
+  pointer-events: none;
+  z-index: 260;
+  white-space: nowrap;
+}
+
+.m-beat {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
   will-change: opacity;
 }
 
-.m-problem {
-  font-weight: 400;
-  font-size: clamp(26px, 3.8vw, 62px);
-  color: var(--text);
-}
-.m-punch {
-  font-weight: 700;
-  font-size: clamp(32px, 5vw, 80px);
-  color: var(--text);
-  letter-spacing: -.035em;
-}
-.m-pivot-dim {
-  font-size: clamp(15px, 2vw, 32px);
-  color: var(--muted);
-}
-.m-pivot-bright {
-  font-weight: 600;
-  font-size: clamp(24px, 3.4vw, 56px);
-  color: var(--text);
-}
-.m-pivot-bright em {
-  font-style: normal;
-  color: var(--accent);
-}
-
-#m-stack {
+/* left column — large display text */
+.m-left {
   position: absolute;
-  top: 50%; left: 50%;
-  transform: translate(-50%, -50%);
-  width: 76%;
-  max-width: 860px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5em;
-  opacity: 0;
-}
-.m-belief {
+  left: 5vw;
+  width: 26vw;
+  max-width: 380px;
+  font-size: clamp(16px, 2.2vw, 36px);
   font-weight: 300;
-  font-size: clamp(15px, 2.1vw, 34px);
   color: var(--muted);
-  line-height: 1.5;
-  text-align: center;
+  line-height: 1.2;
+  letter-spacing: -.025em;
+  text-transform: uppercase;
+  opacity: 0;
+  will-change: transform, opacity;
+}
+.m-l-bold {
+  font-weight: 700;
+  font-size: clamp(20px, 2.8vw, 46px);
+  color: var(--text);
+}
+.m-l-sm {
+  font-size: clamp(12px, 1.4vw, 22px);
+  text-transform: none;
+  line-height: 1.6;
   letter-spacing: -.01em;
 }
-.m-stack-divider {
-  width: 24px;
-  height: 1px;
-  background: var(--accent-dim);
-  margin: 0.15em auto;
-  opacity: 0;
-}
-.m-stack-item {
+
+/* right column — body / punch text */
+.m-right {
+  position: absolute;
+  right: 5vw;
+  width: 24vw;
+  max-width: 320px;
+  font-size: clamp(13px, 1.3vw, 20px);
   font-weight: 300;
-  font-size: clamp(20px, 3vw, 50px);
   color: var(--text);
+  line-height: 1.75;
+  letter-spacing: .01em;
   opacity: 0;
-  text-align: center;
-  letter-spacing: -.02em;
+  will-change: transform, opacity;
+}
+.m-r-punch {
+  font-size: clamp(22px, 3.2vw, 52px);
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1.1;
+  letter-spacing: -.04em;
+}
+.m-r-em em {
+  font-style: normal;
+  color: var(--accent);
+  font-weight: 600;
+}
+.m-r-stack {
+  display: flex;
+  flex-direction: column;
+  gap: .35em;
+}
+.m-r-stack span {
+  font-size: clamp(12px, 1.4vw, 22px);
+  font-weight: 300;
+  color: var(--muted);
+  display: block;
 }
 .m-climax {
   font-weight: 600;
   color: var(--accent);
-  font-size: clamp(26px, 4vw, 66px);
+  font-size: clamp(18px, 2.6vw, 42px);
   letter-spacing: -.03em;
 }
 
+/* ── tablet (640–1023px) ── */
 @media (max-width: 1023px) {
-  .m-st    { width: 86%; }
-  #m-stack { width: 86%; }
+  .m-left   { width: 30vw; left: 3vw; }
+  .m-right  { width: 28vw; right: 3vw; }
+  .m-l-bold { font-size: clamp(18px, 2.5vw, 40px); }
+  .m-l-sm   { font-size: clamp(11px, 1.3vw, 20px); }
+  #manifesto-label { font-size: clamp(48px, 7.5vw, 110px); }
 }
+
+/* ── mobile (<640px): stack text at bottom, watch visible in center ── */
 @media (max-width: 639px) {
-  .m-st           { width: 92%; font-size: clamp(18px, 5.5vw, 34px); }
-  .m-problem      { font-size: clamp(20px, 6vw, 40px); }
-  .m-punch        { font-size: clamp(26px, 7.5vw, 52px); }
-  .m-pivot-dim    { font-size: clamp(13px, 4vw, 24px); }
-  .m-pivot-bright { font-size: clamp(18px, 5.5vw, 36px); }
-  .m-stack-item   { font-size: clamp(16px, 5vw, 36px); }
-  .m-climax       { font-size: clamp(20px, 6.5vw, 48px); }
-  #m-stack        { width: 92%; }
+  .m-left {
+    top: auto; bottom: 30vh;
+    left: 6vw; right: auto;
+    width: 56vw;
+    font-size: clamp(15px, 4.8vw, 26px);
+  }
+  .m-right {
+    top: auto; bottom: 10vh;
+    right: 6vw; left: auto;
+    width: 52vw;
+    font-size: clamp(12px, 3.8vw, 18px);
+  }
+  .m-l-bold  { font-size: clamp(18px, 5.5vw, 32px); }
+  .m-l-sm    { font-size: clamp(12px, 3.8vw, 20px); text-transform: none; }
+  .m-r-punch { font-size: clamp(18px, 5.5vw, 36px); }
+  .m-r-stack span  { font-size: clamp(11px, 3.5vw, 18px); }
+  .m-climax  { font-size: clamp(16px, 5vw, 30px); }
+  #manifesto-label { font-size: clamp(36px, 10vw, 56px); }
 }
 </style>
 </head>
@@ -846,6 +872,9 @@ html, body {
 
 <!-- scanlines -->
 <div id="scanlines"></div>
+
+<!-- manifesto section label -->
+<div id="manifesto-label">MANIFESTO</div>
 
 <!-- dot indicator -->
 <div id="dot-ind"></div>
@@ -1346,18 +1375,25 @@ html, body {
 
 <!-- ══ MANIFESTO — section 2 ══ -->
 <div id="manifesto">
-  <div class="m-st" id="ms0">Software connected information.</div>
-  <div class="m-st" id="ms1">Intelligence connects decisions.</div>
-  <div class="m-st m-problem" id="ms2">Organizations are drowning in data.</div>
-  <div class="m-st m-punch" id="ms3">Yet struggling to act.</div>
-  <div class="m-st m-pivot-dim" id="ms4">The future does not belong to those who collect the most information.</div>
-  <div class="m-st m-pivot-bright" id="ms5">It belongs to those who can transform <em>information into action.</em></div>
-  <div id="m-stack">
-    <div class="m-belief" id="ms6">We believe intelligence should not live inside a single application.</div>
-    <div class="m-stack-divider" id="ms-div"></div>
-    <div class="m-stack-item" id="ms7">It should exist across every interaction.</div>
-    <div class="m-stack-item" id="ms8">Every workflow.</div>
-    <div class="m-stack-item m-climax" id="ms9">Every decision.</div>
+  <div class="m-beat" id="mb0">
+    <div class="m-left">Software connected information.</div>
+    <div class="m-right">Intelligence connects decisions.</div>
+  </div>
+  <div class="m-beat" id="mb1">
+    <div class="m-left m-l-bold">Organizations are drowning<br>in data.</div>
+    <div class="m-right m-r-punch">Yet struggling<br>to act.</div>
+  </div>
+  <div class="m-beat" id="mb2">
+    <div class="m-left m-l-sm">The future does not belong to those who collect the most information.</div>
+    <div class="m-right m-r-em">It belongs to those who can transform <em>information into action.</em></div>
+  </div>
+  <div class="m-beat" id="mb3">
+    <div class="m-left m-l-sm">We believe intelligence should not live inside a single application.</div>
+    <div class="m-right m-r-stack">
+      <span>It should exist across every interaction.</span>
+      <span>Every workflow.</span>
+      <span class="m-climax">Every decision.</span>
+    </div>
   </div>
 </div>
 
@@ -1687,58 +1723,85 @@ function initManifesto() {
   document.body.appendChild(spacer);
   window.scrollTo(0, 0);
 
-  const VH = window.innerHeight;
+  const VH         = window.innerHeight;
+  const BASE_SCALE = getFinalScale();
 
-  // ── hero exit (0 → 1×VH) ──
+  // ── manifesto label: big centered → scale-to-corner ──
+  const mlEl = document.getElementById('manifesto-label');
+  const mW   = mlEl.offsetWidth;
+  const mH   = mlEl.offsetHeight;
+  gsap.set(mlEl, {
+    transformOrigin: 'top left',
+    x: (window.innerWidth - mW) / 2,
+    y: (VH - mH) / 2,
+    scale: 1,
+    opacity: 0
+  });
+  gsap.timeline({ scrollTrigger: { start: 0, end: VH * 1.3, scrub: 1.6 } })
+    .to(mlEl, { opacity: .88, duration: .22 }, 0)
+    .to(mlEl, { x: 46, y: 50, scale: 25 / mH, duration: 1.08, ease: 'power3.inOut' }, .22);
+
+  // ── hero exit (0 → 1×VH): fade ui + zoom out scene once into manifesto ──
   gsap.timeline({ scrollTrigger: { start: 0, end: VH, scrub: 1.5 } })
-    .to('#pcb-surface',                          { opacity: 0, duration: 1 }, 0)
-    .to('#pcb-traces',                           { opacity: 0, duration: 1 }, 0)
-    .to('#ruler-marks',                          { opacity: 0, duration: .7 }, 0)
-    .to('.prop',                                 { opacity: 0, duration: .5, stagger: .05 }, 0)
-    .to('#ui-brand',                             { opacity: 0, x: -22, duration: .8 }, 0)
-    .to('#ui-copy',                              { opacity: 0, x:  22, duration: .8 }, 0)
-    .to(['#sys-status','#scroll-hint','#logo-badge','#sidebar-label'],
-                                                 { opacity: 0, duration: .4 }, 0)
-    .to('#watch-wrap',                           { opacity: .22, duration: 1.2 }, .2);
+    .to('#pcb-surface',  { opacity: 0, duration: 1 }, 0)
+    .to('#pcb-traces',   { opacity: 0, duration: 1 }, 0)
+    .to('#ruler-marks',  { opacity: 0, duration: .7 }, 0)
+    .to('.prop',         { opacity: 0, duration: .5, stagger: .05 }, 0)
+    .to('#ui-brand',     { opacity: 0, x: -22, duration: .8 }, 0)
+    .to('#ui-copy',      { opacity: 0, x:  22, duration: .8 }, 0)
+    .to(['#nav','#sys-status','#scroll-hint','#logo-badge','#sidebar-label'], { opacity: 0, duration: .5 }, 0)
+    .to('#scene-inner',  { scale: BASE_SCALE * 0.68, duration: 1, ease: 'power2.inOut' }, 0)
+    .to('#watch-wrap',   { opacity: .28, duration: 1.2 }, .2);
 
-  // ── solo statements (start 1.5×VH, 1×VH each) ──
-  const STEP   = VH;
+  // ── 4 beats: left + right text flanking watch, backlight per beat ──
+  const STEP   = VH * 2;
   const MSTART = VH * 1.5;
-  const SOLOS  = ['#ms0','#ms1','#ms2','#ms3','#ms4','#ms5'];
+  const BEATS  = ['#mb0', '#mb1', '#mb2', '#mb3'];
 
-  SOLOS.forEach((sel, i) => {
+  BEATS.forEach((sel, i) => {
     const zs = MSTART + i * STEP;
     const el = document.querySelector(sel);
     if (!el) return;
+    const lEl = el.querySelector('.m-left');
+    const rEl = el.querySelector('.m-right');
+
     ScrollTrigger.create({
-      start: zs, end: zs + STEP, scrub: 1,
+      start: zs, end: zs + STEP, scrub: 1.4,
       onUpdate({ progress: p }) {
-        const op = p < .22 ? p / .22
-                 : p < .72 ? 1
-                 : 1 - (p - .72) / .28;
-        gsap.set(el, { opacity: Math.max(0, Math.min(1, op)) });
+        // opacity: ramp up first 20%, hold, ramp down last 22%
+        const op  = p < .2 ? p / .2 : p < .78 ? 1 : 1 - (p - .78) / .22;
+        const c   = Math.max(0, Math.min(1, op));
+        // slide: left in from left, right in from right
+        const raw = p < .2 ? (1 - p / .2) : p > .78 ? (p - .78) / .22 : 0;
+        const xd  = raw * 38;
+
+        gsap.set(lEl, { opacity: c, x: -xd });
+        gsap.set(rEl, { opacity: c, x:  xd });
+
+        // backlight: watch glows bright as text appears, dims as it fades
+        gsap.set('#watch-wrap', {
+          opacity: .28 + c * .62,
+          filter: `drop-shadow(0 0 ${26 + c * 92}px rgba(184,255,60,${.04 + c * .44})) drop-shadow(0 24px 60px rgba(0,0,0,.9))`
+        });
       }
     });
   });
 
-  // ── belief stack (3×VH zone) ──
-  const SS = MSTART + 6 * STEP;
+  // ── final hold glow + label fade-out (after last beat) ──
+  const glowStart = MSTART + BEATS.length * STEP;
   ScrollTrigger.create({
-    start: SS, end: SS + VH * 3, scrub: 1.2,
+    start: glowStart, end: glowStart + VH * 0.5, scrub: 1,
     onUpdate({ progress: p }) {
-      gsap.set('#m-stack', { opacity: Math.min(1, p / .15) });
-      gsap.set('#ms-div',  { opacity: Math.max(0, Math.min(1, (p - .28) / .10)) });
-      gsap.set('#ms7',     { opacity: Math.max(0, Math.min(1, (p - .38) / .14)) });
-      gsap.set('#ms8',     { opacity: Math.max(0, Math.min(1, (p - .55) / .14)) });
-      gsap.set('#ms9',     { opacity: Math.max(0, Math.min(1, (p - .72) / .14)) });
-
-      if (p > .65) {
-        const gp = (p - .65) / .35;
-        gsap.set('#watch-wrap', {
-          opacity: .22 + gp * .30,
-          filter : `drop-shadow(0 0 ${40 + gp * 52}px rgba(184,255,60,${.12 + gp * .28})) drop-shadow(0 24px 60px rgba(0,0,0,.9))`
-        });
-      }
+      gsap.set(mlEl, { opacity: Math.max(0, 1 - p * 2) });
+    }
+  });
+  ScrollTrigger.create({
+    start: glowStart, end: glowStart + VH, scrub: 1,
+    onUpdate({ progress: p }) {
+      gsap.set('#watch-wrap', {
+        opacity: .9 + p * .1,
+        filter: `drop-shadow(0 0 ${40 + p * 90}px rgba(184,255,60,${.12 + p * .45})) drop-shadow(0 24px 60px rgba(0,0,0,.9))`
+      });
     }
   });
 
