@@ -1,0 +1,17 @@
+# reference assets — tidak perlu di-push
+frames/
+
+# env & secrets
+.env
+.env.*
+!.env.example
+
+# dependencies
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Diskusi
+diskusi/

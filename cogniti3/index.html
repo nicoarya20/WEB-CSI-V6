@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Cogniti — Intelligence Infrastructure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg:        #060807;
+  --surface:   #0c150a;
+  --grid-line: #182413;
+  --accent:    #b8ff3c;
+  --accent2:   #00d4ff;
+  --accent-dim:#4a7a10;
+  --text:      #edeae2;
+  --muted:     #6a7864;
+  --handle:    #ff6b35;
+  --red:       #c0392b;
+}
+
+html, body {
+  width: 100%; height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  overflow: hidden;
+  cursor: none;
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* ─── cursor ─── */
+#cursor {
+  position: fixed;
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: exclusion;
+  transition: width .15s, height .15s;
+}
+#cursor-ring {
+  position: fixed;
+  width: 28px; height: 28px;
+  border: 1px solid rgba(184,255,60,.3);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: left .08s linear, top .08s linear;
+}
+
+/* ─── scanlines ─── */
+#scanlines {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 8000;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0px,
+    transparent 3px,
+    rgba(0,0,0,.08) 3px,
+    rgba(0,0,0,.08) 4px
+  );
+  opacity: .5;
+}
+
+/* ─── particle canvas ─── */
+#particle-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+/* ══════════════════════════════
+   PHASE 1 — logo intro
+══════════════════════════════ */
+#phase1 {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  z-index: 500;
+  background: var(--bg);
+}
+
+#brand {
+  display: flex;
+  align-items: center;
+  line-height: 1;
+}
+.bl {
+  font-family: 'Inter', sans-serif;
+  font-weight: 200;
+  font-size: 88px;
+  letter-spacing: 0.15em;
+  color: #d5d1c6;
+  line-height: 1;
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(10px);
+  will-change: transform, opacity;
+}
+#lo { color: transparent; transform: none; }
+
+#tagline {
+  font-family: 'Inter', sans-serif;
+  font-weight: 300;
+  font-size: 13px;
+  letter-spacing: 0.38em;
+  color: var(--accent-dim);
+  text-transform: uppercase;
+  opacity: 0;
+  transform: translateY(6px);
+}
+
+/* progress bar during logo reveal */
+#progress-bar {
+  position: fixed;
+  bottom: 0; left: 0;
+  height: 1px;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-dim), var(--accent));
+  z-index: 600;
+  transition: width 5.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* terminal readout */
+#terminal {
+  position: fixed;
+  bottom: 32px;
+  left: 40px;
+  z-index: 600;
+  opacity: 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--accent-dim);
+  letter-spacing: .08em;
+  line-height: 1.8;
+}
+
+/* ring */
+#ring-wrap {
+  position: fixed;
+  left: 50%; top: 50%;
+  transform: translate(-50%, -50%) scale(0.8);
+  opacity: 0;
+  will-change: transform, opacity;
+  pointer-events: none;
+  z-index: 510;
+}
+#ring-svg {
+  display: block;
+  transform: rotate(-90deg);
+  overflow: visible;
+}
+.rt { fill: none; stroke: #1a2a12; stroke-width: 10; }
+.rp { fill: none; stroke: var(--accent); stroke-width: 10; stroke-linecap: butt; }
+.rp-cyan { fill: none; stroke: var(--accent2); stroke-width: 1.5; stroke-linecap: butt; opacity: .4; }
+
+/* ══════════════════════════════
+   PHASE 2 — hero scene
+══════════════════════════════ */
+#phase2 {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* nav */
+#nav {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 22px 44px;
+  z-index: 300;
+  opacity: 0;
+}
+.nav-logo {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+.nav-links {
+  display: flex; gap: 36px; list-style: none;
+}
+.nav-links a {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color .2s;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-cta {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--bg);
+  background: var(--accent);
+  padding: 7px 18px;
+  border-radius: 100px;
+  text-decoration: none;
+}
+
+/* sidebar */
+#sidebar-label {
+  position: absolute;
+  right: -32px;
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  opacity: 0;
+}
+
+/* scene (the zoomable container) */
+#scene {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+#scene-inner {
+  position: relative;
+  width: 900px; height: 600px;
+  transform: scale(2.8);
+  transform-origin: center center;
+  will-change: transform;
+}
+
+/* PCB surface */
+#pcb-surface {
+  position: absolute;
+  inset: -80px;
+  background: var(--surface);
+  overflow: hidden;
+}
+/* grid */
+#pcb-surface::before {
+  content: '';
+  position: absolute; inset: 0;
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size: 28px 28px;
+  opacity: .8;
+}
+/* ruler */
+#pcb-surface::after {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 36px;
+  background: #090e07;
+  border-right: 1px solid var(--grid-line);
+}
+#ruler-marks {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 36px;
+  z-index: 2;
+}
+.tick {
+  position: absolute;
+  left: 22px;
+  font-family: 'Space Mono', monospace;
+  font-size: 6px;
+  color: #2a4022;
+  line-height: 1;
+}
+.tick::before {
+  content: '';
+  position: absolute;
+  right: 100%; top: 50%;
+  width: 7px; height: 1px;
+  background: #2a4022;
+  margin-right: 2px;
+}
+
+/* circuit traces on PCB (decorative) */
+#pcb-traces {
+  position: absolute;
+  inset: -80px;
+  pointer-events: none;
+  z-index: 1;
+  opacity: .25;
+}
+
+/* selection box */
+#selection-box {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 340px; height: 340px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 20;
+}
+.sel-border {
+  position: absolute; inset: 0;
+  border: 1.5px dashed var(--handle);
+}
+.sel-handle {
+  position: absolute;
+  width: 8px; height: 8px;
+  background: var(--handle);
+  border-radius: 1px;
+  transform: translate(-50%, -50%);
+}
+.sel-handle.tl{top:0;left:0} .sel-handle.tc{top:0;left:50%} .sel-handle.tr{top:0;left:100%}
+.sel-handle.ml{top:50%;left:0} .sel-handle.mr{top:50%;left:100%}
+.sel-handle.bl{top:100%;left:0} .sel-handle.bc{top:100%;left:50%} .sel-handle.br{top:100%;left:100%}
+
+/* watch */
+#watch-wrap {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 300px; height: 300px;
+  z-index: 10;
+  filter: drop-shadow(0 0 40px rgba(184,255,60,.12)) drop-shadow(0 24px 60px rgba(0,0,0,.9));
+}
+
+/* gear animations */
+@keyframes spin-cw  { to { transform: rotate(360deg);  } }
+@keyframes spin-ccw { to { transform: rotate(-360deg); } }
+@keyframes balance-osc { 0%,100%{transform:rotate(22deg)} 50%{transform:rotate(-22deg)} }
+
+.gear-main { animation: spin-cw  14s linear infinite; transform-origin: 150px 150px; }
+.gear-b    { animation: spin-ccw  4.6s linear infinite; transform-origin: 218px 112px; }
+.gear-c    { animation: spin-cw   7s linear infinite; transform-origin: 90px 200px; }
+.gear-d    { animation: spin-ccw  3.2s linear infinite; transform-origin: 225px 195px; }
+.balance   { animation: balance-osc 1.4s ease-in-out infinite; transform-origin: 150px 78px; }
+
+/* props */
+.prop {
+  position: absolute;
+  z-index: 5;
+  opacity: 0;
+}
+
+/* UI overlays */
+#ui-brand {
+  position: absolute;
+  top: 50%; left: 44px;
+  transform: translateY(-50%);
+  z-index: 300;
+  opacity: 0;
+  max-width: 340px;
+}
+.brand-eyebrow {
+  font-size: 9px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.brand-name {
+  font-size: clamp(48px, 5.5vw, 82px);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.03em;
+  color: var(--text);
+  position: relative;
+  white-space: nowrap;
+}
+/* glitch on brand name */
+.brand-name::before {
+  content: attr(data-text);
+  position: absolute;
+  left: 2px; top: 0;
+  color: var(--accent2);
+  clip-path: inset(30% 0 50% 0);
+  opacity: .6;
+  animation: glitch 8s steps(1) infinite;
+}
+@keyframes glitch {
+  0%,94%,100% { clip-path: inset(100% 0 0 0); transform: translateX(0); }
+  95% { clip-path: inset(20% 0 55% 0); transform: translateX(-3px); }
+  96% { clip-path: inset(60% 0 20% 0); transform: translateX(3px); }
+  97% { clip-path: inset(40% 0 40% 0); transform: translateX(-2px); }
+}
+.brand-divider {
+  width: 28px; height: 1px;
+  background: var(--accent-dim);
+  margin: 20px 0;
+}
+.brand-studio {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1.8;
+}
+.brand-sub {
+  margin-top: 10px;
+  font-size: 10px;
+  color: #364830;
+  letter-spacing: .04em;
+  line-height: 1.7;
+}
+
+#ui-copy {
+  position: absolute;
+  top: 50%; right: 56px;
+  transform: translateY(-50%);
+  max-width: 300px;
+  z-index: 300;
+  opacity: 0;
+}
+.copy-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent2);
+  margin-bottom: 16px;
+}
+.copy-label::before {
+  content: '';
+  width: 16px; height: 1px;
+  background: var(--accent2);
+}
+.copy-headline {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--text);
+  margin-bottom: 18px;
+}
+.copy-headline strong { font-weight: 700; }
+.copy-body {
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.9;
+  letter-spacing: .02em;
+}
+.copy-stats {
+  margin-top: 24px;
+  display: flex;
+  gap: 24px;
+  border-top: 1px solid var(--grid-line);
+  padding-top: 16px;
+}
+.stat-val {
+  font-family: 'Space Mono', monospace;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--accent);
+  line-height: 1;
+}
+.stat-label {
+  font-size: 9px;
+  color: var(--muted);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* scroll hint */
+#scroll-hint {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 300;
+  opacity: 0;
+}
+#scroll-hint span {
+  font-size: 9px;
+  letter-spacing: .24em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.scroll-line {
+  width: 1px; height: 28px;
+  background: linear-gradient(to bottom, var(--muted), transparent);
+  animation: pulse-line 2s ease-in-out infinite;
+}
+@keyframes pulse-line {
+  0%,100%{opacity:.3;transform:scaleY(1)}
+  50%{opacity:1;transform:scaleY(1.25)}
+}
+
+/* tool badge (design-app) */
+#tool-badge {
+  position: absolute;
+  top: 22px; right: 22px;
+  width: 30px; height: 30px;
+  background: var(--handle);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 700;
+  color: #fff;
+  font-family: 'Space Mono', monospace;
+  z-index: 400;
+}
+
+/* system status bottom-left (hero) */
+#sys-status {
+  position: absolute;
+  bottom: 30px; left: 44px;
+  z-index: 300;
+  opacity: 0;
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  color: var(--accent-dim);
+  letter-spacing: .1em;
+  line-height: 2;
+}
+.sys-line { display: flex; align-items: center; gap: 8px; }
+.sys-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: sys-blink 2s ease-in-out infinite;
+}
+.sys-dot.cyan { background: var(--accent2); animation-delay: .7s; }
+.sys-dot.dim  { background: var(--accent-dim); animation-delay: 1.4s; }
+@keyframes sys-blink {
+  0%,100%{opacity:1} 50%{opacity:.2}
+}
+
+/* cogniti badge */
+#logo-badge {
+  position: absolute;
+  bottom: 20px; right: 22px;
+  z-index: 300;
+  opacity: 0;
+}
+.badge-inner {
+  background: rgba(12,21,10,.85);
+  border: 1px solid var(--grid-line);
+  border-radius: 8px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  backdrop-filter: blur(12px);
+}
+.badge-icon {
+  width: 22px; height: 22px;
+  background: var(--accent);
+  border-radius: 4px;
+  display: flex; align-items: center; justify-content: center;
+}
+.badge-name {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .12em;
+}
+.badge-ver {
+  font-size: 8px;
+  font-family: 'Space Mono', monospace;
+  color: #364830;
+  letter-spacing: .1em;
+}
+
+/* dot indicator */
+#dot-ind {
+  position: fixed;
+  top: 26px; left: 26px;
+  width: 7px; height: 7px;
+  background: #fff;
+  border-radius: 50%;
+  z-index: 9000;
+  opacity: .4;
+}
+
+/* ════════════════════════════════════════
+   RESPONSIVE
+════════════════════════════════════════ */
+
+/* ── tablet (640 – 1023px) ── */
+@media (max-width: 1023px) {
+  /* nav: compact */
+  #nav { padding: 16px 24px; }
+  .nav-links { gap: 20px; }
+  .nav-links a { font-size: 9px; }
+
+  /* brand: tighter */
+  #ui-brand { left: 24px; max-width: 280px; }
+  .brand-name { font-size: clamp(38px, 4.5vw, 64px); }
+  .brand-sub  { display: none; }
+
+  /* copy: hide stats, shrink */
+  #ui-copy { right: 24px; max-width: 240px; }
+  .copy-stats   { display: none; }
+  .copy-headline { font-size: 15px; }
+  .copy-body    { display: none; }
+
+  /* hide heavy elements */
+  #sys-status   { display: none; }
+  #sidebar-label { display: none; }
+
+  /* hide heavier props on tablet */
+  #prop-caliper, #prop-pencil { display: none; }
+}
+
+/* ── mobile (<640px) ── */
+@media (max-width: 639px) {
+  /* hide cursor ring — touch device */
+  #cursor, #cursor-ring { display: none; }
+  body { cursor: auto; }
+
+  /* nav: logo + CTA only */
+  .nav-links { display: none; }
+  #nav { padding: 14px 20px; }
+
+  /* phase 1 text: scale down */
+  .bl { font-size: clamp(44px, 12vw, 72px); }
+  #tagline { font-size: 10px; letter-spacing: .22em; }
+
+  /* terminal: bottom-center on mobile */
+  #terminal {
+    left: 50%; transform: translateX(-50%);
+    text-align: center;
+    font-size: 8px;
+    bottom: 28px;
+    white-space: nowrap;
+  }
+
+  /* phase 2 layout: stacked */
+  #phase2 { display: flex; flex-direction: column; }
+
+  /* brand: top, full width, centered */
+  #ui-brand {
+    position: absolute;
+    top: 64px; left: 0; right: 0;
+    transform: none;
+    text-align: center;
+    max-width: 100%;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .brand-name {
+    font-size: clamp(40px, 13vw, 72px);
+    white-space: nowrap;
+  }
+  .brand-divider { margin: 12px auto; }
+  .brand-studio  { font-size: 10px; text-align: center; }
+  .brand-sub     { display: none; }
+  .brand-name::before { display: none; } /* disable glitch on mobile */
+
+  /* scene: push down, cover middle portion */
+  #scene {
+    top: 200px;
+    bottom: 120px;
+  }
+
+  /* copy: bottom strip */
+  #ui-copy {
+    position: absolute;
+    top: auto;
+    bottom: 50px;
+    right: 0; left: 0;
+    transform: none;
+    max-width: 100%;
+    padding: 0 24px;
+    text-align: center;
+    border-top: 1px solid var(--grid-line);
+    padding-top: 12px;
+  }
+  .copy-label, .copy-body, .copy-stats { display: none; }
+  .copy-headline {
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  .copy-headline strong { color: var(--text); font-weight: 600; }
+
+  /* hide non-essential */
+  #sys-status    { display: none; }
+  #sidebar-label { display: none; }
+  #tool-badge    { display: none; }
+  #dot-ind       { display: none; }
+  #logo-badge    { bottom: 10px; right: 12px; }
+  .badge-ver     { display: none; }
+
+  /* props: hide all on mobile */
+  .prop { display: none !important; }
+
+  /* scroll hint: reposition */
+  #scroll-hint {
+    bottom: 16px;
+    display: none; /* too cluttered on mobile */
+  }
+}
+
+/* ── very small (<375px) ── */
+@media (max-width: 374px) {
+  .brand-name { font-size: 10vw; }
+  .bl         { font-size: 10vw; }
+  #scene      { top: 180px; }
+}
+</style>
+</head>
+<body>
+
+<!-- cursor -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- scanlines -->
+<div id="scanlines"></div>
+
+<!-- dot indicator -->
+<div id="dot-ind"></div>
+
+<!-- particle canvas -->
+<canvas id="particle-canvas"></canvas>
+
+<!-- progress bar -->
+<div id="progress-bar"></div>
+
+<!-- terminal readout (phase 1) -->
+<div id="terminal"></div>
+
+<!-- ══ PHASE 1 — logo intro ══ -->
+<div id="phase1">
+  <div id="brand">
+    <span class="bl" id="lc">C</span>
+    <span class="bl" id="lo">O</span>
+    <span class="bl" id="lg">G</span>
+    <span class="bl" id="ln">N</span>
+    <span class="bl" id="li1">I</span>
+    <span class="bl" id="lt">T</span>
+    <span class="bl" id="li2">I</span>
+  </div>
+  <div id="tagline">intelligence, designed.</div>
+</div>
+
+<!-- ring (phase 1, lives outside phase1 so it can transition) -->
+<div id="ring-wrap">
+  <svg id="ring-svg" width="180" height="180" viewBox="0 0 180 180">
+    <defs>
+      <filter id="ring-glow" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="4" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="ring-glow2" x="-80%" y="-80%" width="260%" height="260%">
+        <feGaussianBlur stdDeviation="8" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <circle class="rt" cx="90" cy="90" r="74"/>
+    <!-- outer glow ring -->
+    <circle fill="none" stroke="var(--accent)" stroke-width="1" cx="90" cy="90" r="82"
+            stroke-dasharray="12 8" opacity=".15" filter="url(#ring-glow2)"/>
+    <!-- main progress ring -->
+    <circle class="rp" id="rp" cx="90" cy="90" r="74" filter="url(#ring-glow)"/>
+    <!-- cyan inner ring -->
+    <circle class="rp-cyan" id="rp2" cx="90" cy="90" r="62"
+            stroke-dasharray="0" stroke-dashoffset="0"/>
+  </svg>
+</div>
+
+<!-- ══ PHASE 2 — hero ══ -->
+<div id="phase2">
+
+  <!-- nav -->
+  <nav id="nav">
+    <div class="nav-logo">Cogniti</div>
+    <ul class="nav-links">
+      <li><a href="#">Intro</a></li>
+      <li><a href="#">Systems</a></li>
+      <li><a href="#">Product</a></li>
+      <li><a href="#">Contact</a></li>
+    </ul>
+    <a href="#" class="nav-cta">Talk to us</a>
+  </nav>
+
+  <!-- sidebar -->
+  <div id="sidebar-label">Cogniti-1 &nbsp;·&nbsp; System</div>
+
+  <!-- tool badge -->
+  <div id="tool-badge">↺A</div>
+
+  <!-- brand (left) -->
+  <div id="ui-brand">
+    <div class="brand-eyebrow">Intelligence Infrastructure</div>
+    <div class="brand-name" data-text="COGNITI">COGNITI</div>
+    <div class="brand-divider"></div>
+    <div class="brand-studio">
+      Built for decisions.<br/>Wired for scale.
+    </div>
+    <div class="brand-sub">
+      The invisible layer<br/>your systems think through.
+    </div>
+  </div>
+
+  <!-- copy (right) -->
+  <div id="ui-copy">
+    <div class="copy-label">Core System</div>
+    <div class="copy-headline">
+      Designed to <strong>decide, coordinate,<br/>and adapt</strong> — at every layer of your stack.
+    </div>
+    <div class="copy-body">
+      Cogniti builds intelligence infrastructure —<br/>
+      not software, not SaaS, not a vendor.<br/>
+      The system that thinks so yours doesn't have to.
+    </div>
+    <div class="copy-stats">
+      <div>
+        <div class="stat-val">14ms</div>
+        <div class="stat-label">Avg latency</div>
+      </div>
+      <div>
+        <div class="stat-val">99.97%</div>
+        <div class="stat-label">Uptime SLA</div>
+      </div>
+      <div>
+        <div class="stat-val" style="color:var(--accent2)">∞</div>
+        <div class="stat-label">Scale</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- system status (bottom-left) -->
+  <div id="sys-status">
+    <div class="sys-line"><div class="sys-dot"></div>KERNEL ONLINE</div>
+    <div class="sys-line"><div class="sys-dot cyan"></div>INFERENCE ENGINE READY</div>
+    <div class="sys-line"><div class="sys-dot dim"></div>TELEMETRY STREAMING</div>
+  </div>
+
+  <!-- scroll hint -->
+  <div id="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>Scroll to continue</span>
+  </div>
+
+  <!-- logo badge -->
+  <div id="logo-badge">
+    <div class="badge-inner">
+      <div class="badge-icon">
+        <svg width="12" height="12" viewBox="0 0 12 12">
+          <circle cx="6" cy="6" r="4" fill="none" stroke="#060807" stroke-width="1.8"/>
+          <circle cx="6" cy="6" r="1.5" fill="#060807"/>
+        </svg>
+      </div>
+      <div>
+        <div class="badge-name">COGNITI</div>
+        <div class="badge-ver">v2.0 · alpha</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- scene -->
+  <div id="scene">
+    <div id="scene-inner">
+
+      <!-- PCB surface -->
+      <div id="pcb-surface">
+        <div id="ruler-marks"></div>
+
+        <!-- circuit traces SVG overlay -->
+        <svg id="pcb-traces" viewBox="0 0 1060 760" preserveAspectRatio="xMidYMid slice">
+          <g fill="none" stroke="#b8ff3c" stroke-width=".8" opacity=".6">
+            <!-- trace paths mimicking PCB routing -->
+            <polyline points="60,100 200,100 200,180 340,180"/>
+            <polyline points="60,140 120,140 120,300 400,300"/>
+            <polyline points="340,180 340,240 500,240"/>
+            <polyline points="500,240 620,240 620,160 780,160"/>
+            <polyline points="780,160 900,160 900,100 980,100"/>
+            <polyline points="60,400 180,400 180,500 320,500"/>
+            <polyline points="320,500 320,580 500,580"/>
+            <polyline points="500,580 680,580 680,500 820,500"/>
+            <polyline points="820,500 960,500 960,420 1020,420"/>
+            <polyline points="400,300 400,380 560,380 560,300 700,300"/>
+            <polyline points="700,300 700,200 820,200 820,160"/>
+          </g>
+          <!-- via pads -->
+          <g fill="none" stroke="#b8ff3c" stroke-width="1.2" opacity=".5">
+            <circle cx="200" cy="100" r="5"/><circle cx="200" cy="180" r="5"/>
+            <circle cx="340" cy="180" r="5"/><circle cx="340" cy="240" r="5"/>
+            <circle cx="500" cy="240" r="5"/><circle cx="620" cy="160" r="5"/>
+            <circle cx="780" cy="160" r="5"/><circle cx="320" cy="500" r="5"/>
+            <circle cx="500" cy="580" r="5"/><circle cx="680" cy="500" r="5"/>
+            <circle cx="400" cy="300" r="5"/><circle cx="700" cy="300" r="5"/>
+            <circle cx="560" cy="380" r="5"/>
+          </g>
+          <!-- filled via centers -->
+          <g fill="#b8ff3c" opacity=".3">
+            <circle cx="200" cy="100" r="2"/><circle cx="340" cy="180" r="2"/>
+            <circle cx="500" cy="240" r="2"/><circle cx="780" cy="160" r="2"/>
+            <circle cx="320" cy="500" r="2"/><circle cx="500" cy="580" r="2"/>
+          </g>
+          <!-- cyan accent traces -->
+          <g fill="none" stroke="#00d4ff" stroke-width=".6" opacity=".3">
+            <polyline points="60,220 160,220 160,320 280,320"/>
+            <polyline points="800,400 900,400 900,320 1020,320"/>
+          </g>
+        </svg>
+      </div>
+
+      <!-- selection box -->
+      <div id="selection-box">
+        <div class="sel-border"></div>
+        <div class="sel-handle tl"></div><div class="sel-handle tc"></div>
+        <div class="sel-handle tr"></div><div class="sel-handle ml"></div>
+        <div class="sel-handle mr"></div><div class="sel-handle bl"></div>
+        <div class="sel-handle bc"></div><div class="sel-handle br"></div>
+      </div>
+
+      <!-- watch movement -->
+      <div id="watch-wrap">
+        <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" width="300" height="300">
+          <defs>
+            <radialGradient id="plateGrad" cx="50%" cy="40%" r="60%">
+              <stop offset="0%" stop-color="#1a2c18"/>
+              <stop offset="100%" stop-color="#0c150a"/>
+            </radialGradient>
+            <radialGradient id="gearGrad" cx="30%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="#3d5838"/>
+              <stop offset="100%" stop-color="#182313"/>
+            </radialGradient>
+            <filter id="glow-s">
+              <feGaussianBlur stdDeviation="2.5" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+            <filter id="glow-m">
+              <feGaussianBlur stdDeviation="5" result="b"/>
+              <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <!-- outer ring glow (links to scene-1 ring visually) -->
+          <circle cx="150" cy="150" r="146" fill="none"
+                  stroke="var(--accent)" stroke-width=".8" opacity=".06" filter="url(#glow-m)"/>
+
+          <!-- main plate -->
+          <circle cx="150" cy="150" r="147" fill="#080e06" stroke="#1a2c18" stroke-width="1"/>
+          <circle cx="150" cy="150" r="140" fill="url(#plateGrad)" stroke="#152013" stroke-width="1"/>
+
+          <!-- engraved rings -->
+          <circle cx="150" cy="150" r="136" fill="none" stroke="#1e2e1a" stroke-width=".5" stroke-dasharray="5 3"/>
+          <circle cx="150" cy="150" r="118" fill="none" stroke="#172213" stroke-width=".5"/>
+          <circle cx="150" cy="150" r="98"  fill="none" stroke="#121c0e" stroke-width=".5" stroke-dasharray="2 5"/>
+
+          <!-- cyan arc detail -->
+          <circle cx="150" cy="150" r="130" fill="none"
+                  stroke="var(--accent2)" stroke-width=".4"
+                  stroke-dasharray="40 420" stroke-dashoffset="0" opacity=".2"/>
+
+          <!-- jewels -->
+          <circle cx="150" cy="150" r="6"   fill="#7a1515" stroke="var(--red)" stroke-width="1"    filter="url(#glow-s)"/>
+          <circle cx="218" cy="112" r="4"   fill="#7a1515" stroke="var(--red)" stroke-width=".8"/>
+          <circle cx="90"  cy="200" r="4"   fill="#7a1515" stroke="var(--red)" stroke-width=".8"/>
+          <circle cx="225" cy="195" r="3"   fill="#7a1515" stroke="var(--red)" stroke-width=".7"/>
+          <circle cx="150" cy="78"  r="3.5" fill="#7a1515" stroke="var(--red)" stroke-width=".8"/>
+
+          <!-- ── MAIN GEAR ── -->
+          <g class="gear-main">
+            <circle cx="150" cy="150" r="44" fill="url(#gearGrad)" stroke="#3d5838" stroke-width="1.2"/>
+            <g fill="#3d5838" stroke="#1e2e1a" stroke-width=".6">
+              <rect x="148" y="102" width="4" height="13" rx="1" transform-origin="150 150"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(20 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(40 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(60 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(80 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(100 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(120 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(140 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(160 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(180 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(200 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(220 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(240 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(260 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(280 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(300 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(320 150 150)"/>
+              <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(340 150 150)"/>
+            </g>
+            <circle cx="150" cy="150" r="30" fill="#0c150a" stroke="#1e2e1a" stroke-width="1"/>
+            <line x1="150" y1="124" x2="150" y2="176" stroke="#3d5838" stroke-width="1.5"/>
+            <line x1="124" y1="150" x2="176" y2="150" stroke="#3d5838" stroke-width="1.5"/>
+            <line x1="129" y1="129" x2="171" y2="171" stroke="#3d5838" stroke-width="1.2"/>
+            <line x1="171" y1="129" x2="129" y2="171" stroke="#3d5838" stroke-width="1.2"/>
+            <circle cx="150" cy="150" r="6" fill="#7a1515" stroke="var(--red)" stroke-width="1"/>
+            <circle cx="150" cy="150" r="2.5" fill="#111"/>
+          </g>
+
+          <!-- ── GEAR B ── -->
+          <g class="gear-b">
+            <circle cx="218" cy="112" r="22" fill="url(#gearGrad)" stroke="#3d5838" stroke-width="1"/>
+            <g fill="#3d5838" stroke="#1e2e1a" stroke-width=".5">
+              <rect x="216.5" y="88" width="3" height="8" rx=".8" transform-origin="218 112"/>
+              <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(26 218 112)"/>
+              <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(52 218 112)"/>
+              <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(78 218 112)"/>
+              <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(104 218 112)"/>
+              <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(130 218 112)"/>
+              <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(156 218 112)"/>
+              <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(182 218 112)"/>
+              <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(208 218 112)"/>
+              <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(234 218 112)"/>
+              <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(260 218 112)"/>
+              <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(286 218 112)"/>
+              <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(312 218 112)"/>
+              <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(338 218 112)"/>
+            </g>
+            <circle cx="218" cy="112" r="13" fill="#0c150a"/>
+            <line x1="218" y1="101" x2="218" y2="123" stroke="#3d5838" stroke-width="1.2"/>
+            <line x1="207" y1="112" x2="229" y2="112" stroke="#3d5838" stroke-width="1.2"/>
+            <circle cx="218" cy="112" r="4" fill="#7a1515" stroke="var(--red)" stroke-width=".8"/>
+          </g>
+
+          <!-- ── GEAR C ── -->
+          <g class="gear-c">
+            <circle cx="90" cy="200" r="28" fill="url(#gearGrad)" stroke="#3d5838" stroke-width="1"/>
+            <g fill="#3d5838" stroke="#1e2e1a" stroke-width=".5">
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform-origin="90 200"/>
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(24 90 200)"/>
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(48 90 200)"/>
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(72 90 200)"/>
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(96 90 200)"/>
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(120 90 200)"/>
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(144 90 200)"/>
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(168 90 200)"/>
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(192 90 200)"/>
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(216 90 200)"/>
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(240 90 200)"/>
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(264 90 200)"/>
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(288 90 200)"/>
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(312 90 200)"/>
+              <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(336 90 200)"/>
+            </g>
+            <circle cx="90" cy="200" r="18" fill="#0c150a"/>
+            <line x1="90" y1="186" x2="90" y2="214" stroke="#3d5838" stroke-width="1.2"/>
+            <line x1="76" y1="200" x2="104" y2="200" stroke="#3d5838" stroke-width="1.2"/>
+            <line x1="80" y1="190" x2="100" y2="210" stroke="#3d5838" stroke-width=".8"/>
+            <line x1="100" y1="190" x2="80" y2="210" stroke="#3d5838" stroke-width=".8"/>
+            <circle cx="90" cy="200" r="4" fill="#7a1515" stroke="var(--red)" stroke-width=".8"/>
+          </g>
+
+          <!-- ── GEAR D ── -->
+          <g class="gear-d">
+            <circle cx="225" cy="195" r="16" fill="url(#gearGrad)" stroke="#3d5838" stroke-width=".8"/>
+            <g fill="#3d5838" stroke="#1e2e1a" stroke-width=".4">
+              <rect x="223.5" y="178" width="3" height="7" rx=".6" transform-origin="225 195"/>
+              <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(30 225 195)"/>
+              <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(60 225 195)"/>
+              <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(90 225 195)"/>
+              <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(120 225 195)"/>
+              <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(150 225 195)"/>
+              <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(180 225 195)"/>
+              <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(210 225 195)"/>
+              <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(240 225 195)"/>
+              <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(270 225 195)"/>
+              <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(300 225 195)"/>
+              <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(330 225 195)"/>
+            </g>
+            <circle cx="225" cy="195" r="9" fill="#0c150a"/>
+            <line x1="225" y1="188" x2="225" y2="202" stroke="#3d5838" stroke-width="1"/>
+            <line x1="218" y1="195" x2="232" y2="195" stroke="#3d5838" stroke-width="1"/>
+            <circle cx="225" cy="195" r="3" fill="#7a1515" stroke="var(--red)" stroke-width=".6"/>
+          </g>
+
+          <!-- ── BALANCE WHEEL ── -->
+          <g class="balance">
+            <circle cx="150" cy="78" r="21" fill="none" stroke="#3d5838" stroke-width="2"/>
+            <!-- cyan accent on balance -->
+            <circle cx="150" cy="78" r="21" fill="none"
+                    stroke="var(--accent2)" stroke-width=".6" opacity=".25"/>
+            <line x1="150" y1="57" x2="150" y2="99" stroke="#3d5838" stroke-width="1.5"/>
+            <line x1="129" y1="78" x2="171" y2="78" stroke="#3d5838" stroke-width="1.5"/>
+            <circle cx="150" cy="78" r="6" fill="#0c150a" stroke="#3d5838" stroke-width="1"/>
+            <circle cx="150" cy="78" r="3.5" fill="#7a1515" stroke="var(--red)" stroke-width=".8"/>
+            <!-- hairspring -->
+            <path d="M150,74 C153,69 158,69 160,74 C162,79 160,84 155,86 C150,88 145,86 143,81 C141,76 143,69 150,67"
+                  fill="none" stroke="var(--accent)" stroke-width=".6" opacity=".45"/>
+          </g>
+
+          <!-- balance glow -->
+          <circle cx="150" cy="78" r="21" fill="none"
+                  stroke="var(--accent)" stroke-width=".4" opacity=".15" filter="url(#glow-m)"/>
+
+          <!-- plate text -->
+          <text x="150" y="253" text-anchor="middle" font-family="Space Mono" font-size="7"
+                fill="#1e2e1a" letter-spacing="4">COGNITI · I</text>
+          <text x="150" y="264" text-anchor="middle" font-family="Space Mono" font-size="5.5"
+                fill="#152013" letter-spacing="3">INTELLIGENCE SYSTEM</text>
+        </svg>
+      </div>
+
+      <!-- ── PROPS ── -->
+      <!-- caliper -->
+      <div class="prop" style="bottom:7%;right:3%;transform:rotate(-7deg)">
+        <svg width="230" height="62" viewBox="0 0 230 62">
+          <rect x="0" y="21" width="208" height="18" rx="3" fill="#0e1c0c" stroke="#2d4428" stroke-width=".8"/>
+          <g stroke="#3d5838" stroke-width=".5">
+            <line x1="10" y1="23" x2="10" y2="27"/><line x1="20" y1="23" x2="20" y2="26"/>
+            <line x1="30" y1="23" x2="30" y2="27"/><line x1="40" y1="23" x2="40" y2="26"/>
+            <line x1="50" y1="23" x2="50" y2="27"/><line x1="60" y1="23" x2="60" y2="26"/>
+            <line x1="70" y1="23" x2="70" y2="27"/><line x1="80" y1="23" x2="80" y2="26"/>
+            <line x1="90" y1="23" x2="90" y2="27"/><line x1="100" y1="23" x2="100" y2="26"/>
+            <line x1="110" y1="23" x2="110" y2="27"/><line x1="120" y1="23" x2="120" y2="26"/>
+            <line x1="130" y1="23" x2="130" y2="27"/><line x1="140" y1="23" x2="140" y2="26"/>
+            <line x1="150" y1="23" x2="150" y2="27"/><line x1="160" y1="23" x2="160" y2="26"/>
+            <line x1="170" y1="23" x2="170" y2="27"/><line x1="180" y1="23" x2="180" y2="26"/>
+            <line x1="190" y1="23" x2="190" y2="27"/>
+          </g>
+          <path d="M2,9 L14,9 L14,21 L2,21 Z" fill="#182813" stroke="#2d4428" stroke-width=".8"/>
+          <path d="M2,39 L14,39 L14,53 L2,53 Z" fill="#182813" stroke="#2d4428" stroke-width=".8"/>
+          <rect x="90" y="16" width="22" height="28" rx="2" fill="#0a1208" stroke="var(--accent2)" stroke-width=".6" opacity=".8"/>
+          <path d="M92,9 L112,9 L112,16 L92,16 Z" fill="#0e1c0c" stroke="#2d4428" stroke-width=".8"/>
+          <path d="M92,44 L112,44 L112,53 L92,53 Z" fill="#0e1c0c" stroke="#2d4428" stroke-width=".8"/>
+          <g stroke="var(--accent2)" stroke-width=".4" opacity=".6">
+            <line x1="93" y1="18" x2="93" y2="20"/><line x1="96" y1="18" x2="96" y2="21"/>
+            <line x1="99" y1="18" x2="99" y2="20"/><line x1="102" y1="18" x2="102" y2="21"/>
+            <line x1="105" y1="18" x2="105" y2="20"/>
+          </g>
+          <rect x="206" y="25" width="22" height="6" rx="1" fill="#182813" stroke="#2d4428" stroke-width=".8"/>
+        </svg>
+      </div>
+
+      <!-- mechanical pencil -->
+      <div class="prop" style="top:7%;right:7%;transform:rotate(14deg)">
+        <svg width="270" height="18" viewBox="0 0 270 18">
+          <rect x="20" y="4" width="80" height="10" rx="2" fill="#0e1c0c"/>
+          <g stroke="#1a2c18" stroke-width="1">
+            <line x1="24" y1="4" x2="24" y2="14"/><line x1="28" y1="4" x2="28" y2="14"/>
+            <line x1="32" y1="4" x2="32" y2="14"/><line x1="36" y1="4" x2="36" y2="14"/>
+            <line x1="40" y1="4" x2="40" y2="14"/><line x1="44" y1="4" x2="44" y2="14"/>
+            <line x1="48" y1="4" x2="48" y2="14"/><line x1="52" y1="4" x2="52" y2="14"/>
+            <line x1="56" y1="4" x2="56" y2="14"/><line x1="60" y1="4" x2="60" y2="14"/>
+            <line x1="64" y1="4" x2="64" y2="14"/><line x1="68" y1="4" x2="68" y2="14"/>
+            <line x1="72" y1="4" x2="72" y2="14"/><line x1="76" y1="4" x2="76" y2="14"/>
+            <line x1="80" y1="4" x2="80" y2="14"/><line x1="84" y1="4" x2="84" y2="14"/>
+            <line x1="88" y1="4" x2="88" y2="14"/><line x1="92" y1="4" x2="92" y2="14"/>
+            <line x1="96" y1="4" x2="96" y2="14"/>
+          </g>
+          <rect x="100" y="3" width="138" height="12" rx="6" fill="#182813" stroke="#2d4428" stroke-width=".8"/>
+          <rect x="98" y="3" width="6" height="12" rx="2" fill="var(--accent)" opacity=".8"/>
+          <rect x="178" y="1" width="3" height="14" rx="1.5" fill="#0e1c0c"/>
+          <circle cx="179.5" cy="1" r="2.5" fill="#0e1c0c"/>
+          <path d="M100,6 L4,9 L100,12 Z" fill="#2d4428"/>
+          <line x1="4" y1="9" x2="0" y2="9" stroke="#d0ccba" stroke-width="1"/>
+          <rect x="238" y="5" width="20" height="8" rx="2" fill="#3a1010"/>
+          <rect x="236" y="5" width="4" height="8" rx="1" fill="#222"/>
+          <circle cx="248" cy="9" r="5" fill="#0e1c0c" stroke="#2d4428" stroke-width=".8"/>
+        </svg>
+      </div>
+
+      <!-- circuit schematic -->
+      <div class="prop" style="top:10%;left:3%;transform:rotate(-4deg)">
+        <svg width="150" height="108" viewBox="0 0 150 108">
+          <rect x="0" y="0" width="150" height="108" rx="3" fill="#080e06" stroke="#152013" stroke-width="1"/>
+          <g fill="none" stroke="#1e2e1a" stroke-width="1">
+            <polyline points="10,22 32,22 32,54 64,54"/>
+            <polyline points="64,54 64,74 96,74"/>
+            <polyline points="96,22 96,54 128,54 128,32"/>
+            <polyline points="32,22 32,12 84,12 84,22"/>
+            <polyline points="10,74 32,74 32,84 64,84 64,74"/>
+            <polyline points="106,74 136,74 136,54 128,54"/>
+          </g>
+          <!-- highlighted trace -->
+          <polyline points="64,54 96,54" fill="none" stroke="var(--accent)" stroke-width=".8" opacity=".4"/>
+          <rect x="56" y="50" width="14" height="8" rx="1" fill="#080e06" stroke="#3d5838" stroke-width=".8"/>
+          <line x1="90" y1="50" x2="90" y2="58" stroke="#3d5838" stroke-width="2"/>
+          <line x1="98" y1="50" x2="98" y2="58" stroke="#3d5838" stroke-width="2"/>
+          <rect x="48" y="30" width="24" height="16" rx="1" fill="#0c150a" stroke="#3d5838" stroke-width=".8"/>
+          <g stroke="#2d4428" stroke-width=".8">
+            <line x1="48" y1="34" x2="44" y2="34"/><line x1="48" y1="38" x2="44" y2="38"/>
+            <line x1="48" y1="42" x2="44" y2="42"/>
+            <line x1="72" y1="34" x2="76" y2="34"/><line x1="72" y1="38" x2="76" y2="38"/>
+            <line x1="72" y1="42" x2="76" y2="42"/>
+          </g>
+          <circle cx="128" cy="32" r="5" fill="var(--accent2)" opacity=".25" filter="url(#glow-s)"/>
+          <circle cx="10" cy="22" r="2.5" fill="var(--red)" opacity=".7"/>
+          <circle cx="10" cy="74" r="2.5" fill="var(--red)" opacity=".7"/>
+          <text x="75" y="101" text-anchor="middle" font-family="Space Mono" font-size="6"
+                fill="#1e2e1a" letter-spacing="2">CG-01 · REV 4</text>
+        </svg>
+      </div>
+
+      <!-- loupe -->
+      <div class="prop" style="bottom:9%;left:5%">
+        <svg width="72" height="72" viewBox="0 0 72 72">
+          <line x1="52" y1="52" x2="68" y2="68" stroke="#1e2e1a" stroke-width="5.5" stroke-linecap="round"/>
+          <circle cx="31" cy="31" r="25" fill="none" stroke="#3d5838" stroke-width="2.5"/>
+          <circle cx="31" cy="31" r="25" fill="rgba(0,212,255,0.03)"/>
+          <circle cx="23" cy="23" r="7" fill="none" stroke="var(--accent2)" stroke-width=".5" opacity=".25"/>
+          <line x1="31" y1="12" x2="31" y2="50" stroke="#1e2e1a" stroke-width=".5" stroke-dasharray="2 3"/>
+          <line x1="12" y1="31" x2="50" y2="31" stroke="#1e2e1a" stroke-width=".5" stroke-dasharray="2 3"/>
+          <circle cx="31" cy="31" r="2" fill="var(--accent)" opacity=".5"/>
+        </svg>
+      </div>
+
+      <!-- hex numbers floating on PCB -->
+      <div class="prop" style="top:18%;left:38%;font-family:'Space Mono',monospace;font-size:7px;color:#1a2c18;letter-spacing:.1em;line-height:1.8">
+        0xA3F1<br/>0x004C<br/>0xFFB2<br/>0x719E
+      </div>
+      <div class="prop" style="bottom:20%;right:34%;font-family:'Space Mono',monospace;font-size:7px;color:#0d1c20;letter-spacing:.1em;line-height:1.8">
+        0x00D4<br/>0x3C8A<br/>0xB8FF
+      </div>
+
+    </div><!-- /scene-inner -->
+  </div><!-- /scene -->
+
+</div><!-- /phase2 -->
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+// ─── cursor ───
+const cur = document.getElementById('cursor');
+const curR = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cur.style.left = mx + 'px';
+  cur.style.top  = my + 'px';
+});
+(function lerp() {
+  rx += (mx - rx) * .12;
+  ry += (my - ry) * .12;
+  curR.style.left = rx + 'px';
+  curR.style.top  = ry + 'px';
+  requestAnimationFrame(lerp);
+})();
+
+// ─── particle network ───
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, nodes = [];
+function initCanvas() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+function createNodes(n) {
+  nodes = [];
+  for (let i = 0; i < n; i++) {
+    nodes.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - .5) * .25,
+      vy: (Math.random() - .5) * .25,
+      r: Math.random() * 1.5 + .5
+    });
+  }
+}
+function drawParticles() {
+  ctx.clearRect(0, 0, W, H);
+  const maxDist = 120;
+  nodes.forEach(n => {
+    n.x += n.vx; n.y += n.vy;
+    if (n.x < 0 || n.x > W) n.vx *= -1;
+    if (n.y < 0 || n.y > H) n.vy *= -1;
+  });
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dx = nodes[i].x - nodes[j].x;
+      const dy = nodes[i].y - nodes[j].y;
+      const d  = Math.sqrt(dx*dx + dy*dy);
+      if (d < maxDist) {
+        const a = (1 - d / maxDist) * .18;
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(184,255,60,${a})`;
+        ctx.lineWidth = .6;
+        ctx.moveTo(nodes[i].x, nodes[i].y);
+        ctx.lineTo(nodes[j].x, nodes[j].y);
+        ctx.stroke();
+      }
+    }
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(184,255,60,0.35)';
+    ctx.arc(nodes[i].x, nodes[i].y, nodes[i].r, 0, Math.PI*2);
+    ctx.fill();
+  }
+  requestAnimationFrame(drawParticles);
+}
+initCanvas();
+createNodes(55);
+drawParticles();
+window.addEventListener('resize', () => { initCanvas(); createNodes(55); });
+
+// ─── ruler ticks ───
+const ruler = document.getElementById('ruler-marks');
+for (let i = 0; i <= 20; i++) {
+  const t = document.createElement('div');
+  t.className = 'tick';
+  t.style.top = (i * 38 + 18) + 'px';
+  t.textContent = i * 10;
+  ruler.appendChild(t);
+}
+
+// ─── dot indicator blink ───
+const dotInd = document.getElementById('dot-ind');
+setInterval(() => {
+  dotInd.style.opacity = dotInd.style.opacity === '0.1' ? '0.5' : '0.1';
+}, 900);
+
+// ─── terminal lines ───
+const terminal = document.getElementById('terminal');
+const lines = [
+  '> INIT cogniti-kernel v2.0.1',
+  '> LOADING inference engine...',
+  '> MOUNTING telemetry stream',
+  '> SYSTEM READY',
+];
+let lineIdx = 0;
+function typeLine() {
+  if (lineIdx >= lines.length) return;
+  const div = document.createElement('div');
+  div.textContent = lines[lineIdx++];
+  terminal.appendChild(div);
+  setTimeout(typeLine, 420);
+}
+
+// ─── ring setup ───
+const rp  = document.getElementById('rp');
+const rw  = document.getElementById('ring-wrap');
+const lo  = document.getElementById('lo');
+const tg  = document.getElementById('tagline');
+const allBl = [...document.querySelectorAll('.bl')];
+const letters = allBl.filter(l => l !== lo);
+
+const R = 74, SW = 10;
+const C = +(2 * Math.PI * R).toFixed(3);
+rp.style.strokeDasharray  = C;
+rp.style.strokeDashoffset = C;
+
+let fontReady = false;
+document.fonts.ready.then(() => { fontReady = true; });
+
+// ─── PHASE 1: logo intro ───
+function runPhase1() {
+  // progress bar
+  const bar = document.getElementById('progress-bar');
+  setTimeout(() => { bar.style.width = '100%'; }, 50);
+
+  // terminal
+  setTimeout(() => {
+    terminal.style.transition = 'opacity .4s';
+    terminal.style.opacity = '1';
+    typeLine();
+  }, 800);
+
+  // ring appear
+  setTimeout(() => {
+    rw.style.transition = 'opacity .5s ease, transform .7s cubic-bezier(0.34,1.56,0.64,1)';
+    rw.style.opacity = '1';
+    rw.style.transform = 'translate(-50%,-50%) scale(1)';
+  }, 200);
+
+  // ring sweep
+  setTimeout(() => {
+    rp.style.transition = 'stroke-dashoffset 1.9s cubic-bezier(0.25,0.46,0.45,0.94)';
+    rp.style.strokeDashoffset = '0';
+  }, 500);
+
+  // ring zoom in
+  setTimeout(() => {
+    rw.style.transition = 'transform .7s cubic-bezier(0.4,0,0.2,1)';
+    rw.style.transform  = 'translate(-50%,-50%) scale(1.85)';
+  }, 2500);
+
+  // ring move to O
+  setTimeout(() => {
+    const r  = lo.getBoundingClientRect();
+    const oCX = r.left + r.width  / 2;
+    const oCY = r.top  + r.height / 2;
+    const dx  = oCX - window.innerWidth  / 2;
+    const dy  = oCY - window.innerHeight / 2;
+    const capH = r.height * 0.72;
+    const sc  = capH / ((R + SW / 2) * 2);
+
+    rw.style.transition = 'transform .9s cubic-bezier(0.4,0,0.2,1)';
+    rw.style.transform  = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${sc})`;
+  }, 3400);
+
+  // letters cascade
+  setTimeout(() => {
+    letters.forEach((l, i) => {
+      setTimeout(() => {
+        l.style.transition = 'opacity .55s ease, transform .55s cubic-bezier(0.4,0,0.2,1)';
+        l.style.opacity = '1';
+        l.style.transform = 'translateY(0)';
+      }, i * 75);
+    });
+  }, 4400);
+
+  // tagline
+  setTimeout(() => {
+    tg.style.transition = 'opacity .9s ease, transform .9s ease';
+    tg.style.opacity = '1';
+    tg.style.transform = 'translateY(0)';
+  }, 5200);
+
+  // ── transition to phase 2 ──
+  setTimeout(() => {
+    // fade out phase1 content
+    const p1 = document.getElementById('phase1');
+    p1.style.transition = 'opacity .9s ease';
+    p1.style.opacity = '0';
+
+    // fade ring out
+    rw.style.transition = 'opacity .9s ease';
+    rw.style.opacity = '0';
+
+    // progress bar done
+    bar.style.transition = 'opacity .5s';
+    bar.style.opacity = '0';
+
+    // terminal out
+    terminal.style.opacity = '0';
+
+    // particles visible
+    canvas.style.opacity = '.12';
+
+    // phase2 starts to appear
+    const p2 = document.getElementById('phase2');
+    p2.style.pointerEvents = 'auto';
+    p2.style.transition = 'opacity .8s ease';
+    p2.style.opacity = '1';
+
+    runPhase2();
+  }, 6800);
+}
+
+// ─── responsive scene scale ───
+function getFinalScale() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  if (vw < 640) {
+    // mobile: scene sits in middle slot (top 200px → bottom 120px = ~vh-320px)
+    const availH = Math.max(vh - 320, 200);
+    return Math.min((vw * 0.92) / 900, availH / 600);
+  }
+  if (vw < 1024) {
+    // tablet: leave room for side panels
+    return Math.min((vw * 0.58) / 900, (vh * 0.72) / 600);
+  }
+  // desktop: centered, slight padding
+  return Math.min((vw * 0.52) / 900, (vh * 0.82) / 600);
+}
+
+// ─── PHASE 2: hero reveal ───
+function runPhase2() {
+  const finalScale = getFinalScale();
+  const tl = gsap.timeline({ delay: .2 });
+
+  // zoom out scene
+  tl.to('#scene-inner', {
+    scale: finalScale,
+    duration: 2.2,
+    ease: 'power3.inOut'
+  });
+
+  // fade selection handles
+  tl.to('#selection-box', {
+    opacity: 0,
+    duration: .6,
+    ease: 'power2.out'
+  }, '-=1.8');
+
+  // fade tool badge
+  tl.to('#tool-badge', {
+    opacity: 0,
+    duration: .4,
+    ease: 'power2.out'
+  }, '-=1.6');
+
+  // nav
+  tl.to('#nav', {
+    opacity: 1,
+    duration: .7,
+    ease: 'power2.out'
+  }, '-=.8');
+
+  // brand
+  tl.fromTo('#ui-brand', { opacity: 0, x: -28 }, {
+    opacity: 1, x: 0,
+    duration: .9,
+    ease: 'power3.out'
+  }, '-=.5');
+
+  // copy
+  tl.fromTo('#ui-copy', { opacity: 0, x: 28 }, {
+    opacity: 1, x: 0,
+    duration: .9,
+    ease: 'power3.out'
+  }, '-=.8');
+
+  // sidebar
+  tl.to('#sidebar-label', { opacity: 1, duration: .5 }, '-=.6');
+
+  // props
+  tl.to('.prop', {
+    opacity: 1,
+    duration: .5,
+    stagger: .1,
+    ease: 'power2.out'
+  }, '-=.5');
+
+  // sys-status + scroll + badge
+  tl.to(['#sys-status', '#scroll-hint', '#logo-badge'], {
+    opacity: 1,
+    duration: .5,
+    stagger: .1
+  }, '-=.3');
+
+  // ambient drift
+  gsap.to('#scene-inner', {
+    x: 8, y: -5,
+    duration: 9,
+    ease: 'sine.inOut',
+    yoyo: true,
+    repeat: -1,
+    delay: 3.5
+  });
+}
+
+// ─── click to replay ───
+document.getElementById('phase1').addEventListener('click', () => {
+  location.reload();
+});
+
+// ─── resize: re-scale scene after animation settles ───
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const p2 = document.getElementById('phase2');
+    if (parseFloat(p2.style.opacity) > 0) {
+      gsap.to('#scene-inner', {
+        scale: getFinalScale(),
+        duration: .6,
+        ease: 'power2.out'
+      });
+    }
+    initCanvas();
+    createNodes(window.innerWidth < 640 ? 30 : 55);
+  }, 150);
+});
+
+// ─── start ───
+runPhase1();
+</script>
+</body>
+</html>

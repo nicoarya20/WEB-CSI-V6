@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cogniti — Membangun Sistem Yang Berpikir</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <div class="nav-logo">COGNITI</div>
+    <div class="nav-links">
+      <a href="#manifesto">Manifesto</a>
+      <a href="#flow">Arsitektur</a>
+      <a href="#contact">Kontak</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="hero">
+    <canvas id="hero-canvas"></canvas>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Cogniti.id</p>
+      <h1 class="hero-title">Membangun Sistem<br>Yang Berpikir.</h1>
+      <p class="hero-sub">
+        Kami merancang lapisan kecerdasan yang menghubungkan manusia,
+        infrastruktur, informasi, dan keputusan.
+      </p>
+      <a href="#manifesto" class="btn-primary">Jelajahi</a>
+    </div>
+    <div class="scroll-hint">↓ SCROLL</div>
+  </section>
+
+  <!-- MANIFESTO -->
+  <section class="manifesto" id="manifesto">
+    <div class="manifesto-inner">
+      <p class="manifesto-line">Software menghubungkan informasi.</p>
+      <p class="manifesto-line">Kecerdasan menghubungkan keputusan.</p>
+      <p class="manifesto-line dim">Organisasi tenggelam dalam data.</p>
+      <p class="manifesto-line dim">Namun kesulitan untuk bertindak.</p>
+      <p class="manifesto-line accent">Masa depan bukan milik mereka yang mengumpulkan informasi paling banyak.</p>
+      <p class="manifesto-line accent">Masa depan milik mereka yang mampu mengubah informasi menjadi tindakan.</p>
+      <p class="manifesto-line">Kami percaya kecerdasan seharusnya tidak hidup di dalam satu aplikasi saja.</p>
+      <p class="manifesto-line">Ia harus hadir di setiap interaksi.</p>
+      <p class="manifesto-line">Setiap alur kerja.</p>
+      <p class="manifesto-line">Setiap keputusan.</p>
+    </div>
+  </section>
+
+  <!-- FLOW -->
+  <section class="flow" id="flow">
+    <p class="flow-eyebrow">Perubahan Yang Sedang Terjadi</p>
+    <h2 class="flow-title">Dari Informasi Menuju Tindakan.</h2>
+    <div class="flow-track">
+      <div class="flow-node" data-index="0">
+        <div class="node-dot"></div>
+        <div class="node-connector"></div>
+        <p class="node-label">Informasi</p>
+      </div>
+      <div class="flow-node" data-index="1">
+        <div class="node-dot"></div>
+        <div class="node-connector"></div>
+        <p class="node-label">Konteks</p>
+      </div>
+      <div class="flow-node" data-index="2">
+        <div class="node-dot"></div>
+        <div class="node-connector"></div>
+        <p class="node-label">Kecerdasan</p>
+      </div>
+      <div class="flow-node" data-index="3">
+        <div class="node-dot"></div>
+        <div class="node-connector"></div>
+        <p class="node-label">Keputusan</p>
+      </div>
+      <div class="flow-node flow-node--last" data-index="4">
+        <div class="node-dot"></div>
+        <p class="node-label">Tindakan</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <p class="contact-eyebrow">Mari Mulai Percakapan</p>
+    <h2 class="contact-title">Kami senang untuk<br>terhubung.</h2>
+    <a href="mailto:hello@cogniti.id" class="btn-primary">hello@cogniti.id</a>
+    <p class="contact-footer">Cogniti.id © 2025</p>
+  </section>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="main.js"></script>
+</body>
+</html>

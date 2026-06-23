@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Cogniti — Intelligence Infrastructure</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #080a08;
+    --surface:   #111a0f;
+    --grid:      #1a2a16;
+    --grid-line: #223318;
+    --accent:    #b8ff3c;
+    --accent-dim:#6e991d;
+    --text:      #edeae2;
+    --muted:     #7a8470;
+    --handle:    #ff6b35;
+  }
+
+  html, body {
+    width: 100%; height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Grotesk', sans-serif;
+    overflow: hidden;
+    cursor: none;
+  }
+
+  /* ── custom cursor ── */
+  #cursor {
+    position: fixed;
+    width: 8px; height: 8px;
+    background: var(--accent);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform .1s, width .2s, height .2s;
+    mix-blend-mode: exclusion;
+  }
+
+  /* ── nav ── */
+  #nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    opacity: 0;
+  }
+  #nav .logo {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--text);
+  }
+  #nav .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+  #nav .nav-links a {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color .2s;
+  }
+  #nav .nav-links a:hover { color: var(--text); }
+  #nav .nav-cta {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .14em;
+    text-transform: uppercase;
+    color: var(--bg);
+    background: var(--accent);
+    padding: 8px 20px;
+    border-radius: 100px;
+    text-decoration: none;
+  }
+
+  /* ── sidebar label ── */
+  #sidebar-label {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%) rotate(90deg) translateX(50%);
+    transform-origin: right center;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--muted);
+    z-index: 100;
+    opacity: 0;
+    white-space: nowrap;
+  }
+
+  /* ── main scene ── */
+  #scene {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  /* ── scene-inner: the thing that zooms ── */
+  #scene-inner {
+    position: relative;
+    width: 900px;
+    height: 600px;
+    transform-origin: center center;
+    /* starts zoomed in — GSAP will animate this out */
+    transform: scale(2.8);
+  }
+
+  /* ── PCB surface ── */
+  #pcb-surface {
+    position: absolute;
+    inset: -60px;
+    background: var(--surface);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  #pcb-surface::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+    background-size: 24px 24px;
+    opacity: .7;
+  }
+  /* ruler left edge */
+  #pcb-surface::after {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 32px;
+    background: #0d150b;
+    border-right: 1px solid var(--grid-line);
+  }
+
+  /* ruler ticks */
+  #ruler-marks {
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 32px;
+    z-index: 2;
+  }
+  .tick {
+    position: absolute;
+    left: 20px;
+    font-family: 'Space Mono', monospace;
+    font-size: 6px;
+    color: #3d5c38;
+    line-height: 1;
+  }
+  .tick::before {
+    content: '';
+    position: absolute;
+    right: 100%;
+    top: 50%;
+    width: 6px;
+    height: 1px;
+    background: #3d5c38;
+    margin-right: 2px;
+  }
+
+  /* ── selection handles (design-tool aesthetic) ── */
+  #selection-box {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 340px; height: 340px;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 20;
+  }
+  .sel-border {
+    position: absolute;
+    inset: 0;
+    border: 1.5px dashed var(--handle);
+    opacity: .9;
+  }
+  .sel-handle {
+    position: absolute;
+    width: 9px; height: 9px;
+    background: var(--handle);
+    border-radius: 1px;
+    transform: translate(-50%, -50%);
+  }
+  .sel-handle.tl { top: 0;   left: 0;   }
+  .sel-handle.tc { top: 0;   left: 50%; }
+  .sel-handle.tr { top: 0;   left: 100%;}
+  .sel-handle.ml { top: 50%; left: 0;   }
+  .sel-handle.mr { top: 50%; left: 100%;}
+  .sel-handle.bl { top: 100%;left: 0;   }
+  .sel-handle.bc { top: 100%;left: 50%; }
+  .sel-handle.br { top: 100%;left: 100%;}
+
+  /* ── watch movement (central object) ── */
+  #watch-wrap {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 300px; height: 300px;
+    z-index: 10;
+    filter: drop-shadow(0 20px 60px rgba(0,0,0,.8)) drop-shadow(0 4px 16px rgba(0,0,0,.5));
+  }
+
+  /* ── gear animations ── */
+  @keyframes spin-cw  { from { transform: rotate(0deg);   } to { transform: rotate(360deg);  } }
+  @keyframes spin-ccw { from { transform: rotate(0deg);   } to { transform: rotate(-360deg); } }
+
+  .gear-main    { animation: spin-cw  12s linear infinite; transform-origin: 150px 150px; }
+  .gear-b       { animation: spin-ccw  4s linear infinite; transform-origin: 218px 112px; }
+  .gear-c       { animation: spin-cw   6s linear infinite; transform-origin: 90px  200px; }
+  .gear-d       { animation: spin-ccw  3s linear infinite; transform-origin: 225px 195px; }
+  .balance      { animation: spin-cw  1.6s ease-in-out infinite alternate; transform-origin: 150px 78px; }
+
+  /* ── props ── */
+  .prop {
+    position: absolute;
+    z-index: 5;
+    opacity: 0;
+  }
+
+  /* ── UI text elements ── */
+  #ui-brand {
+    position: fixed;
+    top: 50%; left: 40px;
+    transform: translateY(-50%);
+    z-index: 100;
+    opacity: 0;
+  }
+  #ui-brand .brand-name {
+    font-size: clamp(64px, 8vw, 110px);
+    font-weight: 700;
+    line-height: .9;
+    letter-spacing: -.04em;
+    color: var(--text);
+  }
+  #ui-brand .brand-tagline {
+    font-size: 11px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 16px;
+  }
+  #ui-brand .brand-studio {
+    margin-top: 40px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    line-height: 1.7;
+    border-top: 1px solid #2a3525;
+    padding-top: 16px;
+  }
+  #ui-brand .brand-sub {
+    margin-top: 12px;
+    font-size: 11px;
+    color: #4a5a42;
+    letter-spacing: .04em;
+    line-height: 1.6;
+    max-width: 180px;
+  }
+
+  #ui-copy {
+    position: fixed;
+    top: 50%;
+    right: 60px;
+    transform: translateY(-50%);
+    max-width: 320px;
+    z-index: 100;
+    opacity: 0;
+  }
+  #ui-copy .copy-headline {
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.5;
+    color: var(--text);
+    margin-bottom: 20px;
+  }
+  #ui-copy .copy-headline strong {
+    font-weight: 700;
+  }
+  #ui-copy .copy-divider {
+    width: 32px;
+    height: 1px;
+    background: var(--accent-dim);
+    margin-bottom: 20px;
+  }
+  #ui-copy .copy-sub {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: .04em;
+    line-height: 1.8;
+  }
+
+  #scroll-hint {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 100;
+    opacity: 0;
+  }
+  #scroll-hint span {
+    font-size: 10px;
+    letter-spacing: .22em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .scroll-arrow {
+    width: 1px;
+    height: 32px;
+    background: linear-gradient(to bottom, var(--muted), transparent);
+    animation: scroll-pulse 2s ease-in-out infinite;
+  }
+  @keyframes scroll-pulse {
+    0%, 100% { opacity: .3; transform: scaleY(1); }
+    50%       { opacity: 1;  transform: scaleY(1.2); }
+  }
+
+  /* ── tool hint (design app look) ── */
+  #tool-hint {
+    position: fixed;
+    top: 24px; right: 24px;
+    width: 32px; height: 32px;
+    background: var(--handle);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+    color: #fff;
+    z-index: 200;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ── dot indicator top-left ── */
+  #dot-indicator {
+    position: fixed;
+    top: 28px; left: 28px;
+    width: 8px; height: 8px;
+    background: #fff;
+    border-radius: 50%;
+    z-index: 200;
+    opacity: .5;
+  }
+</style>
+</head>
+<body>
+
+<div id="cursor"></div>
+
+<!-- design-app dot top-left -->
+<div id="dot-indicator"></div>
+
+<!-- design-app tool badge -->
+<div id="tool-hint">↺A</div>
+
+<!-- nav -->
+<nav id="nav">
+  <div class="logo">Cogniti</div>
+  <ul class="nav-links">
+    <li><a href="#">Intro</a></li>
+    <li><a href="#">Systems</a></li>
+    <li><a href="#">Product</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+  <a href="#" class="nav-cta">Talk to us</a>
+</nav>
+
+<!-- sidebar -->
+<div id="sidebar-label">Cogniti-1 &nbsp; System</div>
+
+<!-- brand text (left) -->
+<div id="ui-brand">
+  <div class="brand-tagline">Built for decisions. Wired for scale.</div>
+  <div class="brand-name">COG<br/>NITI</div>
+  <div class="brand-studio">
+    Intelligence<br/>Infrastructure<br/>Company
+  </div>
+  <div class="brand-sub">
+    The world's most<br/>
+    invisible intelligence layer.
+  </div>
+</div>
+
+<!-- value prop copy (right) -->
+<div id="ui-copy">
+  <div class="copy-headline">
+    Designed to <strong>decide, coordinate,<br/>and adapt</strong> — at every layer of your stack.
+  </div>
+  <div class="copy-divider"></div>
+  <div class="copy-sub">
+    Cogniti builds intelligence infrastructure —<br/>
+    not software, not SaaS, not a vendor.<br/>
+    The system that thinks so yours doesn't have to.
+  </div>
+</div>
+
+<!-- scroll hint -->
+<div id="scroll-hint">
+  <div class="scroll-arrow"></div>
+  <span>Scroll to continue</span>
+</div>
+
+<!-- scene -->
+<div id="scene">
+  <div id="scene-inner">
+
+    <!-- PCB surface -->
+    <div id="pcb-surface">
+      <!-- ruler marks -->
+      <div id="ruler-marks">
+        <!-- ticks generated via JS -->
+      </div>
+    </div>
+
+    <!-- selection box (design-tool handles) -->
+    <div id="selection-box">
+      <div class="sel-border"></div>
+      <div class="sel-handle tl"></div>
+      <div class="sel-handle tc"></div>
+      <div class="sel-handle tr"></div>
+      <div class="sel-handle ml"></div>
+      <div class="sel-handle mr"></div>
+      <div class="sel-handle bl"></div>
+      <div class="sel-handle bc"></div>
+      <div class="sel-handle br"></div>
+    </div>
+
+    <!-- watch movement SVG -->
+    <div id="watch-wrap">
+      <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" width="300" height="300">
+        <defs>
+          <radialGradient id="plateGrad" cx="50%" cy="40%" r="60%">
+            <stop offset="0%" stop-color="#2a3d28"/>
+            <stop offset="100%" stop-color="#111a0f"/>
+          </radialGradient>
+          <radialGradient id="gearGrad" cx="30%" cy="30%" r="70%">
+            <stop offset="0%" stop-color="#4a6644"/>
+            <stop offset="100%" stop-color="#1e2e1c"/>
+          </radialGradient>
+          <filter id="bevel">
+            <feGaussianBlur in="SourceAlpha" stdDeviation="1" result="blur"/>
+            <feOffset dx="1" dy="1" in="blur" result="shadow"/>
+            <feComposite in="SourceGraphic" in2="shadow" operator="over"/>
+          </filter>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="2" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- main plate -->
+        <circle cx="150" cy="150" r="148" fill="#0c1209" stroke="#2a3d28" stroke-width="1.5"/>
+        <circle cx="150" cy="150" r="142" fill="url(#plateGrad)" stroke="#1e2e1c" stroke-width="1"/>
+
+        <!-- fine engraved rings -->
+        <circle cx="150" cy="150" r="138" fill="none" stroke="#233020" stroke-width=".5" stroke-dasharray="4 3"/>
+        <circle cx="150" cy="150" r="120" fill="none" stroke="#1a2518" stroke-width=".5"/>
+        <circle cx="150" cy="150" r="100" fill="none" stroke="#162013" stroke-width=".5" stroke-dasharray="2 4"/>
+
+        <!-- jewel bezels -->
+        <circle cx="150" cy="150" r="6" fill="#8B1A1A" stroke="#c0392b" stroke-width="1" filter="url(#glow)"/>
+        <circle cx="218" cy="112" r="4" fill="#8B1A1A" stroke="#c0392b" stroke-width=".8"/>
+        <circle cx="90"  cy="200" r="4" fill="#8B1A1A" stroke="#c0392b" stroke-width=".8"/>
+        <circle cx="225" cy="195" r="3" fill="#8B1A1A" stroke="#c0392b" stroke-width=".8"/>
+        <circle cx="150" cy="78"  r="3.5" fill="#8B1A1A" stroke="#c0392b" stroke-width=".8"/>
+
+        <!-- ── MAIN GEAR (center) ── -->
+        <g class="gear-main">
+          <circle cx="150" cy="150" r="44" fill="url(#gearGrad)" stroke="#3a5436" stroke-width="1.2"/>
+          <!-- 18 teeth -->
+          <g fill="#3a5436" stroke="#233020" stroke-width=".6">
+            <rect x="148" y="102" width="4" height="12" rx="1"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(20 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(40 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(60 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(80 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(100 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(120 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(140 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(160 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(180 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(200 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(220 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(240 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(260 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(280 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(300 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(320 150 150)"/>
+            <rect x="148" y="102" width="4" height="12" rx="1" transform="rotate(340 150 150)"/>
+          </g>
+          <circle cx="150" cy="150" r="30" fill="#0f1a0d" stroke="#2a3d28" stroke-width="1"/>
+          <!-- spokes -->
+          <line x1="150" y1="125" x2="150" y2="175" stroke="#3a5436" stroke-width="1.5"/>
+          <line x1="125" y1="150" x2="175" y2="150" stroke="#3a5436" stroke-width="1.5"/>
+          <line x1="129" y1="129" x2="171" y2="171" stroke="#3a5436" stroke-width="1.5"/>
+          <line x1="171" y1="129" x2="129" y2="171" stroke="#3a5436" stroke-width="1.5"/>
+          <circle cx="150" cy="150" r="6" fill="#8B1A1A" stroke="#c0392b" stroke-width="1"/>
+          <circle cx="150" cy="150" r="3" fill="#1a1a1a"/>
+        </g>
+
+        <!-- ── GEAR B (top-right, fast) ── -->
+        <g class="gear-b">
+          <circle cx="218" cy="112" r="22" fill="url(#gearGrad)" stroke="#3a5436" stroke-width="1"/>
+          <g fill="#3a5436" stroke="#233020" stroke-width=".5">
+            <rect x="216.5" y="88" width="3" height="8" rx=".8" transform-origin="218 112"/>
+            <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(26 218 112)"/>
+            <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(52 218 112)"/>
+            <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(78 218 112)"/>
+            <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(104 218 112)"/>
+            <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(130 218 112)"/>
+            <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(156 218 112)"/>
+            <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(182 218 112)"/>
+            <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(208 218 112)"/>
+            <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(234 218 112)"/>
+            <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(260 218 112)"/>
+            <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(286 218 112)"/>
+            <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(312 218 112)"/>
+            <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(338 218 112)"/>
+          </g>
+          <circle cx="218" cy="112" r="14" fill="#0f1a0d"/>
+          <line x1="218" y1="101" x2="218" y2="123" stroke="#3a5436" stroke-width="1.2"/>
+          <line x1="207" y1="112" x2="229" y2="112" stroke="#3a5436" stroke-width="1.2"/>
+          <circle cx="218" cy="112" r="4" fill="#8B1A1A" stroke="#c0392b" stroke-width=".8"/>
+        </g>
+
+        <!-- ── GEAR C (bottom-left) ── -->
+        <g class="gear-c">
+          <circle cx="90" cy="200" r="28" fill="url(#gearGrad)" stroke="#3a5436" stroke-width="1"/>
+          <g fill="#3a5436" stroke="#233020" stroke-width=".5">
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform-origin="90 200"/>
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(24 90 200)"/>
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(48 90 200)"/>
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(72 90 200)"/>
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(96 90 200)"/>
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(120 90 200)"/>
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(144 90 200)"/>
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(168 90 200)"/>
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(192 90 200)"/>
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(216 90 200)"/>
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(240 90 200)"/>
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(264 90 200)"/>
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(288 90 200)"/>
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(312 90 200)"/>
+            <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(336 90 200)"/>
+          </g>
+          <circle cx="90" cy="200" r="18" fill="#0f1a0d"/>
+          <line x1="90" y1="186" x2="90" y2="214" stroke="#3a5436" stroke-width="1.2"/>
+          <line x1="76" y1="200" x2="104" y2="200" stroke="#3a5436" stroke-width="1.2"/>
+          <line x1="80" y1="190" x2="100" y2="210" stroke="#3a5436" stroke-width=".8"/>
+          <line x1="100" y1="190" x2="80" y2="210" stroke="#3a5436" stroke-width=".8"/>
+          <circle cx="90" cy="200" r="4" fill="#8B1A1A" stroke="#c0392b" stroke-width=".8"/>
+        </g>
+
+        <!-- ── GEAR D (bottom-right, tiny) ── -->
+        <g class="gear-d">
+          <circle cx="225" cy="195" r="16" fill="url(#gearGrad)" stroke="#3a5436" stroke-width=".8"/>
+          <g fill="#3a5436" stroke="#233020" stroke-width=".4">
+            <rect x="223.5" y="178" width="3" height="7" rx=".6" transform-origin="225 195"/>
+            <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(30 225 195)"/>
+            <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(60 225 195)"/>
+            <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(90 225 195)"/>
+            <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(120 225 195)"/>
+            <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(150 225 195)"/>
+            <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(180 225 195)"/>
+            <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(210 225 195)"/>
+            <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(240 225 195)"/>
+            <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(270 225 195)"/>
+            <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(300 225 195)"/>
+            <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(330 225 195)"/>
+          </g>
+          <circle cx="225" cy="195" r="9" fill="#0f1a0d"/>
+          <line x1="225" y1="188" x2="225" y2="202" stroke="#3a5436" stroke-width="1"/>
+          <line x1="218" y1="195" x2="232" y2="195" stroke="#3a5436" stroke-width="1"/>
+          <circle cx="225" cy="195" r="3" fill="#8B1A1A" stroke="#c0392b" stroke-width=".6"/>
+        </g>
+
+        <!-- ── BALANCE WHEEL (top-center) ── -->
+        <g class="balance">
+          <circle cx="150" cy="78" r="20" fill="none" stroke="#3a5436" stroke-width="2"/>
+          <circle cx="150" cy="78" r="20" fill="none" stroke="#b8ff3c" stroke-width=".5" opacity=".3"/>
+          <line x1="150" y1="58" x2="150" y2="98" stroke="#3a5436" stroke-width="1.5"/>
+          <line x1="130" y1="78" x2="170" y2="78" stroke="#3a5436" stroke-width="1.5"/>
+          <circle cx="150" cy="78" r="6" fill="#0f1a0d" stroke="#3a5436" stroke-width="1"/>
+          <circle cx="150" cy="78" r="3.5" fill="#8B1A1A" stroke="#c0392b" stroke-width=".8"/>
+          <!-- hairspring spiral -->
+          <path d="M150,74 C152,70 156,70 158,74 C160,78 158,82 154,84 C150,86 146,84 144,80 C142,76 144,70 150,68"
+                fill="none" stroke="#b8ff3c" stroke-width=".6" opacity=".5"/>
+        </g>
+
+        <!-- accent glow on accent parts -->
+        <circle cx="150" cy="78" r="20" fill="none" stroke="#b8ff3c" stroke-width=".3" opacity=".2" filter="url(#glow)"/>
+
+        <!-- engraved text on plate -->
+        <text x="150" y="252" text-anchor="middle" font-family="Space Mono" font-size="7" fill="#2a3d28" letter-spacing="4">COGNITI · I</text>
+        <text x="150" y="263" text-anchor="middle" font-family="Space Mono" font-size="5.5" fill="#1e2e1c" letter-spacing="3">INTELLIGENCE SYSTEM</text>
+      </svg>
+    </div>
+
+    <!-- ── PROP: Vernier Caliper ── -->
+    <div class="prop" id="prop-caliper" style="bottom: 8%; right: 4%; transform: rotate(-8deg);">
+      <svg width="220" height="60" viewBox="0 0 220 60" xmlns="http://www.w3.org/2000/svg">
+        <!-- main body -->
+        <rect x="0" y="20" width="200" height="18" rx="3" fill="#1e2d1c" stroke="#3a5436" stroke-width=".8"/>
+        <!-- scale marks -->
+        <g stroke="#4a6644" stroke-width=".5">
+          <line x1="10" y1="22" x2="10" y2="26"/><line x1="20" y1="22" x2="20" y2="25"/>
+          <line x1="30" y1="22" x2="30" y2="26"/><line x1="40" y1="22" x2="40" y2="25"/>
+          <line x1="50" y1="22" x2="50" y2="26"/><line x1="60" y1="22" x2="60" y2="25"/>
+          <line x1="70" y1="22" x2="70" y2="26"/><line x1="80" y1="22" x2="80" y2="25"/>
+          <line x1="90" y1="22" x2="90" y2="26"/><line x1="100" y1="22" x2="100" y2="25"/>
+          <line x1="110" y1="22" x2="110" y2="26"/><line x1="120" y1="22" x2="120" y2="25"/>
+          <line x1="130" y1="22" x2="130" y2="26"/><line x1="140" y1="22" x2="140" y2="25"/>
+          <line x1="150" y1="22" x2="150" y2="26"/><line x1="160" y1="22" x2="160" y2="25"/>
+          <line x1="170" y1="22" x2="170" y2="26"/><line x1="180" y1="22" x2="180" y2="25"/>
+          <line x1="190" y1="22" x2="190" y2="26"/>
+        </g>
+        <!-- jaw left -->
+        <path d="M2,8 L14,8 L14,20 L2,20 Z" fill="#2a3d28" stroke="#3a5436" stroke-width=".8"/>
+        <path d="M2,38 L14,38 L14,52 L2,52 Z" fill="#2a3d28" stroke="#3a5436" stroke-width=".8"/>
+        <!-- sliding jaw -->
+        <rect x="88" y="15" width="22" height="28" rx="2" fill="#162013" stroke="#b8ff3c" stroke-width=".6" opacity=".8"/>
+        <path d="M90,8 L110,8 L110,15 L90,15 Z" fill="#1e2d1c" stroke="#3a5436" stroke-width=".8"/>
+        <path d="M90,43 L110,43 L110,52 L90,52 Z" fill="#1e2d1c" stroke="#3a5436" stroke-width=".8"/>
+        <!-- vernier scale on slider -->
+        <g stroke="#b8ff3c" stroke-width=".4" opacity=".6">
+          <line x1="91" y1="17" x2="91" y2="19"/>
+          <line x1="94" y1="17" x2="94" y2="20"/>
+          <line x1="97" y1="17" x2="97" y2="19"/>
+          <line x1="100" y1="17" x2="100" y2="20"/>
+          <line x1="103" y1="17" x2="103" y2="19"/>
+          <line x1="106" y1="17" x2="106" y2="20"/>
+        </g>
+        <!-- depth probe -->
+        <rect x="198" y="24" width="20" height="6" rx="1" fill="#2a3d28" stroke="#3a5436" stroke-width=".8"/>
+      </svg>
+    </div>
+
+    <!-- ── PROP: Mechanical Pencil ── -->
+    <div class="prop" id="prop-pencil" style="top: 8%; right: 8%; transform: rotate(15deg);">
+      <svg width="260" height="18" viewBox="0 0 260 18" xmlns="http://www.w3.org/2000/svg">
+        <!-- grip section -->
+        <rect x="20" y="4" width="80" height="10" rx="2" fill="#1a2518"/>
+        <g stroke="#2a3d28" stroke-width="1">
+          <line x1="24" y1="4" x2="24" y2="14"/><line x1="28" y1="4" x2="28" y2="14"/>
+          <line x1="32" y1="4" x2="32" y2="14"/><line x1="36" y1="4" x2="36" y2="14"/>
+          <line x1="40" y1="4" x2="40" y2="14"/><line x1="44" y1="4" x2="44" y2="14"/>
+          <line x1="48" y1="4" x2="48" y2="14"/><line x1="52" y1="4" x2="52" y2="14"/>
+          <line x1="56" y1="4" x2="56" y2="14"/><line x1="60" y1="4" x2="60" y2="14"/>
+          <line x1="64" y1="4" x2="64" y2="14"/><line x1="68" y1="4" x2="68" y2="14"/>
+          <line x1="72" y1="4" x2="72" y2="14"/><line x1="76" y1="4" x2="76" y2="14"/>
+          <line x1="80" y1="4" x2="80" y2="14"/><line x1="84" y1="4" x2="84" y2="14"/>
+          <line x1="88" y1="4" x2="88" y2="14"/><line x1="92" y1="4" x2="92" y2="14"/>
+          <line x1="96" y1="4" x2="96" y2="14"/>
+        </g>
+        <!-- barrel -->
+        <rect x="100" y="3" width="130" height="12" rx="6" fill="#2a3d28" stroke="#3a5436" stroke-width=".8"/>
+        <!-- accent ring -->
+        <rect x="98" y="3" width="6" height="12" rx="2" fill="#b8ff3c" opacity=".7"/>
+        <!-- clip -->
+        <rect x="180" y="1" width="3" height="14" rx="1.5" fill="#1a2518"/>
+        <circle cx="181.5" cy="1" r="2.5" fill="#1a2518"/>
+        <!-- tip -->
+        <path d="M100,6 L4,9 L100,12 Z" fill="#3a5436"/>
+        <line x1="4" y1="9" x2="0" y2="9" stroke="#c8c8b8" stroke-width="1"/>
+        <!-- eraser end -->
+        <rect x="230" y="5" width="20" height="8" rx="2" fill="#4a1a1a"/>
+        <rect x="228" y="5" width="4" height="8" rx="1" fill="#2a2a2a"/>
+        <!-- clip end -->
+        <circle cx="240" cy="9" r="5" fill="#1a2518" stroke="#3a5436" stroke-width=".8"/>
+      </svg>
+    </div>
+
+    <!-- ── PROP: Circuit Schematic fragment ── -->
+    <div class="prop" id="prop-schematic" style="top: 12%; left: 4%; transform: rotate(-5deg);">
+      <svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg" opacity=".7">
+        <rect x="0" y="0" width="140" height="100" rx="3" fill="#0d150b" stroke="#1e2e1c" stroke-width="1"/>
+        <!-- schematic traces -->
+        <g fill="none" stroke="#2a3d28" stroke-width="1">
+          <polyline points="10,20 30,20 30,50 60,50"/>
+          <polyline points="60,50 60,70 90,70"/>
+          <polyline points="90,20 90,50 120,50 120,30"/>
+          <polyline points="30,20 30,10 80,10 80,20"/>
+          <polyline points="10,70 30,70 30,80 60,80 60,70"/>
+          <polyline points="100,70 130,70 130,50 120,50"/>
+        </g>
+        <!-- components -->
+        <!-- resistor -->
+        <rect x="55" y="46" width="14" height="8" rx="1" fill="#0d150b" stroke="#3a5436" stroke-width=".8"/>
+        <!-- capacitor -->
+        <line x1="86" y1="46" x2="86" y2="54" stroke="#3a5436" stroke-width="2"/>
+        <line x1="94" y1="46" x2="94" y2="54" stroke="#3a5436" stroke-width="2"/>
+        <!-- IC box -->
+        <rect x="48" y="28" width="24" height="16" rx="1" fill="#111a0f" stroke="#4a6644" stroke-width=".8"/>
+        <!-- IC pins -->
+        <g stroke="#3a5436" stroke-width=".8">
+          <line x1="48" y1="32" x2="44" y2="32"/><line x1="48" y1="36" x2="44" y2="36"/>
+          <line x1="48" y1="40" x2="44" y2="40"/>
+          <line x1="72" y1="32" x2="76" y2="32"/><line x1="72" y1="36" x2="76" y2="36"/>
+          <line x1="72" y1="40" x2="76" y2="40"/>
+        </g>
+        <!-- accent dot -->
+        <circle cx="120" cy="30" r="4" fill="#b8ff3c" opacity=".4"/>
+        <circle cx="10"  cy="20" r="2" fill="#8B1A1A" opacity=".8"/>
+        <circle cx="10"  cy="70" r="2" fill="#8B1A1A" opacity=".8"/>
+        <!-- label -->
+        <text x="70" y="94" text-anchor="middle" font-family="Space Mono" font-size="6" fill="#2a3d28" letter-spacing="2">CG-01 · REV 4</text>
+      </svg>
+    </div>
+
+    <!-- ── PROP: Magnifying loupe ── -->
+    <div class="prop" id="prop-loupe" style="bottom: 10%; left: 6%;">
+      <svg width="70" height="70" viewBox="0 0 70 70" xmlns="http://www.w3.org/2000/svg">
+        <!-- handle -->
+        <line x1="50" y1="50" x2="66" y2="66" stroke="#2a3d28" stroke-width="5" stroke-linecap="round"/>
+        <!-- frame -->
+        <circle cx="30" cy="30" r="24" fill="none" stroke="#3a5436" stroke-width="3"/>
+        <circle cx="30" cy="30" r="24" fill="rgba(184,255,60,0.03)"/>
+        <!-- glass glare -->
+        <circle cx="22" cy="22" r="6" fill="none" stroke="#b8ff3c" stroke-width=".5" opacity=".3"/>
+        <!-- crosshair -->
+        <line x1="30" y1="12" x2="30" y2="48" stroke="#2a3d28" stroke-width=".5" stroke-dasharray="2 3"/>
+        <line x1="12" y1="30" x2="48" y2="30" stroke="#2a3d28" stroke-width=".5" stroke-dasharray="2 3"/>
+        <circle cx="30" cy="30" r="2" fill="#b8ff3c" opacity=".4"/>
+      </svg>
+    </div>
+
+    <!-- ── PROP: Coiled wire ── -->
+    <div class="prop" id="prop-wire" style="bottom: 14%; right: 22%;">
+      <svg width="60" height="30" viewBox="0 0 60 30" xmlns="http://www.w3.org/2000/svg">
+        <path d="M2,15 C6,5 12,5 16,15 C20,25 26,25 30,15 C34,5 40,5 44,15 C48,25 54,25 58,15"
+              fill="none" stroke="#2a3d28" stroke-width="2.5" stroke-linecap="round"/>
+      </svg>
+    </div>
+
+  </div><!-- /scene-inner -->
+</div><!-- /scene -->
+
+<!-- cogniti logo badge bottom-right -->
+<div style="position:fixed;bottom:20px;right:24px;z-index:200;opacity:0;" id="logo-badge">
+  <div style="background:#111a0f;border:1px solid #2a3d28;border-radius:8px;padding:8px 14px;display:flex;align-items:center;gap:10px;">
+    <div style="width:24px;height:24px;background:var(--accent);border-radius:4px;display:flex;align-items:center;justify-content:center;">
+      <svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="5" fill="none" stroke="#080a08" stroke-width="2"/><circle cx="7" cy="7" r="2" fill="#080a08"/></svg>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.1em;color:#edeae2;">COGNITI</div>
+      <div style="font-size:9px;font-family:'Space Mono';color:#4a5a42;letter-spacing:.1em;">v1.0</div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script>
+  // ── cursor ──
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top  = e.clientY + 'px';
+  });
+
+  // ── ruler ticks ──
+  const ruler = document.getElementById('ruler-marks');
+  for (let i = 0; i <= 18; i++) {
+    const t = document.createElement('div');
+    t.className = 'tick';
+    t.style.top = (i * 40 + 20) + 'px';
+    t.textContent = (i * 10);
+    ruler.appendChild(t);
+  }
+
+  // ── main reveal animation ──
+  const tl = gsap.timeline({ delay: .3 });
+
+  // 1. zoom out from 2.8x → 1x over 2.4s
+  tl.to('#scene-inner', {
+    scale: 1,
+    duration: 2.4,
+    ease: 'power3.inOut'
+  });
+
+  // 2. fade out selection handles as zoom progresses
+  tl.to('#selection-box', {
+    opacity: 0,
+    duration: .6,
+    ease: 'power2.out'
+  }, '-=1.8');
+
+  // 2b. fade out tool hint
+  tl.to('#tool-hint', {
+    opacity: 0,
+    duration: .4,
+    ease: 'power2.out'
+  }, '-=1.6');
+
+  // 3. fade in nav
+  tl.to('#nav', {
+    opacity: 1,
+    duration: .7,
+    ease: 'power2.out'
+  }, '-=.8');
+
+  // 4. fade in brand text from left
+  tl.fromTo('#ui-brand', {
+    opacity: 0,
+    x: -30
+  }, {
+    opacity: 1,
+    x: 0,
+    duration: .9,
+    ease: 'power3.out'
+  }, '-=.6');
+
+  // 5. fade in copy from right
+  tl.fromTo('#ui-copy', {
+    opacity: 0,
+    x: 30
+  }, {
+    opacity: 1,
+    x: 0,
+    duration: .9,
+    ease: 'power3.out'
+  }, '-=.8');
+
+  // 6. fade in sidebar + props
+  tl.to('#sidebar-label', {
+    opacity: 1,
+    duration: .5,
+    ease: 'power2.out'
+  }, '-=.6');
+
+  // props staggered
+  tl.to('.prop', {
+    opacity: 1,
+    duration: .5,
+    stagger: .12,
+    ease: 'power2.out'
+  }, '-=.5');
+
+  // 7. scroll hint + badge
+  tl.to(['#scroll-hint', '#logo-badge'], {
+    opacity: 1,
+    duration: .5,
+    stagger: .1,
+    ease: 'power2.out'
+  }, '-=.2');
+
+  // ── subtle ambient drift after reveal ──
+  gsap.to('#scene-inner', {
+    x: 6,
+    y: -4,
+    duration: 8,
+    ease: 'sine.inOut',
+    yoyo: true,
+    repeat: -1,
+    delay: 3
+  });
+
+  // ── dot indicator blink ──
+  gsap.to('#dot-indicator', {
+    opacity: 0.1,
+    duration: 1.2,
+    ease: 'sine.inOut',
+    yoyo: true,
+    repeat: -1
+  });
+</script>
+</body>
+</html>
