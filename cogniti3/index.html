@@ -728,6 +728,114 @@ html, body {
   .bl         { font-size: 10vw; }
   #scene      { top: 180px; }
 }
+
+/* ══════════════════════════════
+   MANIFESTO — section 2
+══════════════════════════════ */
+#manifesto {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  pointer-events: none;
+}
+
+.m-st {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 76%;
+  max-width: 860px;
+  text-align: center;
+  opacity: 0;
+  font-weight: 300;
+  font-size: clamp(22px, 3vw, 48px);
+  line-height: 1.35;
+  letter-spacing: -.02em;
+  color: var(--muted);
+  will-change: opacity;
+}
+
+.m-problem {
+  font-weight: 400;
+  font-size: clamp(26px, 3.8vw, 62px);
+  color: var(--text);
+}
+.m-punch {
+  font-weight: 700;
+  font-size: clamp(32px, 5vw, 80px);
+  color: var(--text);
+  letter-spacing: -.035em;
+}
+.m-pivot-dim {
+  font-size: clamp(15px, 2vw, 32px);
+  color: var(--muted);
+}
+.m-pivot-bright {
+  font-weight: 600;
+  font-size: clamp(24px, 3.4vw, 56px);
+  color: var(--text);
+}
+.m-pivot-bright em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+#m-stack {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 76%;
+  max-width: 860px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5em;
+  opacity: 0;
+}
+.m-belief {
+  font-weight: 300;
+  font-size: clamp(15px, 2.1vw, 34px);
+  color: var(--muted);
+  line-height: 1.5;
+  text-align: center;
+  letter-spacing: -.01em;
+}
+.m-stack-divider {
+  width: 24px;
+  height: 1px;
+  background: var(--accent-dim);
+  margin: 0.15em auto;
+  opacity: 0;
+}
+.m-stack-item {
+  font-weight: 300;
+  font-size: clamp(20px, 3vw, 50px);
+  color: var(--text);
+  opacity: 0;
+  text-align: center;
+  letter-spacing: -.02em;
+}
+.m-climax {
+  font-weight: 600;
+  color: var(--accent);
+  font-size: clamp(26px, 4vw, 66px);
+  letter-spacing: -.03em;
+}
+
+@media (max-width: 1023px) {
+  .m-st    { width: 86%; }
+  #m-stack { width: 86%; }
+}
+@media (max-width: 639px) {
+  .m-st           { width: 92%; font-size: clamp(18px, 5.5vw, 34px); }
+  .m-problem      { font-size: clamp(20px, 6vw, 40px); }
+  .m-punch        { font-size: clamp(26px, 7.5vw, 52px); }
+  .m-pivot-dim    { font-size: clamp(13px, 4vw, 24px); }
+  .m-pivot-bright { font-size: clamp(18px, 5.5vw, 36px); }
+  .m-stack-item   { font-size: clamp(16px, 5vw, 36px); }
+  .m-climax       { font-size: clamp(20px, 6.5vw, 48px); }
+  #m-stack        { width: 92%; }
+}
 </style>
 </head>
 <body>
@@ -1236,7 +1344,25 @@ html, body {
 
 </div><!-- /phase2 -->
 
+<!-- ══ MANIFESTO — section 2 ══ -->
+<div id="manifesto">
+  <div class="m-st" id="ms0">Software connected information.</div>
+  <div class="m-st" id="ms1">Intelligence connects decisions.</div>
+  <div class="m-st m-problem" id="ms2">Organizations are drowning in data.</div>
+  <div class="m-st m-punch" id="ms3">Yet struggling to act.</div>
+  <div class="m-st m-pivot-dim" id="ms4">The future does not belong to those who collect the most information.</div>
+  <div class="m-st m-pivot-bright" id="ms5">It belongs to those who can transform <em>information into action.</em></div>
+  <div id="m-stack">
+    <div class="m-belief" id="ms6">We believe intelligence should not live inside a single application.</div>
+    <div class="m-stack-divider" id="ms-div"></div>
+    <div class="m-stack-item" id="ms7">It should exist across every interaction.</div>
+    <div class="m-stack-item" id="ms8">Every workflow.</div>
+    <div class="m-stack-item m-climax" id="ms9">Every decision.</div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <script>
 // ─── cursor ───
 const cur = document.getElementById('cursor');
@@ -1474,7 +1600,7 @@ function getFinalScale() {
 // ─── PHASE 2: hero reveal ───
 function runPhase2() {
   const finalScale = getFinalScale();
-  const tl = gsap.timeline({ delay: .2 });
+  const tl = gsap.timeline({ delay: .2, onComplete: initManifesto });
 
   // zoom out scene
   tl.to('#scene-inner', {
@@ -1545,6 +1671,78 @@ function runPhase2() {
     repeat: -1,
     delay: 3.5
   });
+}
+
+// ─── initManifesto ───
+function initManifesto() {
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.documentElement.style.height   = 'auto';
+  document.documentElement.style.overflow = 'auto';
+  document.body.style.height   = 'auto';
+  document.body.style.overflow = 'auto';
+
+  const spacer = document.createElement('div');
+  spacer.style.cssText = 'height:1100vh;width:100%;pointer-events:none;';
+  document.body.appendChild(spacer);
+  window.scrollTo(0, 0);
+
+  const VH = window.innerHeight;
+
+  // ── hero exit (0 → 1×VH) ──
+  gsap.timeline({ scrollTrigger: { start: 0, end: VH, scrub: 1.5 } })
+    .to('#pcb-surface',                          { opacity: 0, duration: 1 }, 0)
+    .to('#pcb-traces',                           { opacity: 0, duration: 1 }, 0)
+    .to('#ruler-marks',                          { opacity: 0, duration: .7 }, 0)
+    .to('.prop',                                 { opacity: 0, duration: .5, stagger: .05 }, 0)
+    .to('#ui-brand',                             { opacity: 0, x: -22, duration: .8 }, 0)
+    .to('#ui-copy',                              { opacity: 0, x:  22, duration: .8 }, 0)
+    .to(['#sys-status','#scroll-hint','#logo-badge','#sidebar-label'],
+                                                 { opacity: 0, duration: .4 }, 0)
+    .to('#watch-wrap',                           { opacity: .22, duration: 1.2 }, .2);
+
+  // ── solo statements (start 1.5×VH, 1×VH each) ──
+  const STEP   = VH;
+  const MSTART = VH * 1.5;
+  const SOLOS  = ['#ms0','#ms1','#ms2','#ms3','#ms4','#ms5'];
+
+  SOLOS.forEach((sel, i) => {
+    const zs = MSTART + i * STEP;
+    const el = document.querySelector(sel);
+    if (!el) return;
+    ScrollTrigger.create({
+      start: zs, end: zs + STEP, scrub: 1,
+      onUpdate({ progress: p }) {
+        const op = p < .22 ? p / .22
+                 : p < .72 ? 1
+                 : 1 - (p - .72) / .28;
+        gsap.set(el, { opacity: Math.max(0, Math.min(1, op)) });
+      }
+    });
+  });
+
+  // ── belief stack (3×VH zone) ──
+  const SS = MSTART + 6 * STEP;
+  ScrollTrigger.create({
+    start: SS, end: SS + VH * 3, scrub: 1.2,
+    onUpdate({ progress: p }) {
+      gsap.set('#m-stack', { opacity: Math.min(1, p / .15) });
+      gsap.set('#ms-div',  { opacity: Math.max(0, Math.min(1, (p - .28) / .10)) });
+      gsap.set('#ms7',     { opacity: Math.max(0, Math.min(1, (p - .38) / .14)) });
+      gsap.set('#ms8',     { opacity: Math.max(0, Math.min(1, (p - .55) / .14)) });
+      gsap.set('#ms9',     { opacity: Math.max(0, Math.min(1, (p - .72) / .14)) });
+
+      if (p > .65) {
+        const gp = (p - .65) / .35;
+        gsap.set('#watch-wrap', {
+          opacity: .22 + gp * .30,
+          filter : `drop-shadow(0 0 ${40 + gp * 52}px rgba(184,255,60,${.12 + gp * .28})) drop-shadow(0 24px 60px rgba(0,0,0,.9))`
+        });
+      }
+    }
+  });
+
+  window.addEventListener('resize', () => ScrollTrigger.refresh());
 }
 
 // ─── click to replay ───
