@@ -7,6 +7,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1042,6 +1050,198 @@ html, body {
   line-height: 1.9; color: var(--muted);
   max-width: 400px;
 }
+
+/* ── Living Architecture scene — z-index above ALL sections (max 9xxx) ── */
+#la-canvas {
+  position: fixed; inset: 0;
+  display: block; z-index: 9000;
+  opacity: 0; pointer-events: none;
+}
+#la-canvas.active { pointer-events: all; }
+#la-section-label {
+  position: fixed; top: 36px; left: 44px;
+  z-index: 9100; display: flex; align-items: baseline; gap: 10px;
+  opacity: 0; transform: translateY(-8px); pointer-events: none;
+}
+.la-sl-num { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em; color:#4a7a10; }
+.la-sl-sep { font-size:10px; color:#2a3a20; }
+.la-sl-title { font-family:'Inter',sans-serif; font-weight:200; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:#6a7864; }
+#la-text-block {
+  position: fixed; bottom: 88px; left: 44px;
+  z-index: 9100; max-width: 440px;
+  opacity: 0; transform: translateY(18px); pointer-events: none;
+}
+#la-headline {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(26px, 3.4vw, 50px);
+  font-weight: 200; line-height: 1.1;
+  letter-spacing: -.025em; color: #edeae2;
+  margin-bottom: 18px;
+}
+#la-description {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px; font-weight: 300;
+  line-height: 1.85; color: #6a7864;
+  max-width: 380px;
+}
+.la-node-label {
+  position: fixed; pointer-events: none; z-index: 9050;
+  text-align: center; opacity: 0;
+}
+.la-node-label .nl-name {
+  font-family: 'Space Mono', monospace; font-size: 8px; font-weight: 400;
+  letter-spacing: .22em; text-transform: uppercase; color: #a0b89a;
+  display: block;
+  text-shadow: 0 0 10px rgba(0,0,0,1);
+  background: rgba(6,8,7,.55);
+  padding: 3px 7px;
+  border-left: 1px solid rgba(184,255,60,.25);
+}
+.la-hud-wrap {
+  position:fixed; pointer-events:none; z-index:9045;
+  transform:translate(-50%,-50%); opacity:0;
+}
+.la-hud-wrap.large { width:72px; height:72px; }
+.la-hud-wrap.small { width:48px; height:48px; }
+.la-hud-tl,.la-hud-tr,.la-hud-bl,.la-hud-br {
+  position:absolute; width:9px; height:9px;
+}
+.la-hud-tl { top:0; left:0; border-top:1px solid; border-left:1px solid; }
+.la-hud-tr { top:0; right:0; border-top:1px solid; border-right:1px solid; }
+.la-hud-bl { bottom:0; left:0; border-bottom:1px solid; border-left:1px solid; }
+.la-hud-br { bottom:0; right:0; border-bottom:1px solid; border-right:1px solid; }
+.la-hud-wrap.hub::before,.la-hud-wrap.hub::after {
+  content:''; position:absolute; background:currentColor; opacity:.25;
+}
+.la-hud-wrap.hub::before { width:1px; height:100%; left:50%; top:0; }
+.la-hud-wrap.hub::after  { height:1px; width:100%; top:50%; left:0; }
+#la-panel {
+  position:fixed; top:0; right:0; width:320px; height:100%;
+  z-index:9200; display:flex; flex-direction:column; justify-content:center;
+  padding:48px 44px; opacity:0; transform:translateX(40px);
+  pointer-events:none;
+  border-left:1px solid rgba(24,36,19,.8);
+  background:linear-gradient(to left,rgba(6,8,7,.95),rgba(6,8,7,.6));
+  backdrop-filter:blur(12px);
+}
+#la-panel.visible { pointer-events:all; }
+.la-p-section { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.2em; color:#4a7a10; text-transform:uppercase; margin-bottom:6px; }
+.la-p-index   { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.15em; color:#4a7a10; margin-bottom:4px; }
+.la-p-name    { font-family:'Inter',sans-serif; font-weight:200; font-size:36px; letter-spacing:-.02em; line-height:1; margin-bottom:20px; color:#edeae2; }
+.la-p-bar     { height:1px; background:linear-gradient(to right,#4a7a10,transparent); margin-bottom:20px; opacity:.5; }
+.la-p-desc    { font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:300; line-height:1.7; color:#6a7864; margin-bottom:28px; }
+.la-p-conn-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.2em; color:#4a7a10; text-transform:uppercase; margin-bottom:10px; }
+.la-p-conn-list  { display:flex; flex-wrap:wrap; gap:6px; }
+.la-p-conn-tag   { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.1em; color:#4a7a10; border:1px solid rgba(74,122,16,.3); padding:3px 8px; border-radius:2px; text-transform:uppercase; }
+#la-statusbar {
+  position:fixed; bottom:28px; left:44px; z-index:9100;
+  display:flex; align-items:center; gap:12px; opacity:0; pointer-events:none;
+}
+.la-sb-item { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.18em; color:#6a7864; text-transform:uppercase; }
+.la-sb-dot  { color:#2a3a20; font-size:10px; }
+#la-sb-active { color:#b8ff3c; position:relative; padding-left:12px; }
+#la-sb-active::before {
+  content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:5px; height:5px; border-radius:50%;
+  background:#b8ff3c; box-shadow:0 0 6px #b8ff3c;
+  animation:blink 2s ease infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+#la-close-hint {
+  position:fixed; top:36px; right:44px; z-index:9400;
+  font-family:'Space Mono',monospace; font-size:9px;
+  letter-spacing:.15em; color:#6a7864; cursor:none; opacity:0;
+  display:flex; align-items:center; gap:8px; pointer-events:none;
+}
+#la-close-hint.visible { pointer-events:all; }
+#la-close-hint span {
+  width:16px; height:16px; border:1px solid rgba(106,120,100,.3);
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:10px; color:#6a7864; border-radius:2px;
+}
+
+/* ── LA cursor hover state (from v2) ── */
+body.la-hovering #cursor { width:10px; height:10px; }
+body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,255,60,.5); }
+
+/* ── Living Architecture transition overlay ── */
+#tx-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #060807;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+#tx-overlay.active { pointer-events: all; }
+
+.tx-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .22em;
+  color: #4a7a10;
+  margin-bottom: 14px;
+  opacity: 0;
+}
+.tx-rule {
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(to right, #4a7a10, transparent);
+  margin-bottom: 28px;
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+.tx-title-wrap {
+  overflow: hidden;
+  line-height: 1;
+}
+.tx-word {
+  font-family: 'Inter', sans-serif;
+  font-weight: 200;
+  font-size: clamp(52px, 8vw, 96px);
+  letter-spacing: -.02em;
+  color: #edeae2;
+  display: block;
+  transform: translateY(100%);
+}
+.tx-word:first-child { margin-bottom: 4px; }
+.tx-sub {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: .18em;
+  color: #6a7864;
+  text-transform: uppercase;
+  margin-top: 28px;
+  opacity: 0;
+}
+.tx-prog-wrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: #182413;
+}
+.tx-prog {
+  height: 100%;
+  background: linear-gradient(to right, #4a7a10, #b8ff3c);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+#tx-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  background: #060807;
+  opacity: 0;
+  pointer-events: none;
+}
 </style>
 </head>
 <body>
@@ -1978,7 +2178,7 @@ function initManifesto() {
   document.body.style.overflow = 'auto';
 
   const spacer = document.createElement('div');
-  spacer.style.cssText = 'height:3900vh;width:100%;pointer-events:none;';
+  spacer.style.cssText = 'height:4000vh;width:100%;pointer-events:none;';
   document.body.appendChild(spacer);
   window.scrollTo(0, 0);
 
@@ -2555,7 +2755,7 @@ function initShift() {
       document.getElementById('shift-hud').style.opacity     = fade.toString();
       document.getElementById('shift-content').style.opacity = fade.toString();
     },
-    onLeave() { shiftActive = false; },
+    onLeave() { shiftActive = false; triggerTransition(); },
   });
 
   // initial render so canvas isn't blank on first scroll into view
@@ -2567,10 +2767,537 @@ function initShift() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
   });
+
+  // Fallback: trigger transition when user reaches page bottom
+  let _txBottomFired = false;
+  window.addEventListener('scroll', () => {
+    if (_txBottomFired) return;
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    if (window.scrollY >= maxScroll - 8 && window.scrollY > SHIFT_OUT) {
+      _txBottomFired = true;
+      setTimeout(triggerTransition, 500);
+    }
+  }, { passive: true });
+
+  // Bidirectional: hide LA when scrolling back above The Shift, re-reveal when scrolling down
+  window.addEventListener('scroll', () => {
+    if (document.getElementById('tx-overlay').classList.contains('active')) return;
+    const scrollY = window.scrollY;
+    if (_laVisible && scrollY < SHIFT_OUT - VH * 0.5) {
+      // Scrolled back above LA entry — show shift content again
+      concealLA();
+      gsap.to(['#shift-canvas','#shift-hud','#shift-content','#shift-label'], {
+        opacity: 1, duration: 0.35, ease: 'power2.out'
+      });
+    } else if (!_laVisible && _txBottomFired && scrollY >= SHIFT_OUT) {
+      // Scrolled back down to LA — reveal without overlay
+      revealLA();
+      gsap.to(['#shift-canvas','#shift-hud','#shift-content','#shift-label'], {
+        opacity: 0, duration: 0.2, overwrite: true
+      });
+    }
+  }, { passive: true });
 }
 
 // ─── start ───
 runPhase1();
+
+// ── Living Architecture transition ──
+let _laVisible = false;
+
+function revealLA() {
+  if (_laVisible) return;
+  _laVisible = true;
+  if (typeof window.initLivingArchitecture === 'function') {
+    window.initLivingArchitecture();
+  }
+  const cvs = document.getElementById('la-canvas');
+  cvs.classList.add('active');
+  gsap.to(cvs, { opacity: 1, duration: 0.4, ease: 'power2.out' });
+}
+
+function concealLA() {
+  if (!_laVisible) return;
+  _laVisible = false;
+  const cvs = document.getElementById('la-canvas');
+  gsap.to(cvs, { opacity: 0, duration: 0.3, ease: 'power2.in',
+    onComplete() { cvs.classList.remove('active'); }
+  });
+  gsap.to(['#la-section-label','#la-text-block','#la-statusbar','#la-close-hint'], {
+    opacity: 0, duration: 0.2
+  });
+}
+
+function triggerTransition() {
+  const overlay = document.getElementById('tx-overlay');
+  if (overlay.classList.contains('active')) return;
+  overlay.classList.add('active');
+
+  gsap.to(['#shift-canvas','#shift-hud','#shift-content','#shift-label'], {
+    opacity: 0, duration: 0.25, overwrite: true
+  });
+
+  gsap.set('.tx-num', { y: 10, opacity: 0 });
+  gsap.set('.tx-sub', { opacity: 0, y: 8 });
+  gsap.set('.tx-rule', { scaleX: 0 });
+  gsap.set(['#tx-w1','#tx-w2'], { y: '100%' });
+  gsap.set('.tx-prog', { scaleX: 0 });
+
+  gsap.timeline({
+    onComplete() {
+      gsap.to('#tx-flash', { opacity: 1, duration: 0.25, ease: 'power2.in',
+        onComplete() {
+          // Init + reveal LA now (at flash peak so setup is hidden)
+          revealLA();
+          // Dismiss overlay — no overflow lock
+          gsap.to(['#tx-overlay','#tx-flash'], { opacity: 0, duration: 0.5, ease: 'power2.out',
+            onComplete() {
+              overlay.classList.remove('active');
+              overlay.style.pointerEvents = 'none';
+              document.getElementById('la-close-hint').classList.add('visible');
+            }
+          });
+        }
+      });
+    }
+  })
+    .to('#tx-overlay',  { opacity: 1, duration: 0.55, ease: 'power2.inOut' })
+    .to('.tx-num',      { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, '+=0.15')
+    .to('.tx-rule',     { scaleX: 1, duration: 0.65, ease: 'power2.inOut' }, '+=0.08')
+    .to('#tx-w1',       { y: '0%', duration: 0.6, ease: 'power3.out' }, '+=0.06')
+    .to('#tx-w2',       { y: '0%', duration: 0.6, ease: 'power3.out' }, '-=0.38')
+    .to('.tx-sub',      { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, '+=0.12')
+    .to('.tx-prog',     { scaleX: 1, duration: 1.0, ease: 'power2.inOut' }, '+=0.1');
+}
 </script>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass }     from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass }     from 'three/addons/postprocessing/OutputPass.js';
+
+const NODES = [
+  { id:'intelligence', label:'Intelligence', idx:'00', pos:[0,0,0], color:'#e8f4ff', size:0.44, pulseSpeed:1.4,
+    desc:'The cognitive core. Synthesizes all inputs across every domain into unified, real-time organizational understanding.',
+    peers:['citizen','operations','knowledge','infrastructure','decision','action'] },
+  { id:'citizen', label:'Citizen', idx:'01', pos:[-3.8,1.8,-0.6], color:'#b8ff3c', size:0.27, pulseSpeed:0.72,
+    desc:'Direct interface with the community. Captures real-time feedback, service requests, and civic signals at every touchpoint.',
+    peers:['intelligence','operations'] },
+  { id:'operations', label:'Operations', idx:'02', pos:[3.6,1.5,0.5], color:'#00d4ff', size:0.30, pulseSpeed:0.88,
+    desc:'Operational intelligence hub. Streamlines workflows, resource allocation, and field coordination with precision.',
+    peers:['intelligence','infrastructure','citizen'] },
+  { id:'knowledge', label:'Knowledge', idx:'03', pos:[-3.3,-1.7,0.8], color:'#ffaa33', size:0.27, pulseSpeed:0.61,
+    desc:'Institutional memory. Stores, indexes, and surfaces critical organizational insights exactly when decisions require them.',
+    peers:['intelligence','decision'] },
+  { id:'infrastructure', label:'Infrastructure', idx:'04', pos:[3.2,-2.0,-0.5], color:'#9966ff', size:0.29, pulseSpeed:0.76,
+    desc:'The backbone. Monitors and manages physical and digital assets with predictive intelligence and live telemetry.',
+    peers:['intelligence','operations'] },
+  { id:'decision', label:'Decision', idx:'05', pos:[-0.9,3.1,1.2], color:'#ff6b35', size:0.27, pulseSpeed:0.67,
+    desc:'Strategic synthesis engine. Translates multi-source intelligence into clear, prioritized, accountable action pathways.',
+    peers:['intelligence','action','knowledge'] },
+  { id:'action', label:'Action', idx:'06', pos:[1.3,-3.1,0.7], color:'#00ffaa', size:0.27, pulseSpeed:0.93,
+    desc:'Execution layer. Closes the loop from insight to verifiable, measured outcomes — keeping the system alive.',
+    peers:['intelligence','decision'] }
+];
+
+const CONNECTIONS = [
+  ['intelligence','citizen'], ['intelligence','operations'], ['intelligence','knowledge'],
+  ['intelligence','infrastructure'], ['intelligence','decision'], ['intelligence','action'],
+  ['citizen','operations'], ['knowledge','decision'], ['operations','infrastructure'],
+  ['decision','action'],
+];
+
+const NODE_VERT = `
+varying vec3 vNormal; varying vec3 vViewDir;
+void main() {
+  vec4 mvPos = modelViewMatrix * vec4(position,1.0);
+  vViewDir = normalize(-mvPos.xyz);
+  vNormal = normalize(normalMatrix * normal);
+  gl_Position = projectionMatrix * mvPos;
+}`;
+const NODE_FRAG = `
+uniform vec3 uColor; uniform float uTime,uSpeed,uHover,uFire;
+varying vec3 vNormal,vViewDir;
+void main() {
+  float f = pow(1.0 - clamp(dot(vNormal,vViewDir),0.0,1.0),3.2);
+  float pulse = sin(uTime*uSpeed*2.1)*0.06+0.94;
+  float boost = 1.0+uHover*0.55+uFire*0.65;
+  vec3 rim = uColor*(f*1.6*pulse*boost);
+  float alpha = 0.04+f*0.72*(0.6+uHover*0.3+uFire*0.2);
+  gl_FragColor = vec4(uColor*0.03+rim,alpha);
+}`;
+const HALO_FRAG = `
+uniform vec3 uColor; uniform float uTime,uSpeed,uHover,uFire;
+varying vec3 vNormal,vViewDir;
+void main() {
+  float f = pow(1.0-clamp(dot(vNormal,vViewDir),0.0,1.0),1.6);
+  float pulse = sin(uTime*uSpeed*1.4+0.8)*0.08+0.92;
+  float boost = 1.0+uHover*0.45+uFire*0.55;
+  gl_FragColor = vec4(uColor*f*pulse*boost, f*0.13*pulse*boost);
+}`;
+const EDGE_VERT = `
+attribute float aProgress; varying float vProgress;
+void main() { vProgress=aProgress; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+const EDGE_FRAG = `
+uniform vec3 uColor; uniform float uTime,uPhase,uOpacity; varying float vProgress;
+float pulse(float pos,float t,float w){ return smoothstep(pos-w,pos,t)*smoothstep(pos+w,pos,t); }
+void main() {
+  float base=0.09; float pos=mod(uTime*0.14+uPhase,1.0);
+  float glow=pulse(pos,vProgress,0.055)*1.1;
+  gl_FragColor = vec4(uColor*(base+glow), (base*0.45+glow*0.55)*uOpacity);
+}`;
+
+let _laInitialised = false;
+
+window.initLivingArchitecture = function() {
+  if (_laInitialised) return;
+  _laInitialised = true;
+
+  const cvs = document.getElementById('la-canvas');
+  const W = window.innerWidth, H = window.innerHeight;
+
+  const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(W, H);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.9;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color('#060807');
+  scene.fog = new THREE.Fog('#060807', 12, 28);
+
+  const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 50);
+  camera.position.set(0, 0, 9);
+
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  composer.addPass(new UnrealBloomPass(new THREE.Vector2(W, H), 0.5, 0.35, 0.42));
+  composer.addPass(new OutputPass());
+
+  // Grid
+  const grid = new THREE.GridHelper(30, 30, 0x182413, 0x182413);
+  grid.position.y = -5; grid.material.opacity = 0.35; grid.material.transparent = true;
+  scene.add(grid);
+
+  // Bg particles
+  const bgPos = new Float32Array(400 * 3);
+  for (let i = 0; i < 400; i++) {
+    bgPos[i*3]   = (Math.random()-.5)*22;
+    bgPos[i*3+1] = (Math.random()-.5)*18;
+    bgPos[i*3+2] = (Math.random()-.5)*12;
+  }
+  const bgGeom = new THREE.BufferGeometry();
+  bgGeom.setAttribute('position', new THREE.BufferAttribute(bgPos, 3));
+  const bgMat = new THREE.PointsMaterial({ color:0x4a7a10, size:0.025, transparent:true, opacity:0.18, blending:THREE.AdditiveBlending, depthWrite:false });
+  scene.add(new THREE.Points(bgGeom, bgMat));
+
+  const nodeMap = {};
+  NODES.forEach(n => { nodeMap[n.id] = n; });
+
+  const nodeObjects = [], allCoreMeshes = [];
+
+  NODES.forEach((nd, i) => {
+    const color = new THREE.Color(nd.color);
+    const group = new THREE.Group();
+    group.position.set(...nd.pos);
+
+    const coreMat = new THREE.ShaderMaterial({
+      uniforms: { uColor:{value:color.clone()}, uTime:{value:0}, uSpeed:{value:nd.pulseSpeed}, uHover:{value:0}, uFire:{value:0} },
+      vertexShader: NODE_VERT, fragmentShader: NODE_FRAG,
+      transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, side:THREE.DoubleSide
+    });
+    const coreMesh = new THREE.Mesh(new THREE.IcosahedronGeometry(nd.size, 2), coreMat);
+    coreMesh.userData.nodeIdx = i;
+    group.add(coreMesh);
+    allCoreMeshes.push(coreMesh);
+
+    group.add(new THREE.Mesh(new THREE.IcosahedronGeometry(nd.size*1.02, 1), new THREE.MeshBasicMaterial({
+      color:new THREE.Color(nd.color), wireframe:true, transparent:true, opacity:0.22,
+      blending:THREE.AdditiveBlending, depthWrite:false
+    })));
+
+    const haloMat = new THREE.ShaderMaterial({
+      uniforms: { uColor:{value:color.clone()}, uTime:{value:0}, uSpeed:{value:nd.pulseSpeed}, uHover:{value:0}, uFire:{value:0} },
+      vertexShader: NODE_VERT, fragmentShader: HALO_FRAG,
+      transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, side:THREE.BackSide
+    });
+    // halo sphere removed — keep only planet core + torus rings
+
+    const rings = [];
+    const ringCount = nd.id === 'intelligence' ? 3 : 1;
+    for (let r = 0; r < ringCount; r++) {
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(nd.size*(1.55+r*0.55), 0.007, 3, 56),
+        new THREE.MeshBasicMaterial({ color:new THREE.Color(nd.color), transparent:true, opacity:r===0?0.38:0.18-r*0.04, blending:THREE.AdditiveBlending, depthWrite:false })
+      );
+      ring.rotation.x = [Math.PI/2.8, Math.PI/5, Math.PI/1.9][r];
+      ring.rotation.y = [0, Math.PI/3, Math.PI/7][r];
+      group.add(ring); rings.push(ring);
+    }
+
+    const [px,py,pz] = nd.pos;
+    const label = document.createElement('div');
+    label.className = 'la-node-label';
+    label.innerHTML = `<span class="nl-name">${nd.label}</span>`;
+    document.body.appendChild(label);
+
+    const bracket = document.createElement('div');
+    const isHub = nd.id === 'intelligence';
+    bracket.className = `la-hud-wrap ${isHub?'large hub':'small'}`;
+    bracket.style.color = nd.color;
+    bracket.innerHTML = '<div class="la-hud-tl"></div><div class="la-hud-tr"></div><div class="la-hud-bl"></div><div class="la-hud-br"></div>';
+    document.body.appendChild(bracket);
+
+    group.scale.setScalar(0);
+    scene.add(group);
+    nodeObjects.push({ group, coreMesh, coreMat, haloMat, label, bracket, rings, data: nd });
+    // wireMat stored for potential future use (from v2)
+  });
+
+  const edgeObjects = [];
+  CONNECTIONS.forEach(([aId, bId], i) => {
+    const nA = nodeMap[aId], nB = nodeMap[bId];
+    const pA = new THREE.Vector3(...nA.pos), pB = new THREE.Vector3(...nB.pos);
+    const mid = pA.clone().add(pB).multiplyScalar(0.5);
+    const dist = pA.distanceTo(pB);
+    mid.x += (Math.random()-.5)*dist*0.18;
+    mid.y += (Math.random()-.5)*dist*0.12;
+    mid.z += (Math.random()-.5)*dist*0.1;
+    const curve = new THREE.CatmullRomCurve3([pA, mid, pB]);
+    const N = 90; const pts = curve.getPoints(N);
+    const geom = new THREE.BufferGeometry().setFromPoints(pts);
+    const progress = new Float32Array(N+1);
+    for (let k = 0; k <= N; k++) progress[k] = k/N;
+    geom.setAttribute('aProgress', new THREE.BufferAttribute(progress, 1));
+    const cA = new THREE.Color(nA.color), cB = new THREE.Color(nB.color);
+    const mat = new THREE.ShaderMaterial({
+      uniforms: { uColor:{value:cA.lerp(cB,0.5)}, uTime:{value:0}, uPhase:{value:i*0.13}, uOpacity:{value:0} },
+      vertexShader:EDGE_VERT, fragmentShader:EDGE_FRAG,
+      transparent:true, blending:THREE.AdditiveBlending, depthWrite:false
+    });
+    scene.add(new THREE.Line(geom, mat));
+    edgeObjects.push({ mat });
+  });
+
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  const targetOrbit = new THREE.Vector2(), currentOrbit = new THREE.Vector2();
+  const tempV = new THREE.Vector3();
+  let hoveredIdx = -1, selectedIdx = -1;
+  const fireState = new Float32Array(NODES.length);
+  let nextFireTime = 3;
+
+  window.addEventListener('mousemove', e => {
+    mouse.x =  (e.clientX/window.innerWidth)*2-1;
+    mouse.y = -(e.clientY/window.innerHeight)*2+1;
+    targetOrbit.x = mouse.x*0.4;
+    targetOrbit.y = -mouse.y*0.25;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(allCoreMeshes);
+    if (hits.length > 0) {
+      const idx = hits[0].object.userData.nodeIdx;
+      if (idx !== hoveredIdx) {
+        hoveredIdx = idx;
+        document.body.classList.add('la-hovering');
+      }
+    } else {
+      hoveredIdx = -1;
+      document.body.classList.remove('la-hovering');
+    }
+  });
+
+  window.addEventListener('click', () => {
+    if (!_laInitialised || !document.getElementById('la-canvas').classList.contains('active')) return;
+    if (hoveredIdx >= 0 && hoveredIdx !== selectedIdx) { selectedIdx = hoveredIdx; openPanel(selectedIdx); }
+    else if (hoveredIdx < 0 && selectedIdx >= 0) { closePanel(); }
+  });
+
+  document.getElementById('la-close-hint').addEventListener('click', closePanel);
+
+  function openPanel(idx) {
+    const nd = NODES[idx];
+    document.getElementById('la-p-index').textContent = nd.idx;
+    document.getElementById('la-p-name').textContent  = nd.label;
+    document.getElementById('la-p-desc').textContent  = nd.desc;
+    const cl = document.getElementById('la-p-conn-list');
+    cl.innerHTML = '';
+    nd.peers.filter(p => p !== nd.id).forEach(peerId => {
+      const span = document.createElement('span');
+      span.className = 'la-p-conn-tag';
+      span.textContent = nodeMap[peerId].label;
+      cl.appendChild(span);
+    });
+    const panel = document.getElementById('la-panel');
+    panel.classList.add('visible');
+    gsap.to(panel, { opacity:1, x:0, duration:.45, ease:'power3.out' });
+    gsap.to('#la-close-hint', { opacity:1, duration:.3, delay:.2 });
+  }
+
+  function closePanel() {
+    selectedIdx = -1;
+    const panel = document.getElementById('la-panel');
+    gsap.to(panel, { opacity:0, x:40, duration:.35, ease:'power2.in', onComplete:()=>panel.classList.remove('visible') });
+    gsap.to('#la-close-hint', { opacity:0, duration:.2 });
+  }
+
+  // ── reveal (v2 style: separated function) ──
+  function reveal() {
+    nodeObjects.forEach((obj, i) => {
+      const nd = NODES[i];
+      const fp = new THREE.Vector3(...nd.pos);
+      const spread = 7;
+      obj.group.position.set(
+        fp.x + (Math.random() - .5) * spread,
+        fp.y + (Math.random() - .5) * spread,
+        fp.z + (Math.random() - .5) * 3
+      );
+      obj.group.scale.setScalar(0);
+    });
+
+    nodeObjects.forEach((obj, i) => {
+      const nd = NODES[i];
+      const fp = new THREE.Vector3(...nd.pos);
+      const delay = i === 0 ? 0.2 : 0.4 + i * 0.18;
+      gsap.to(obj.group.position, { x:fp.x, y:fp.y, z:fp.z, duration:1.6, delay, ease:'power3.out' });
+      gsap.to(obj.group.scale,    { x:1, y:1, z:1, duration:1.1, delay:delay+0.05, ease:'back.out(1.6)' });
+    });
+
+    edgeObjects.forEach((e, i) => {
+      gsap.to(e.mat.uniforms.uOpacity, { value:1, duration:1.2, delay:1.8+i*0.07, ease:'power2.out' });
+    });
+
+    nodeObjects.forEach((obj, i) => {
+      const delay = 1.4 + i * 0.1;
+      gsap.fromTo(obj.bracket, { scale:1.35 }, { scale:1, duration:.5, delay, ease:'power2.out' });
+    });
+
+    gsap.to('#la-section-label', { opacity:1, y:0, duration:.8, delay:.3, ease:'power2.out' });
+    gsap.to('#la-text-block',    { opacity:1, y:0, duration:1.0, delay:.6, ease:'power3.out' });
+    gsap.to('#la-statusbar',     { opacity:1,      duration:.8, delay:2.8 });
+  }
+
+  // ── fireNode (v2 style: separated function) ──
+  function fireNode(idx) {
+    fireState[idx] = 1;
+    setTimeout(() => { fireState[0] = 0.5; }, 300 + Math.random() * 200);
+  }
+
+  const clock = new THREE.Clock();
+
+  (function animate() {
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta(), t = clock.getElapsedTime();
+
+    currentOrbit.x += (targetOrbit.x - currentOrbit.x) * 0.04;
+    currentOrbit.y += (targetOrbit.y - currentOrbit.y) * 0.04;
+    camera.position.x = currentOrbit.x;
+    camera.position.y = currentOrbit.y;
+    camera.lookAt(scene.position);
+
+    nextFireTime -= delta;
+    if (nextFireTime <= 0) {
+      const nonHub = nodeObjects.filter((_,i) => i !== 0);
+      const tIdx = nodeObjects.indexOf(nonHub[Math.floor(Math.random()*nonHub.length)]);
+      fireNode(tIdx);
+      nextFireTime = 5 + Math.random() * 6;
+    }
+
+    nodeObjects.forEach((obj, i) => {
+      const isHovered  = hoveredIdx === i;
+      const isSelected = selectedIdx === i;
+
+      const hoverTarget = (isHovered || isSelected) ? 1 : 0;
+      obj.coreMat.uniforms.uHover.value += (hoverTarget - obj.coreMat.uniforms.uHover.value) * 0.1;
+      obj.haloMat.uniforms.uHover.value  = obj.coreMat.uniforms.uHover.value;
+
+      obj.coreMat.uniforms.uFire.value += (fireState[i] - obj.coreMat.uniforms.uFire.value) * 0.15;
+      obj.haloMat.uniforms.uFire.value  = obj.coreMat.uniforms.uFire.value;
+
+      obj.coreMat.uniforms.uTime.value = t;
+      obj.haloMat.uniforms.uTime.value = t;
+      if (fireState[i] > 0) fireState[i] = Math.max(0, fireState[i] - delta * 1.2);
+
+      const breathe = 1 + Math.sin(t * NODES[i].pulseSpeed * 1.5 + i) * 0.012;
+      const hoverSc = 1 + obj.coreMat.uniforms.uHover.value * 0.12;
+      obj.group.scale.setScalar(breathe * hoverSc);
+      obj.rings.forEach((ring, r) => { ring.rotation.z += delta * (0.18 + r * 0.09) * (r%2===0?1:-1); });
+
+      tempV.copy(obj.group.position);
+      tempV.project(camera);
+      const sx = (tempV.x * .5 + .5) * window.innerWidth;
+      const sy = (-tempV.y * .5 + .5) * window.innerHeight;
+      const laActive = cvs.classList.contains('active');
+      const visible = laActive && tempV.z < 1 && obj.group.scale.x > 0.08;
+      const lOff = NODES[i].size * 90 + 14;
+
+      obj.label.style.transform = `translate(-50%,-50%) translate(${sx}px,${sy+lOff}px)`;
+      obj.label.style.opacity = visible ? '1' : '0';
+      obj.bracket.style.transform = `translate(-50%,-50%) translate(${sx}px,${sy}px)`;
+      obj.bracket.style.opacity = visible ? String(0.3 + obj.coreMat.uniforms.uHover.value * 0.5) : '0';
+    });
+
+    edgeObjects.forEach(e => { e.mat.uniforms.uTime.value = t; });
+    bgMat.size = 0.03 + Math.sin(t * 0.3) * 0.005;
+    composer.render();
+  })();
+
+  reveal();
+
+  window.addEventListener('resize', () => {
+    const w = window.innerWidth, h = window.innerHeight;
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    renderer.setSize(w, h); composer.setSize(w, h);
+  });
+};
+</script>
+
+<!-- ══ SECTION 5 — LIVING ARCHITECTURE ══ -->
+<canvas id="la-canvas"></canvas>
+
+<div id="la-section-label">
+  <span class="la-sl-num">05</span>
+  <span class="la-sl-sep">/</span>
+  <span class="la-sl-title">Living Architecture</span>
+</div>
+
+<div id="la-text-block">
+  <div id="la-headline">A Living Architecture<br>For Decisions.</div>
+  <div id="la-description">We connect signals, context, knowledge, and workflows into adaptive systems that help organizations move from awareness to action.</div>
+</div>
+
+<div id="la-panel">
+  <div class="la-p-section">Node Detail</div>
+  <div class="la-p-index" id="la-p-index">—</div>
+  <div class="la-p-name" id="la-p-name">—</div>
+  <div class="la-p-bar"></div>
+  <div class="la-p-desc" id="la-p-desc">—</div>
+  <div class="la-p-conn-label">Connects to</div>
+  <div class="la-p-conn-list" id="la-p-conn-list"></div>
+</div>
+
+<div id="la-close-hint"><span>✕</span> CLICK TO CLOSE</div>
+
+<div id="la-statusbar">
+  <span class="la-sb-item">7 NODES</span>
+  <span class="la-sb-dot">·</span>
+  <span class="la-sb-item">10 CONNECTIONS</span>
+  <span class="la-sb-dot">·</span>
+  <span class="la-sb-item" id="la-sb-active">SYSTEM ACTIVE</span>
+</div>
+
+<!-- ── Living Architecture transition overlay ── -->
+<div id="tx-overlay">
+  <div class="tx-num">05</div>
+  <div class="tx-rule"></div>
+  <div class="tx-title-wrap"><div class="tx-word" id="tx-w1">Living</div></div>
+  <div class="tx-title-wrap"><div class="tx-word" id="tx-w2">Architecture</div></div>
+  <div class="tx-sub">A unified intelligence ecosystem</div>
+  <div class="tx-prog-wrap"><div class="tx-prog"></div></div>
+</div>
+<div id="tx-flash"></div>
+
 </body>
 </html>
