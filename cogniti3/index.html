@@ -196,7 +196,7 @@ html, body {
   justify-content: space-between;
   align-items: center;
   padding: 22px 44px;
-  z-index: 7000;
+  z-index: 9800;
   opacity: 0;
   transition: background .35s ease, backdrop-filter .35s ease, border-color .35s ease;
   border-bottom: 1px solid transparent;
@@ -1079,7 +1079,7 @@ html, body {
 }
 #la-canvas.active { pointer-events: all; }
 #la-section-label {
-  position: fixed; top: 36px; left: 44px;
+  position: fixed; top: 84px; left: 44px;
   z-index: 9100; display: flex; align-items: baseline; gap: 10px;
   opacity: 0; transform: translateY(-8px); pointer-events: none;
 }
@@ -1168,7 +1168,7 @@ html, body {
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
 #la-close-hint {
-  position:fixed; top:36px; right:44px; z-index:9400;
+  position:fixed; top:84px; right:44px; z-index:9400;
   font-family:'Space Mono',monospace; font-size:9px;
   letter-spacing:.15em; color:#6a7864; cursor:none; opacity:0;
   display:flex; align-items:center; gap:8px; pointer-events:none;
@@ -1274,7 +1274,7 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 #sd-canvas.active { pointer-events: all; }
 
 #sd-section-label {
-  position: fixed; top: 36px; left: 44px;
+  position: fixed; top: 84px; left: 44px;
   z-index: 9600; display: flex; align-items: baseline; gap: 10px;
   opacity: 0; transform: translateY(-8px); pointer-events: none;
 }
@@ -1418,7 +1418,7 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 
 /* back button */
 #sd-back {
-  position: fixed; top: 36px; right: 44px;
+  position: fixed; top: 84px; right: 44px;
   z-index: 9700; opacity: 0; pointer-events: none;
   display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
 }
@@ -1516,7 +1516,7 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 #phil-canvas.active { pointer-events: all; }
 
 #phil-section-label {
-  position: fixed; top: 36px; left: 44px;
+  position: fixed; top: 84px; left: 44px;
   z-index: 9600; display: flex; align-items: baseline; gap: 10px;
   opacity: 0; transform: translateY(-8px); pointer-events: none;
 }
@@ -4600,7 +4600,7 @@ window.addEventListener('resize', () => {
 #car-canvas.active { pointer-events:all; }
 
 #car-section-label {
-  position:fixed; top:36px; left:44px; z-index:200;
+  position:fixed; top:84px; left:44px; z-index:200;
   display:flex; align-items:baseline; gap:10px;
   opacity:0; transform:translateY(-8px);
 }
@@ -5072,7 +5072,7 @@ window.addEventListener('resize', () => {
 
 /* Section label */
 #ct-section-label {
-  position:fixed; top:36px; left:44px; z-index:820;
+  position:fixed; top:84px; left:44px; z-index:820;
   display:flex; align-items:baseline; gap:10px;
   opacity:0; transform:translateY(-8px);
 }
