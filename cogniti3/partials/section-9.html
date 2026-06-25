@@ -1,0 +1,484 @@
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 9 — CONTACT  "Reach Out"
+     Static form section — no canvas. Terminal section.
+     Entry: window.revealContact() called by section-8.html (_carToContact).
+     Exit:  scroll up → window.revealCar().
+══════════════════════════════════════════════════════ -->
+
+<style>
+/* ── SECTION 9 — CONTACT ──────────────────────────── */
+
+#ct-container {
+  position:fixed; inset:0; z-index:800;
+  display:grid; grid-template-columns:1fr 1fr;
+  align-items:center; gap:80px;
+  padding:80px 80px 60px;
+  background:var(--bg);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+  background-size:60px 60px;
+  opacity:0; pointer-events:none;
+  overflow:hidden;
+}
+#ct-container.active { pointer-events:all; }
+
+/* Section label */
+#ct-section-label {
+  position:fixed; top:36px; left:44px; z-index:820;
+  display:flex; align-items:baseline; gap:10px;
+  opacity:0; transform:translateY(-8px);
+}
+.ct-sl-num   { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em; color:var(--accent-dim); }
+.ct-sl-sep   { font-size:10px; color:#2a3a20; }
+.ct-sl-title { font-family:'Inter',sans-serif; font-weight:200; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:var(--muted); }
+
+/* Left copy column */
+#ct-copy {
+  display:flex; flex-direction:column; gap:28px;
+  padding-right:20px;
+}
+#ct-eyebrow {
+  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.28em;
+  color:var(--accent-dim); text-transform:uppercase;
+}
+#ct-heading {
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(34px,4.8vw,64px); font-weight:600;
+  letter-spacing:-.02em; color:var(--text); line-height:1.05;
+}
+#ct-sub {
+  font-family:'Inter',sans-serif; font-weight:300; font-size:13px;
+  line-height:1.75; color:var(--muted); letter-spacing:.01em;
+  max-width:320px;
+}
+#ct-meta { display:flex; flex-direction:column; gap:14px; margin-top:8px; }
+.ct-meta-row { display:flex; flex-direction:column; gap:3px; }
+.ct-meta-label {
+  font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.22em;
+  color:var(--accent-dim); text-transform:uppercase;
+}
+.ct-meta-val {
+  font-family:'Inter',sans-serif; font-size:13px; font-weight:300; color:var(--muted);
+}
+
+/* Form column */
+#ct-form-wrap { display:flex; flex-direction:column; }
+
+#ct-form { display:flex; flex-direction:column; gap:28px; }
+
+.ct-field { display:flex; flex-direction:column; }
+
+.ct-label {
+  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.22em;
+  color:var(--muted); text-transform:uppercase; margin-bottom:8px;
+}
+
+.ct-input {
+  width:100%; background:transparent;
+  border:none; border-bottom:1px solid var(--accent-dim);
+  color:var(--text); font-family:'Space Grotesk',sans-serif;
+  font-size:15px; padding:10px 0; outline:none;
+  transition:border-color 150ms;
+  caret-color:var(--accent);
+}
+.ct-input:focus { border-color:var(--accent); }
+.ct-input::placeholder { color:var(--muted); opacity:.5; font-size:14px; }
+
+.ct-textarea { resize:none; line-height:1.6; }
+
+/* Pill selector */
+.ct-field-pills { gap:10px; }
+#ct-pills {
+  display:flex; flex-wrap:wrap; gap:6px;
+}
+.ct-pill {
+  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.18em;
+  padding:6px 14px; text-transform:uppercase;
+  border:1px solid var(--accent-dim); background:transparent;
+  color:var(--muted); cursor:pointer;
+  transition:border-color 150ms, color 150ms, background 150ms;
+}
+.ct-pill:hover  { border-color:var(--accent); color:var(--accent); }
+.ct-pill.active { background:var(--accent); border-color:var(--accent); color:var(--bg); }
+
+/* Submit */
+#ct-submit {
+  font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em;
+  text-transform:uppercase; padding:14px 28px;
+  background:var(--accent); color:var(--bg);
+  border:none; cursor:pointer;
+  display:inline-flex; align-items:center; gap:10px;
+  margin-top:8px; align-self:flex-start;
+  transition:opacity 150ms;
+}
+#ct-submit:hover    { opacity:.82; }
+#ct-submit:disabled { opacity:.35; cursor:not-allowed; }
+
+/* Success state */
+#ct-success {
+  display:flex; flex-direction:column; gap:14px;
+  padding:32px 0;
+}
+#ct-success[hidden] { display:none; }
+.ct-success-icon {
+  font-size:24px; color:var(--accent);
+  font-family:'Space Mono',monospace;
+}
+.ct-success-title {
+  font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:600;
+  color:var(--text); letter-spacing:-.01em;
+}
+.ct-success-sub {
+  font-family:'Inter',sans-serif; font-size:13px; font-weight:300;
+  color:var(--muted); line-height:1.7;
+}
+
+/* Back hint + progress */
+#ct-back-hint {
+  position:fixed; left:20px; top:50%; transform:translateY(-50%);
+  z-index:821; font-family:'Space Mono',monospace; font-size:8px;
+  letter-spacing:.18em; color:var(--muted); writing-mode:vertical-rl;
+  text-transform:uppercase; opacity:0; transition:opacity .4s;
+}
+#ct-back-hint.visible { opacity:1; }
+
+#ct-back-progress-wrap {
+  position:fixed; bottom:28px; left:44px; z-index:821;
+  display:flex; align-items:center; gap:10px; opacity:0;
+}
+.ct-bpw-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.18em; color:var(--muted); }
+#ct-back-bar  { width:60px; height:1px; background:rgba(184,255,60,.1); position:relative; }
+#ct-back-fill { position:absolute; top:0; left:0; height:100%; width:0%; background:var(--accent-dim); transition:width .08s linear; }
+
+/* Transition overlay */
+#ct-tx-overlay {
+  position:fixed; inset:0; z-index:8000;
+  background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+  opacity:0; pointer-events:none;
+}
+#ct-tx-overlay.active { pointer-events:all; }
+.ct-tx-rule { width:80px; height:1px; background:var(--accent-dim); transform:scaleX(0); transform-origin:left; }
+.ct-tx-num  { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.24em; color:var(--accent-dim); opacity:0; }
+.ct-tx-wrap { overflow:hidden; line-height:1; }
+.ct-tx-word { font-family:'Space Grotesk',sans-serif; font-size:clamp(32px,5vw,64px); font-weight:600; letter-spacing:-.03em; color:var(--text); display:block; transform:translateY(100%); }
+.ct-tx-sub  { font-family:'Inter',sans-serif; font-size:12px; font-weight:300; color:var(--muted); letter-spacing:.08em; opacity:0; }
+.ct-tx-bar  { width:200px; height:1px; background:rgba(255,255,255,.06); overflow:hidden; }
+.ct-tx-prog { height:100%; width:100%; background:var(--accent-dim); transform:scaleX(0); transform-origin:left; }
+#ct-flash   { position:fixed; inset:0; z-index:8100; background:var(--accent); opacity:0; pointer-events:none; }
+
+/* Footer */
+#ct-footer {
+  position:fixed; bottom:0; left:0; right:0; z-index:820;
+  display:flex; justify-content:space-between; align-items:center;
+  padding:18px 44px;
+  border-top:1px solid var(--grid-line);
+  background:var(--bg);
+  opacity:0;
+  font-family:'Space Mono',monospace; font-size:9px;
+}
+.ct-ft-logo {
+  font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.28em;
+  color:var(--accent-dim); text-transform:uppercase;
+}
+.ct-ft-right {
+  display:flex; align-items:center; gap:16px;
+}
+.ct-ft-copy {
+  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.08em;
+  color:var(--muted);
+}
+.ct-ft-sep { color:#2a3a20; font-size:9px; }
+.ct-ft-link {
+  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.12em;
+  color:var(--muted); text-decoration:none; text-transform:uppercase;
+  transition:color 150ms;
+}
+.ct-ft-link:hover { color:var(--accent); }
+
+/* Mobile */
+@media (max-width:767px) {
+  #ct-container {
+    grid-template-columns:1fr;
+    padding:80px 24px 60px;
+    gap:40px;
+    align-items:start;
+    overflow-y:auto;
+  }
+  #ct-copy { padding-right:0; }
+  #ct-sub  { max-width:100%; }
+  .ct-pill { font-size:8px; padding:5px 10px; }
+  #ct-submit { width:100%; justify-content:center; }
+  #ct-footer { padding:14px 24px; flex-direction:column; gap:8px; align-items:flex-start; }
+  .ct-ft-right { gap:10px; }
+}
+</style>
+
+<!-- ── Transition overlay (S8 → S9) ── -->
+<div id="ct-tx-overlay">
+  <div class="ct-tx-rule"></div>
+  <div class="ct-tx-num">09 / CONTACT</div>
+  <div class="ct-tx-wrap"><div class="ct-tx-word">Contact</div></div>
+  <div class="ct-tx-sub">Let's talk.</div>
+  <div class="ct-tx-bar"><div class="ct-tx-prog"></div></div>
+</div>
+<div id="ct-flash"></div>
+
+<!-- ── Section label ── -->
+<div id="ct-section-label">
+  <span class="ct-sl-num">09</span>
+  <span class="ct-sl-sep">/</span>
+  <span class="ct-sl-title">Contact</span>
+</div>
+
+<!-- ── Main 2-column container ── -->
+<div id="ct-container">
+
+  <!-- Left: copy -->
+  <div id="ct-copy">
+    <div id="ct-eyebrow">REACH OUT</div>
+    <h2 id="ct-heading">Let's Talk.</h2>
+    <p id="ct-sub">Select your inquiry type and we'll route your message to the right team.</p>
+    <div id="ct-meta">
+      <div class="ct-meta-row">
+        <span class="ct-meta-label">EMAIL</span>
+        <span class="ct-meta-val">contact@cogniti.ai</span>
+      </div>
+      <div class="ct-meta-row">
+        <span class="ct-meta-label">RESPONSE TIME</span>
+        <span class="ct-meta-val">Within 48 hours</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: form -->
+  <div id="ct-form-wrap">
+    <form id="ct-form" novalidate>
+
+      <!-- Inquiry type pills -->
+      <div class="ct-field ct-field-pills">
+        <label class="ct-label">INQUIRY TYPE</label>
+        <div id="ct-pills">
+          <button type="button" class="ct-pill" data-value="partnership">PARTNERSHIP</button>
+          <button type="button" class="ct-pill" data-value="government">GOVERNMENT</button>
+          <button type="button" class="ct-pill" data-value="enterprise">ENTERPRISE</button>
+          <button type="button" class="ct-pill" data-value="investor">INVESTOR</button>
+          <button type="button" class="ct-pill" data-value="career">CAREER</button>
+          <button type="button" class="ct-pill" data-value="general">GENERAL</button>
+        </div>
+        <input type="hidden" id="ct-inquiry" name="inquiry">
+      </div>
+
+      <!-- Full name -->
+      <div class="ct-field">
+        <label class="ct-label" for="ct-name">FULL NAME</label>
+        <input class="ct-input" type="text" id="ct-name" name="name"
+               autocomplete="name" placeholder="Your name" required>
+      </div>
+
+      <!-- Email -->
+      <div class="ct-field">
+        <label class="ct-label" for="ct-email">EMAIL</label>
+        <input class="ct-input" type="email" id="ct-email" name="email"
+               autocomplete="email" placeholder="you@org.com" required>
+      </div>
+
+      <!-- Organization -->
+      <div class="ct-field">
+        <label class="ct-label" for="ct-org">ORGANIZATION</label>
+        <input class="ct-input" type="text" id="ct-org" name="organization"
+               autocomplete="organization" placeholder="Optional">
+      </div>
+
+      <!-- Message -->
+      <div class="ct-field">
+        <label class="ct-label" for="ct-message">MESSAGE</label>
+        <textarea class="ct-input ct-textarea" id="ct-message" name="message"
+                  rows="4" placeholder="Tell us what you're working on." required></textarea>
+      </div>
+
+      <button type="submit" id="ct-submit">
+        <span>SEND MESSAGE</span>
+        <span>→</span>
+      </button>
+
+    </form>
+
+    <!-- Success state -->
+    <div id="ct-success" hidden>
+      <div class="ct-success-icon">✓</div>
+      <div class="ct-success-title">Message Received</div>
+      <div class="ct-success-sub">We'll be in touch within 48 hours.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── Footer ── -->
+<footer id="ct-footer">
+  <span class="ct-ft-logo">Cogniti</span>
+  <div class="ct-ft-right">
+    <span class="ct-ft-copy">© 2026 Cogniti. All rights reserved.</span>
+    <span class="ct-ft-sep">·</span>
+    <a href="#" class="ct-ft-link">Privacy</a>
+    <span class="ct-ft-sep">·</span>
+    <a href="#" class="ct-ft-link">Terms</a>
+  </div>
+</footer>
+
+<!-- ── Back hint + progress ── -->
+<div id="ct-back-hint">↑ Scroll back</div>
+<div id="ct-back-progress-wrap">
+  <span class="ct-bpw-label">Back</span>
+  <div id="ct-back-bar"><div id="ct-back-fill"></div></div>
+</div>
+
+<script type="module">
+/* ── State ── */
+let _ctVisible  = false;
+let _ctBackAcc  = 0;
+let _ctBackLock = false;
+
+const BACK_THRESH = 350;
+
+/* ── DOM refs ── */
+const container     = document.getElementById('ct-container');
+const sectionLabel  = document.getElementById('ct-section-label');
+const backHint      = document.getElementById('ct-back-hint');
+const backWrap      = document.getElementById('ct-back-progress-wrap');
+const backFill      = document.getElementById('ct-back-fill');
+
+/* ── Reveal / Conceal ── */
+function revealContact() {
+  if (_ctVisible) return;
+  _ctVisible = true;
+
+  _ctBackAcc  = 0;
+  _ctBackLock = false;
+  backFill.style.width = '0%';
+
+  // Reset form to initial state
+  document.getElementById('ct-form').hidden   = false;
+  document.getElementById('ct-success').hidden = true;
+  document.getElementById('ct-form').reset();
+  document.querySelectorAll('.ct-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('ct-inquiry').value = '';
+
+  _triggerTransitionCt();
+}
+
+function _showCtContent() {
+  container.classList.add('active');
+  gsap.to(container,                       { opacity: 1, duration: .7, ease: 'power2.out' });
+  gsap.to(sectionLabel,                    { opacity: 1, y: 0, duration: .8, delay: .25, ease: 'power2.out' });
+  gsap.to('#ct-footer',                    { opacity: 1, duration: .6, delay: .4, ease: 'power2.out' });
+  gsap.to(backWrap,                        { opacity: 1, duration: .5, delay: .6 });
+  setTimeout(() => backHint.classList.add('visible'), 1100);
+}
+
+function concealContact() {
+  if (!_ctVisible) return;
+  _ctVisible = false;
+
+  gsap.to([container, sectionLabel, backWrap, '#ct-footer'],
+    { opacity: 0, duration: .38, ease: 'power2.in',
+      onComplete() { container.classList.remove('active'); }
+    });
+  backHint.classList.remove('visible');
+}
+
+/* ── Transition overlay (S8 → S9) ── */
+function _triggerTransitionCt() {
+  const ov = document.getElementById('ct-tx-overlay');
+  if (ov.classList.contains('active')) return;
+  ov.classList.add('active');
+
+  gsap.set('.ct-tx-word', { y: '100%' });
+  gsap.set(['.ct-tx-num', '.ct-tx-sub'], { opacity: 0, y: 10 });
+  gsap.set('.ct-tx-rule', { scaleX: 0 });
+  gsap.set('.ct-tx-prog', { scaleX: 0 });
+
+  gsap.timeline({
+    onComplete() {
+      gsap.to('#ct-flash', { opacity: 1, duration: .2, ease: 'power2.in',
+        onComplete() {
+          _showCtContent();
+          gsap.to(['#ct-tx-overlay', '#ct-flash'], { opacity: 0, duration: .5, ease: 'power2.out',
+            onComplete() { ov.classList.remove('active'); }
+          });
+        }
+      });
+    }
+  })
+    .to('#ct-tx-overlay', { opacity: 1, duration: .4,  ease: 'power2.out' })
+    .to('.ct-tx-rule',    { scaleX: 1, duration: .6,   ease: 'power2.inOut' }, '+=.05')
+    .to('.ct-tx-num',     { opacity: 1, y: 0, duration: .4 }, '+=.08')
+    .to('.ct-tx-word',    { y: '0%', duration: .7,     ease: 'power3.out' }, '-=.2')
+    .to('.ct-tx-sub',     { opacity: 1, y: 0, duration: .5 }, '-=.3')
+    .to('.ct-tx-prog',    { scaleX: 1, duration: 1.0,  ease: 'power2.inOut' }, '+=.1');
+}
+
+/* ── Wheel handler — back only (terminal section) ── */
+window.addEventListener('wheel', function onCtWheel(e) {
+  if (!_ctVisible) return;
+
+  // Suppress scroll inside the container (form is scrollable on mobile)
+  // Only act on upward scroll to go back
+  if (e.deltaY >= 0) {
+    _ctBackAcc = 0;
+    backFill.style.width = '0%';
+    return;
+  }
+
+  _ctBackAcc += -e.deltaY;
+  backFill.style.width = Math.min(_ctBackAcc / BACK_THRESH, 1) * 100 + '%';
+
+  if (_ctBackAcc >= BACK_THRESH && !_ctBackLock) {
+    _ctBackLock = true;
+    _ctToCar();
+  }
+}, { passive: true });
+
+/* ── Navigate back to S8 ── */
+function _ctToCar() {
+  concealContact();
+  if (typeof window.revealCar === 'function') setTimeout(() => window.revealCar(), 320);
+  setTimeout(() => { _ctBackLock = false; }, 900);
+}
+
+/* ── Pill selector ── */
+document.querySelectorAll('.ct-pill').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.ct-pill').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('ct-inquiry').value = btn.dataset.value;
+  });
+});
+
+/* ── Form submit ── */
+document.getElementById('ct-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const name    = document.getElementById('ct-name').value.trim();
+  const email   = document.getElementById('ct-email').value.trim();
+  const message = document.getElementById('ct-message').value.trim();
+  if (!name || !email || !message) return;
+
+  const submitBtn = document.getElementById('ct-submit');
+  submitBtn.disabled = true;
+
+  // Animate out form, animate in success
+  gsap.to('#ct-form', { opacity: 0, y: -10, duration: .35, ease: 'power2.in',
+    onComplete() {
+      document.getElementById('ct-form').hidden    = true;
+      document.getElementById('ct-success').hidden = false;
+      gsap.from('#ct-success', { opacity: 0, y: 12, duration: .5, ease: 'power2.out' });
+    }
+  });
+});
+
+/* ── Expose globals ── */
+window.revealContact  = revealContact;
+window.concealContact = concealContact;
+</script>

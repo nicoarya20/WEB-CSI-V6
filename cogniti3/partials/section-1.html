@@ -1,0 +1,44 @@
+
+<!-- terminal readout (phase 1) -->
+<div id="terminal"></div>
+
+<!-- ══ PHASE 1 — logo intro ══ -->
+<div id="phase1">
+  <div id="brand">
+    <span class="bl" id="lc">C</span>
+    <span class="bl" id="lo">O</span>
+    <span class="bl" id="lg">G</span>
+    <span class="bl" id="ln">N</span>
+    <span class="bl" id="li1">I</span>
+    <span class="bl" id="lt">T</span>
+    <span class="bl" id="li2">I</span>
+  </div>
+  <div id="tagline">intelligence, designed.</div>
+</div>
+
+<!-- ring (phase 1, lives outside phase1 so it can transition) -->
+<div id="ring-wrap">
+  <svg id="ring-svg" width="180" height="180" viewBox="0 0 180 180">
+    <defs>
+      <filter id="ring-glow" x="-60%" y="-60%" width="220%" height="220%">
+        <feGaussianBlur stdDeviation="4" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+      <filter id="ring-glow2" x="-80%" y="-80%" width="260%" height="260%">
+        <feGaussianBlur stdDeviation="8" result="b"/>
+        <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+      </filter>
+    </defs>
+    <circle class="rt" cx="90" cy="90" r="74"/>
+    <!-- outer glow ring -->
+    <circle fill="none" stroke="var(--accent)" stroke-width="1" cx="90" cy="90" r="82"
+            stroke-dasharray="12 8" opacity=".15" filter="url(#ring-glow2)"/>
+    <!-- main progress ring -->
+    <circle class="rp" id="rp" cx="90" cy="90" r="74" filter="url(#ring-glow)"/>
+    <!-- cyan inner ring -->
+    <circle class="rp-cyan" id="rp2" cx="90" cy="90" r="62"
+            stroke-dasharray="0" stroke-dashoffset="0"/>
+  </svg>
+</div>
+
+<!-- ══ PHASE 2 — hero ══ -->

@@ -1,0 +1,369 @@
+<!-- ══════════════════════════════════════════════════════
+     SECTION 7 — PHILOSOPHY  "The Breath"
+     One translucent sphere breathing in the void.
+     Seven statements, wheel-driven, bidirectional S6 ↔ S7.
+     CSS lives in _02-styles.html under "SECTION 7 — PHILOSOPHY".
+══════════════════════════════════════════════════════ -->
+
+<!-- nav hint shown in S6 at last category -->
+<div id="phil-nav">
+  <div class="phil-nav-label">Scroll to continue</div>
+  <div class="phil-nav-arrow">↓</div>
+  <div id="phil-nav-progress"><div id="phil-nav-fill"></div></div>
+</div>
+
+<canvas id="phil-canvas"></canvas>
+
+<div id="phil-section-label">
+  <span class="phil-sl-num">07</span>
+  <span class="phil-sl-sep">/</span>
+  <span class="phil-sl-title">Philosophy</span>
+</div>
+
+<div id="phil-statement">
+  <div id="phil-stmt-num">11</div>
+  <div id="phil-stmt-text">Technology alone does not solve complexity.</div>
+</div>
+
+<div id="phil-back-hint">↑ Scroll back</div>
+<div id="phil-back-progress-wrap"><div id="phil-back-progress-fill"></div></div>
+
+<!-- Philosophy transition overlay -->
+<div id="phil-tx-overlay">
+  <div class="phil-tx-num">07</div>
+  <div class="phil-tx-rule"></div>
+  <div class="phil-tx-title-wrap"><div class="phil-tx-word">Philosophy</div></div>
+  <div class="phil-tx-sub">The interface between intelligence and decision.</div>
+  <div class="phil-tx-prog-wrap"><div class="phil-tx-prog"></div></div>
+</div>
+<div id="phil-flash"></div>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ── Content ── */
+const STATEMENTS = [
+  { num: '11', text: 'Technology alone does not solve complexity.' },
+  { num: '12', text: 'People do.' },
+  { num: '13', text: 'When equipped with the right intelligence.' },
+  { num: '14', text: 'Artificial Intelligence is not the destination.' },
+  { num: '15', text: 'It is the interface.' },
+  { num: '16', text: 'The real challenge is creating systems that help humans make better decisions.' },
+  { num: '17', text: 'That is what we build.' },
+];
+
+/* Sphere uniform targets per statement group */
+const STMT_CFG = [
+  { breathRate:1.0, color:[0.91,0.93,0.96], glow:0.40 }, // 11–13: cool white
+  { breathRate:1.0, color:[0.91,0.93,0.96], glow:0.40 },
+  { breathRate:1.0, color:[0.91,0.93,0.96], glow:0.40 },
+  { breathRate:0.8, color:[0.95,0.92,0.88], glow:0.50 }, // 14–15: warm muted
+  { breathRate:0.8, color:[0.95,0.92,0.88], glow:0.50 },
+  { breathRate:0.6, color:[0.98,0.88,0.72], glow:0.70 }, // 16–17: warm amber
+  { breathRate:0.6, color:[0.98,0.88,0.72], glow:0.70 },
+];
+
+/* ── GLSL shaders ── */
+const VERT = `
+uniform float uTime;
+uniform float uBreathRate;
+uniform float uAmplitude;
+varying vec3 vNormal;
+varying vec3 vViewDir;
+
+float hash(vec3 p) {
+  p = fract(p * vec3(0.1031, 0.1030, 0.0973));
+  p += dot(p, p.yxz + 33.33);
+  return fract((p.x + p.y) * p.z);
+}
+float vnoise(vec3 x) {
+  vec3 i = floor(x), f = fract(x);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(
+    mix(mix(hash(i),              hash(i+vec3(1,0,0)), f.x),
+        mix(hash(i+vec3(0,1,0)), hash(i+vec3(1,1,0)), f.x), f.y),
+    mix(mix(hash(i+vec3(0,0,1)), hash(i+vec3(1,0,1)), f.x),
+        mix(hash(i+vec3(0,1,1)), hash(i+vec3(1,1,1)), f.x), f.y), f.z);
+}
+void main() {
+  float t  = uTime * uBreathRate;
+  vec3  p  = normalize(position);
+  float n1 = vnoise(p * 2.4 + vec3(t*0.40, 0.0,    0.0   ));
+  float n2 = vnoise(p * 5.1 + vec3(0.0,    t*0.25,  t*0.18)) * 0.40;
+  float n3 = vnoise(p * 11.3 + vec3(t*0.15, t*0.22, 0.0   )) * 0.15;
+  vec3 displaced = position + normal * (n1 + n2 + n3) * uAmplitude;
+  vec4 mvPos = modelViewMatrix * vec4(displaced, 1.0);
+  vViewDir = normalize(-mvPos.xyz);
+  vNormal  = normalize(normalMatrix * normal);
+  gl_Position = projectionMatrix * mvPos;
+}`;
+
+const FRAG = `
+uniform vec3  uColor;
+uniform float uTime;
+uniform float uGlowIntensity;
+uniform float uBreathRate;
+varying vec3 vNormal;
+varying vec3 vViewDir;
+void main() {
+  float fresnel    = pow(1.0 - clamp(dot(vNormal, vViewDir), 0.0, 1.0), 2.5);
+  float pulse      = sin(uTime * uBreathRate * 1.8) * 0.15 + 0.85;
+  float edgeGlow   = fresnel * uGlowIntensity;
+  float innerLight = (1.0 - fresnel) * 0.08 * pulse;
+  float alpha      = clamp(edgeGlow + innerLight, 0.0, 0.55);
+  vec3  col        = uColor + vec3(fresnel * 0.12);
+  gl_FragColor = vec4(col * (edgeGlow + innerLight), alpha);
+}`;
+
+/* ── State ── */
+let _philInit    = false;
+let _philVisible = false;
+window._philVisible = false;
+
+let _philStmt     = 0;
+let _philStmtLock = false;
+let _philFwdAcc   = 0, _philFwdLock = false;
+let _philBackAcc  = 0, _philBackLock = false;
+
+const STMT_THRESHOLD = 200; // px per statement advance
+const PHIL_THRESHOLD = 420; // px to exit section
+
+/* ── Three.js setup ── */
+const cvs = document.getElementById('phil-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+
+const scene = new THREE.Scene();
+const cam   = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 100);
+cam.position.set(0, 0, 18);
+
+const uniforms = {
+  uTime:         { value: 0 },
+  uBreathRate:   { value: 1.0 },
+  uAmplitude:    { value: 0.38 },
+  uColor:        { value: new THREE.Color(0.91, 0.93, 0.96) },
+  uGlowIntensity:{ value: 0.4 },
+};
+
+const geo    = new THREE.SphereGeometry(5, 128, 128);
+const mat    = new THREE.ShaderMaterial({
+  vertexShader: VERT, fragmentShader: FRAG,
+  uniforms, transparent: true, depthWrite: false,
+  blending: THREE.AdditiveBlending,
+});
+const sphere = new THREE.Mesh(geo, mat);
+scene.add(sphere);
+
+/* lerp targets */
+let tBreathRate = 1.0;
+let tColor      = new THREE.Color(0.91, 0.93, 0.96);
+let tGlow       = 0.4;
+
+function animate() {
+  requestAnimationFrame(animate);
+  if (!_philVisible) return;
+  uniforms.uTime.value        += 0.016;
+  uniforms.uBreathRate.value   += (tBreathRate - uniforms.uBreathRate.value)    * 0.025;
+  uniforms.uGlowIntensity.value += (tGlow      - uniforms.uGlowIntensity.value) * 0.025;
+  uniforms.uColor.value.lerp(tColor, 0.025);
+  renderer.render(scene, cam);
+}
+animate(); // loop starts here; gated by _philVisible flag above
+
+/* ── Helpers ── */
+function applyStmtConfig(idx) {
+  const c  = STMT_CFG[idx];
+  tBreathRate = c.breathRate;
+  tColor      = new THREE.Color(...c.color);
+  tGlow       = c.glow;
+}
+
+function showStatement(idx, dir) {
+  const stmt   = document.getElementById('phil-statement');
+  const numEl  = document.getElementById('phil-stmt-num');
+  const textEl = document.getElementById('phil-stmt-text');
+  const fromY  = dir > 0 ? 24 : -24;
+
+  gsap.to(stmt, { opacity:0, y: -fromY * 0.6, duration:.32, ease:'power2.in',
+    onComplete() {
+      numEl.textContent  = STATEMENTS[idx].num;
+      textEl.textContent = STATEMENTS[idx].text;
+      gsap.fromTo(stmt,
+        { opacity:0, y: fromY },
+        { opacity:1, y:0, duration:.55, ease:'power3.out' }
+      );
+    }
+  });
+  applyStmtConfig(idx);
+}
+
+/* ── Reveal / conceal ── */
+function revealPhil() {
+  if (_philVisible) return;
+  _philVisible = true;
+  window._philVisible = true;
+
+  if (!_philInit) {
+    _philInit = true;
+    applyStmtConfig(0);
+  }
+
+  _philStmt = 0;
+  document.getElementById('phil-stmt-num').textContent  = STATEMENTS[0].num;
+  document.getElementById('phil-stmt-text').textContent = STATEMENTS[0].text;
+  document.getElementById('phil-statement').style.opacity = '0';
+
+  cvs.classList.add('active');
+  gsap.set(sphere.scale, { x:0.55, y:0.55, z:0.55 });
+  gsap.to(sphere.scale,  { x:1, y:1, z:1, duration:1.4, ease:'power3.out' });
+  gsap.to(cvs,                       { opacity:1, duration:.6, ease:'power2.out' });
+  gsap.to('#phil-section-label',     { opacity:1, y:0, duration:.8, delay:.4, ease:'power2.out' });
+  gsap.to('#phil-statement',         { opacity:1, duration:.7, delay:.65, ease:'power2.out' });
+  gsap.to('#phil-back-progress-wrap',{ opacity:1, duration:.5, delay:.8 });
+  setTimeout(() => {
+    document.getElementById('phil-back-hint').classList.add('visible');
+  }, 1200);
+}
+
+function concealPhil() {
+  if (!_philVisible) return;
+  _philVisible = false;
+  window._philVisible = false;
+
+  gsap.to(['#phil-canvas','#phil-section-label','#phil-statement',
+           '#phil-back-hint','#phil-back-progress-wrap','#phil-nav'],
+    { opacity:0, duration:.38, ease:'power2.in',
+      onComplete() { cvs.classList.remove('active'); }
+    });
+  document.getElementById('phil-back-hint').classList.remove('visible');
+  document.getElementById('phil-back-progress-fill').style.width = '0%';
+  document.getElementById('phil-nav-fill').style.width = '0%';
+  _philBackAcc = 0; _philBackLock = false;
+  _philFwdAcc  = 0; _philFwdLock  = false; _philStmtLock = false;
+}
+
+window.revealPhil  = revealPhil;
+window.concealPhil = concealPhil;
+
+/* ── Transition overlay ── */
+function triggerTransitionPhil() {
+  const ov = document.getElementById('phil-tx-overlay');
+  if (ov.classList.contains('active')) return;
+  ov.classList.add('active');
+  ov.style.pointerEvents = 'all';
+
+  gsap.set('.phil-tx-word',              { y: '100%' });
+  gsap.set(['.phil-tx-num','.phil-tx-sub'], { opacity:0, y:10 });
+  gsap.set('.phil-tx-rule',              { scaleX: 0 });
+  gsap.set('.phil-tx-prog',              { scaleX: 0 });
+
+  gsap.timeline({
+    onComplete() {
+      gsap.to('#phil-flash', { opacity:1, duration:.2, ease:'power2.in',
+        onComplete() {
+          revealPhil();
+          gsap.to(['#phil-tx-overlay','#phil-flash'], { opacity:0, duration:.5, ease:'power2.out',
+            onComplete() {
+              ov.classList.remove('active');
+              ov.style.pointerEvents = 'none';
+            }
+          });
+        }
+      });
+    }
+  })
+    .to('#phil-tx-overlay', { opacity:1, duration:.55, ease:'power2.inOut' })
+    .to('.phil-tx-num',     { opacity:1, y:0, duration:.4, ease:'power2.out' }, '+=0.15')
+    .to('.phil-tx-rule',    { scaleX:1,  duration:.65, ease:'power2.inOut' },   '+=0.08')
+    .to('.phil-tx-word',    { y:'0%',    duration:.6,  ease:'power3.out'  },    '+=0.06')
+    .to('.phil-tx-sub',     { opacity:1, y:0, duration:.45, ease:'power2.out' },'+=0.12')
+    .to('.phil-tx-prog',    { scaleX:1,  duration:1.0, ease:'power2.inOut' },   '+=0.1');
+}
+
+/* ── S6 → S7 ── */
+function sdToPhil() {
+  /* concealSD resets _sdVisible + _sdActive; re-lock overflow immediately */
+  if (typeof window.concealSD === 'function') window.concealSD();
+  document.body.style.overflow = 'hidden';
+  gsap.to('#phil-nav', { opacity:0, duration:.2 });
+  document.getElementById('phil-nav').classList.remove('visible');
+  setTimeout(triggerTransitionPhil, 320);
+}
+
+/* ── S7 → S6 ── */
+function philToSD() {
+  if (_philBackLock) return;
+  _philBackLock = true;
+  concealPhil();
+  window._sdActive = true; // block S3/S4 scroll listener
+  if (typeof window.revealSD === 'function') window.revealSD();
+  setTimeout(() => { _philBackLock = false; }, 1200);
+}
+
+window.sdToPhil = sdToPhil;
+window.philToSD = philToSD;
+
+/* ── Wheel handler for S7 ── */
+window.addEventListener('wheel', (e) => {
+  if (!window._philVisible) return;
+
+  if (e.deltaY > 0) {
+    /* scroll down → next statement */
+    _philBackAcc = 0;
+    document.getElementById('phil-back-progress-fill').style.width = '0%';
+
+    if (_philStmt < STATEMENTS.length - 1 && !_philStmtLock) {
+      _philFwdAcc += e.deltaY;
+      if (_philFwdAcc >= STMT_THRESHOLD) {
+        _philFwdAcc   = 0;
+        _philStmtLock = true;
+        _philStmt++;
+        showStatement(_philStmt, 1);
+        setTimeout(() => { _philStmtLock = false; }, 900);
+      }
+    } else if (_philStmt === STATEMENTS.length - 1 && !_philStmtLock) {
+      /* at last statement → exit forward to S8 Careers */
+      _philFwdAcc += e.deltaY;
+      document.getElementById('phil-nav-fill').style.width =
+        Math.min(_philFwdAcc / PHIL_THRESHOLD * 100, 100) + '%';
+      gsap.to('#phil-nav', { opacity:1, duration:.3 });
+      if (_philFwdAcc >= PHIL_THRESHOLD && !_philFwdLock) {
+        _philFwdLock = true;
+        if (typeof window.philToCar === 'function') window.philToCar();
+      }
+    }
+
+  } else if (e.deltaY < 0) {
+    /* scroll up */
+    _philFwdAcc = 0;
+    document.getElementById('phil-nav-fill').style.width = '0%';
+    gsap.to('#phil-nav', { opacity:0, duration:.2 });
+
+    if (_philStmt > 0 && !_philStmtLock) {
+      /* previous statement */
+      _philBackAcc += Math.abs(e.deltaY);
+      if (_philBackAcc >= STMT_THRESHOLD) {
+        _philBackAcc  = 0;
+        _philStmtLock = true;
+        _philStmt--;
+        showStatement(_philStmt, -1);
+        setTimeout(() => { _philStmtLock = false; }, 900);
+      }
+    } else if (_philStmt === 0) {
+      /* at first statement → accumulate back to S6 */
+      _philBackAcc = Math.min(_philBackAcc + Math.abs(e.deltaY), PHIL_THRESHOLD);
+      document.getElementById('phil-back-progress-fill').style.width =
+        (_philBackAcc / PHIL_THRESHOLD * 100) + '%';
+      if (_philBackAcc >= PHIL_THRESHOLD) philToSD();
+    }
+  }
+}, { passive: true });
+
+/* ── Resize ── */
+window.addEventListener('resize', () => {
+  const w = innerWidth, h = innerHeight;
+  cam.aspect = w / h; cam.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+</script>

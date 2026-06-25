@@ -1,0 +1,462 @@
+<!-- ══════════════════════════════════════════════════════
+     SECTION 8 — CAREERS  "The Unfinished Structure"
+     Four crystalline wireframe fragments assembling on scroll.
+     Bidirectional: S7 (Philosophy) ↔ S8 ↔ S9 (Contact).
+     NOTE: section-7.html must call window.philToCar?.() when
+     advancing past the last statement to enter this section.
+══════════════════════════════════════════════════════ -->
+
+<style>
+/* ── SECTION 8 — CAREERS ──────────────────────────── */
+
+#car-canvas {
+  position:fixed; inset:0; display:block;
+  z-index:2; opacity:0; pointer-events:none;
+}
+#car-canvas.active { pointer-events:all; }
+
+#car-section-label {
+  position:fixed; top:36px; left:44px; z-index:200;
+  display:flex; align-items:baseline; gap:10px;
+  opacity:0; transform:translateY(-8px);
+}
+.car-sl-num   { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em; color:var(--accent-dim); }
+.car-sl-sep   { font-size:10px; color:#2a3a20; }
+.car-sl-title { font-family:'Inter',sans-serif; font-weight:200; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:var(--muted); }
+
+#car-headline {
+  position:fixed; top:18%; left:50%;
+  transform:translateX(-50%);
+  z-index:200; text-align:center;
+  opacity:0; pointer-events:none;
+}
+#car-hl-kicker {
+  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.28em;
+  color:var(--accent-dim); text-transform:uppercase; margin-bottom:18px;
+}
+#car-hl-main {
+  font-family:'Space Grotesk',sans-serif;
+  font-size:clamp(30px,4.2vw,56px); font-weight:600; letter-spacing:-.02em;
+  color:var(--text); line-height:1.1; margin-bottom:22px; white-space:nowrap;
+}
+#car-hl-sub {
+  font-family:'Inter',sans-serif; font-weight:300; font-size:13px;
+  line-height:1.75; color:var(--muted);
+  max-width:440px; margin:0 auto; letter-spacing:.015em;
+}
+
+#car-roles {
+  position:fixed; bottom:44px; left:50%;
+  transform:translateX(-50%);
+  z-index:200;
+  display:grid; grid-template-columns:1fr 1fr; gap:14px;
+  width:min(720px,88vw);
+}
+.car-role {
+  opacity:0;
+  padding:18px 22px 16px;
+  border:1px solid rgba(184,255,60,.1);
+  background:rgba(6,8,7,.78);
+  backdrop-filter:blur(8px);
+  transition:border-color .3s;
+}
+.car-role:hover { border-color:rgba(184,255,60,.28); }
+.car-role-num {
+  font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.24em;
+  color:var(--accent-dim); margin-bottom:8px; text-transform:uppercase;
+}
+.car-role-title {
+  font-family:'Space Grotesk',sans-serif; font-size:14px; font-weight:600;
+  color:var(--text); letter-spacing:-.01em; margin-bottom:6px;
+}
+.car-role-mission {
+  font-family:'Inter',sans-serif; font-size:11.5px; font-weight:300;
+  color:var(--muted); line-height:1.6; margin-bottom:14px; font-style:italic;
+}
+.car-role-apply {
+  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.18em;
+  color:var(--accent); text-transform:uppercase; cursor:pointer;
+  border:none; background:none; padding:0;
+  transition:letter-spacing .2s, color .2s;
+}
+.car-role-apply:hover { letter-spacing:.28em; color:var(--text); }
+
+#car-back-hint {
+  position:fixed; left:20px; top:50%; transform:translateY(-50%);
+  z-index:202; font-family:'Space Mono',monospace; font-size:8px;
+  letter-spacing:.18em; color:var(--muted); writing-mode:vertical-rl;
+  text-transform:uppercase; opacity:0; transition:opacity .4s;
+}
+#car-back-hint.visible { opacity:1; }
+
+#car-back-progress-wrap {
+  position:fixed; bottom:28px; left:44px; z-index:201;
+  display:flex; align-items:center; gap:10px; opacity:0;
+}
+.car-bpw-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.18em; color:var(--muted); }
+#car-back-bar  { width:60px; height:1px; background:rgba(184,255,60,.1); position:relative; }
+#car-back-fill { position:absolute; top:0; left:0; height:100%; width:0%; background:var(--accent-dim); transition:width .08s linear; }
+
+#car-nav {
+  position:fixed; bottom:28px; left:50%; transform:translateX(-50%);
+  z-index:201; opacity:0;
+  display:flex; flex-direction:column; align-items:center; gap:5px;
+}
+.car-nav-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.18em; color:var(--muted); text-transform:uppercase; }
+.car-nav-arrow { font-size:9px; color:var(--accent-dim); animation:carArrow 1.8s ease-in-out infinite; }
+@keyframes carArrow { 0%,100%{opacity:.35} 50%{opacity:.9} }
+#car-nav-bar  { width:80px; height:1px; background:rgba(184,255,60,.1); position:relative; }
+#car-nav-fill { position:absolute; top:0; left:0; height:100%; width:0%; background:var(--accent); transition:width .08s linear; }
+
+/* Transition overlay */
+#car-tx-overlay {
+  position:fixed; inset:0; z-index:8000;
+  background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
+  opacity:0; pointer-events:none;
+}
+#car-tx-overlay.active { pointer-events:all; }
+.car-tx-rule { width:80px; height:1px; background:var(--accent-dim); transform:scaleX(0); transform-origin:left; }
+.car-tx-num  { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.24em; color:var(--accent-dim); opacity:0; }
+.car-tx-wrap { overflow:hidden; line-height:1; }
+.car-tx-word { font-family:'Space Grotesk',sans-serif; font-size:clamp(32px,5vw,64px); font-weight:600; letter-spacing:-.03em; color:var(--text); display:block; transform:translateY(100%); }
+.car-tx-sub  { font-family:'Inter',sans-serif; font-size:12px; font-weight:300; color:var(--muted); letter-spacing:.08em; opacity:0; }
+.car-tx-bar  { width:200px; height:1px; background:rgba(255,255,255,.06); overflow:hidden; }
+.car-tx-prog { height:100%; width:100%; background:var(--accent-dim); transform:scaleX(0); transform-origin:left; }
+#car-flash   { position:fixed; inset:0; z-index:8100; background:var(--accent); opacity:0; pointer-events:none; }
+</style>
+
+<!-- ── Transition overlay (S7 → S8) ── -->
+<div id="car-tx-overlay">
+  <div class="car-tx-rule"></div>
+  <div class="car-tx-num">08 / CAREERS</div>
+  <div class="car-tx-wrap"><div class="car-tx-word">Careers</div></div>
+  <div class="car-tx-sub">The interface between potential and purpose.</div>
+  <div class="car-tx-bar"><div class="car-tx-prog"></div></div>
+</div>
+<div id="car-flash"></div>
+
+<!-- ── Canvas ── -->
+<canvas id="car-canvas"></canvas>
+
+<!-- ── Section label ── -->
+<div id="car-section-label">
+  <span class="car-sl-num">08</span>
+  <span class="car-sl-sep">/</span>
+  <span class="car-sl-title">Careers</span>
+</div>
+
+<!-- ── Headline ── -->
+<div id="car-headline">
+  <div id="car-hl-kicker">08 / THE UNFINISHED STRUCTURE</div>
+  <div id="car-hl-main">Build What Comes Next.</div>
+  <div id="car-hl-sub">
+    We are building the next generation of intelligence systems.<br>
+    We are looking for curious minds who want to create<br>
+    meaningful impact through technology.
+  </div>
+</div>
+
+<!-- ── Role cards (2×2 grid) ── -->
+<div id="car-roles">
+  <div class="car-role" data-idx="0">
+    <div class="car-role-num">ROLE 01</div>
+    <div class="car-role-title">Innovation &amp; Growth Manager</div>
+    <div class="car-role-mission">"Build the bridges between vision and execution."</div>
+    <button class="car-role-apply" onclick="window.carApply(0)">Apply →</button>
+  </div>
+  <div class="car-role" data-idx="1">
+    <div class="car-role-num">ROLE 02</div>
+    <div class="car-role-title">Technical Lead</div>
+    <div class="car-role-mission">"Architect the systems that think."</div>
+    <button class="car-role-apply" onclick="window.carApply(1)">Apply →</button>
+  </div>
+  <div class="car-role" data-idx="2">
+    <div class="car-role-num">ROLE 03</div>
+    <div class="car-role-title">Product Builder</div>
+    <div class="car-role-mission">"Shape intelligence into experience."</div>
+    <button class="car-role-apply" onclick="window.carApply(2)">Apply →</button>
+  </div>
+  <div class="car-role" data-idx="3">
+    <div class="car-role-num">ROLE 04</div>
+    <div class="car-role-title">Full Stack Engineer</div>
+    <div class="car-role-mission">"Write the code that matters."</div>
+    <button class="car-role-apply" onclick="window.carApply(3)">Apply →</button>
+  </div>
+</div>
+
+<!-- ── Back hint + progress ── -->
+<div id="car-back-hint">↑ Scroll back</div>
+<div id="car-back-progress-wrap">
+  <span class="car-bpw-label">Back</span>
+  <div id="car-back-bar"><div id="car-back-fill"></div></div>
+</div>
+
+<!-- ── Forward nav (visible after all 4 roles revealed) ── -->
+<div id="car-nav">
+  <div class="car-nav-label">Continue to Contact</div>
+  <div class="car-nav-arrow">↓</div>
+  <div id="car-nav-bar"><div id="car-nav-fill"></div></div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+
+/* ── State ── */
+let _carVisible  = false;
+window._carVisible = false;
+let _carStage    = 0;   // 0=headline only; 1–4=each role revealed
+let _carFwdAcc   = 0;
+let _carBackAcc  = 0;
+let _carExitAcc  = 0;
+let _carBackLock = false;
+
+const ROLE_THRESH = 240;
+const EXIT_THRESH = 320;
+const BACK_THRESH = 350;
+
+/* ── Fragment config (scatter → target world positions) ── */
+const FRAGS = [
+  { scatter:[-8.5,  5.2, -1.5], target:[-4.0,  2.2, 0], rot:[.003,.005,.002] },
+  { scatter:[ 8.5,  5.0,  1.8], target:[ 4.0,  2.2, 0], rot:[.005,.002,.004] },
+  { scatter:[-7.5, -5.5,  1.2], target:[-4.0, -2.2, 0], rot:[.004,.006,.003] },
+  { scatter:[ 7.5, -5.2, -1.0], target:[ 4.0, -2.2, 0], rot:[.002,.004,.006] },
+];
+
+/* ── Three.js ── */
+const cvs = document.getElementById('car-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+
+const scene = new THREE.Scene();
+const cam   = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 100);
+cam.position.set(0, 0, 14);
+
+/* ── Particle background drift ── */
+const PT = 90;
+const ptBuf = new Float32Array(PT * 3);
+for (let i = 0; i < PT; i++) {
+  ptBuf[i*3]   = (Math.random() - .5) * 26;
+  ptBuf[i*3+1] = (Math.random() - .5) * 20;
+  ptBuf[i*3+2] = (Math.random() - .5) * 8 - 5;
+}
+const ptGeo = new THREE.BufferGeometry();
+ptGeo.setAttribute('position', new THREE.BufferAttribute(ptBuf, 3));
+scene.add(new THREE.Points(ptGeo,
+  new THREE.PointsMaterial({ color: 0x4a7a10, size: .05, transparent: true, opacity: .4 })
+));
+
+/* ── Wireframe fragments ── */
+const ACCENT = 0xb8ff3c;
+const mats   = Array.from({ length: 4 }, () =>
+  new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0 })
+);
+
+const meshes = [
+  new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(1.7, 1)),  mats[0]),
+  new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.OctahedronGeometry(2.0, 0)),   mats[1]),
+  new THREE.LineSegments(new THREE.WireframeGeometry(new THREE.TorusKnotGeometry(1.15, .32, 64, 8, 2, 3)), mats[2]),
+  new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.CylinderGeometry(1.4, 1.4, 3.2, 6, 6)), mats[3]),
+];
+
+meshes.forEach((m, i) => {
+  m.position.set(...FRAGS[i].scatter);
+  scene.add(m);
+});
+
+const revealed = [false, false, false, false];
+
+/* ── Render loop (gated by _carVisible) ── */
+let clock = 0;
+(function animate() {
+  requestAnimationFrame(animate);
+  if (!_carVisible) return;
+  clock += .016;
+
+  meshes.forEach((m, i) => {
+    const [rx, ry, rz] = FRAGS[i].rot;
+    m.rotation.x += rx;
+    m.rotation.y += ry;
+    m.rotation.z += rz;
+    if (!revealed[i]) {
+      // Organic float while scattered
+      m.position.x += Math.sin(clock * .3 + i * 1.7) * .003;
+      m.position.y += Math.cos(clock * .25 + i * 2.1) * .0025;
+    }
+  });
+
+  // Drift particles upward
+  const p = ptGeo.attributes.position.array;
+  for (let i = 0; i < PT; i++) {
+    p[i*3+1] += .005;
+    if (p[i*3+1] > 10) p[i*3+1] = -10;
+  }
+  ptGeo.attributes.position.needsUpdate = true;
+
+  renderer.render(scene, cam);
+})();
+
+/* ── Reveal / Conceal ── */
+function revealCar() {
+  if (_carVisible) return;
+  _carVisible = true;
+  window._carVisible = true;
+
+  _carStage = 0; _carFwdAcc = 0; _carBackAcc = 0;
+  _carExitAcc = 0; _carBackLock = false;
+  revealed.fill(false);
+
+  meshes.forEach((m, i) => {
+    m.position.set(...FRAGS[i].scatter);
+    mats[i].opacity = 0;
+  });
+  document.querySelectorAll('.car-role').forEach(el => gsap.set(el, { opacity: 0, y: 18 }));
+  gsap.set('#car-nav', { opacity: 0 });
+  document.getElementById('car-nav-fill').style.width = '0%';
+  document.getElementById('car-back-fill').style.width = '0%';
+
+  cvs.classList.add('active');
+  gsap.to(cvs,                       { opacity: 1, duration: .6, ease: 'power2.out' });
+  gsap.to('#car-section-label',      { opacity: 1, y: 0, duration: .8, delay: .3, ease: 'power2.out' });
+  gsap.to('#car-headline',           { opacity: 1, duration: .9, delay: .5, ease: 'power2.out' });
+  mats.forEach((mat, i) => gsap.to(mat, { opacity: .35, duration: .8, delay: .6 + i * .12 }));
+  gsap.to('#car-back-progress-wrap', { opacity: 1, duration: .5, delay: .9 });
+  setTimeout(() => document.getElementById('car-back-hint').classList.add('visible'), 1300);
+}
+
+function concealCar() {
+  if (!_carVisible) return;
+  _carVisible = false;
+  window._carVisible = false;
+
+  gsap.to(['#car-canvas','#car-section-label','#car-headline','#car-roles',
+           '#car-back-hint','#car-back-progress-wrap','#car-nav'],
+    { opacity: 0, duration: .38, ease: 'power2.in',
+      onComplete() { cvs.classList.remove('active'); }
+    });
+  document.getElementById('car-back-hint').classList.remove('visible');
+}
+
+/* ── Reveal one role stage ── */
+function revealRole(idx) {
+  if (revealed[idx]) return;
+  revealed[idx] = true;
+
+  const { target } = FRAGS[idx];
+  gsap.to(meshes[idx].position, { x: target[0], y: target[1], z: target[2], duration: 1.2, ease: 'power3.out' });
+  gsap.to(mats[idx],            { opacity: .88, duration: .6 });
+  gsap.to(`.car-role[data-idx="${idx}"]`, { opacity: 1, y: 0, duration: .7, delay: .28, ease: 'power2.out' });
+
+  if (idx === 3) {
+    // All revealed: brief pulse then show exit nav
+    setTimeout(() => {
+      mats.forEach(mat => gsap.to(mat, { opacity: 1, duration: .35, yoyo: true, repeat: 3, ease: 'power2.inOut' }));
+    }, 700);
+    gsap.to('#car-nav', { opacity: 1, duration: .6, delay: 1.0 });
+  }
+}
+
+/* ── Wheel handler ── */
+window.addEventListener('wheel', function onCarWheel(e) {
+  if (!_carVisible) return;
+  const dy = e.deltaY;
+
+  if (dy < 0) {
+    _carFwdAcc = 0; _carExitAcc = 0;
+    _carBackAcc += -dy;
+    document.getElementById('car-back-fill').style.width =
+      Math.min(_carBackAcc / BACK_THRESH, 1) * 100 + '%';
+    if (_carBackAcc >= BACK_THRESH && !_carBackLock) {
+      _carBackLock = true;
+      _carToPhil();
+    }
+    return;
+  }
+
+  _carBackAcc = 0;
+  document.getElementById('car-back-fill').style.width = '0%';
+
+  if (_carStage < 4) {
+    _carFwdAcc += dy;
+    if (_carFwdAcc >= ROLE_THRESH) {
+      _carFwdAcc -= ROLE_THRESH;
+      revealRole(_carStage);
+      _carStage++;
+    }
+  } else {
+    _carExitAcc += dy;
+    document.getElementById('car-nav-fill').style.width =
+      Math.min(_carExitAcc / EXIT_THRESH, 1) * 100 + '%';
+    if (_carExitAcc >= EXIT_THRESH) _carToContact();
+  }
+}, { passive: true });
+
+/* ── Navigation ── */
+function _carToPhil() {
+  concealCar();
+  document.body.style.overflow = 'hidden';
+  if (typeof window.revealPhil === 'function') setTimeout(() => window.revealPhil(), 320);
+  setTimeout(() => { _carBackLock = false; }, 900);
+}
+
+function _carToContact() {
+  concealCar();
+  if (typeof window.revealContact === 'function') window.revealContact();
+}
+
+window.carApply = function() {
+  _carToContact();
+};
+
+/* ── Transition overlay (S7 → S8) ── */
+function _triggerTransitionCar() {
+  const ov = document.getElementById('car-tx-overlay');
+  if (ov.classList.contains('active')) return;
+  ov.classList.add('active');
+  ov.style.pointerEvents = 'all';
+
+  gsap.set('.car-tx-word', { y: '100%' });
+  gsap.set(['.car-tx-num','.car-tx-sub'], { opacity: 0, y: 10 });
+  gsap.set('.car-tx-rule', { scaleX: 0 });
+  gsap.set('.car-tx-prog', { scaleX: 0 });
+
+  gsap.timeline({
+    onComplete() {
+      gsap.to('#car-flash', { opacity: 1, duration: .2, ease: 'power2.in',
+        onComplete() {
+          revealCar();
+          gsap.to(['#car-tx-overlay','#car-flash'], { opacity: 0, duration: .5, ease: 'power2.out',
+            onComplete() { ov.classList.remove('active'); ov.style.pointerEvents = 'none'; }
+          });
+        }
+      });
+    }
+  })
+    .to('#car-tx-overlay', { opacity: 1, duration: .4,  ease: 'power2.out' })
+    .to('.car-tx-rule',    { scaleX: 1, duration: .6,   ease: 'power2.inOut' }, '+=.05')
+    .to('.car-tx-num',     { opacity: 1, y: 0, duration: .4 }, '+=.08')
+    .to('.car-tx-word',    { y: '0%', duration: .7,     ease: 'power3.out' }, '-=.2')
+    .to('.car-tx-sub',     { opacity: 1, y: 0, duration: .5 }, '-=.3')
+    .to('.car-tx-prog',    { scaleX: 1, duration: 1.0,  ease: 'power2.inOut' }, '+=.1');
+}
+
+/* ── S7 → S8 (called from section-7.html via window.philToCar) ── */
+function philToCar() {
+  if (typeof window.concealPhil === 'function') window.concealPhil();
+  document.body.style.overflow = 'hidden';
+  setTimeout(_triggerTransitionCar, 320);
+}
+
+window.philToCar  = philToCar;
+window.revealCar  = revealCar;
+window.concealCar = concealCar;
+
+/* ── Resize ── */
+window.addEventListener('resize', () => {
+  if (!_carVisible) return;
+  renderer.setSize(innerWidth, innerHeight);
+  cam.aspect = innerWidth / innerHeight;
+  cam.updateProjectionMatrix();
+});
+</script>

@@ -1,0 +1,1055 @@
+<script>
+// ─── cursor ───
+const cur = document.getElementById('cursor');
+const curR = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cur.style.left = mx + 'px';
+  cur.style.top  = my + 'px';
+});
+(function lerp() {
+  rx += (mx - rx) * .12;
+  ry += (my - ry) * .12;
+  curR.style.left = rx + 'px';
+  curR.style.top  = ry + 'px';
+  requestAnimationFrame(lerp);
+})();
+
+// ─── particle network ───
+const canvas = document.getElementById('particle-canvas');
+const ctx = canvas.getContext('2d');
+let W, H, nodes = [];
+function initCanvas() {
+  W = canvas.width  = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+}
+function createNodes(n) {
+  nodes = [];
+  for (let i = 0; i < n; i++) {
+    nodes.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      vx: (Math.random() - .5) * .25,
+      vy: (Math.random() - .5) * .25,
+      r: Math.random() * 1.5 + .5
+    });
+  }
+}
+function drawParticles() {
+  ctx.clearRect(0, 0, W, H);
+  const maxDist = 120;
+  nodes.forEach(n => {
+    n.x += n.vx; n.y += n.vy;
+    if (n.x < 0 || n.x > W) n.vx *= -1;
+    if (n.y < 0 || n.y > H) n.vy *= -1;
+  });
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dx = nodes[i].x - nodes[j].x;
+      const dy = nodes[i].y - nodes[j].y;
+      const d  = Math.sqrt(dx*dx + dy*dy);
+      if (d < maxDist) {
+        const a = (1 - d / maxDist) * .18;
+        ctx.beginPath();
+        ctx.strokeStyle = `rgba(184,255,60,${a})`;
+        ctx.lineWidth = .6;
+        ctx.moveTo(nodes[i].x, nodes[i].y);
+        ctx.lineTo(nodes[j].x, nodes[j].y);
+        ctx.stroke();
+      }
+    }
+    ctx.beginPath();
+    ctx.fillStyle = 'rgba(184,255,60,0.35)';
+    ctx.arc(nodes[i].x, nodes[i].y, nodes[i].r, 0, Math.PI*2);
+    ctx.fill();
+  }
+  requestAnimationFrame(drawParticles);
+}
+initCanvas();
+createNodes(55);
+drawParticles();
+window.addEventListener('resize', () => { initCanvas(); createNodes(55); });
+
+// ─── ruler ticks ───
+const ruler = document.getElementById('ruler-marks');
+for (let i = 0; i <= 20; i++) {
+  const t = document.createElement('div');
+  t.className = 'tick';
+  t.style.top = (i * 38 + 18) + 'px';
+  t.textContent = i * 10;
+  ruler.appendChild(t);
+}
+
+// ─── dot indicator blink ───
+const dotInd = document.getElementById('dot-ind');
+setInterval(() => {
+  dotInd.style.opacity = dotInd.style.opacity === '0.1' ? '0.5' : '0.1';
+}, 900);
+
+// ─── terminal lines ───
+const terminal = document.getElementById('terminal');
+const lines = [
+  '> INIT cogniti-kernel v2.0.1',
+  '> LOADING inference engine...',
+  '> MOUNTING telemetry stream',
+  '> SYSTEM READY',
+];
+let lineIdx = 0;
+function typeLine() {
+  if (lineIdx >= lines.length) return;
+  const div = document.createElement('div');
+  div.textContent = lines[lineIdx++];
+  terminal.appendChild(div);
+  setTimeout(typeLine, 420);
+}
+
+// ─── ring setup ───
+const rp  = document.getElementById('rp');
+const rw  = document.getElementById('ring-wrap');
+const lo  = document.getElementById('lo');
+const tg  = document.getElementById('tagline');
+const allBl = [...document.querySelectorAll('.bl')];
+const letters = allBl.filter(l => l !== lo);
+
+const R = 74, SW = 10;
+const C = +(2 * Math.PI * R).toFixed(3);
+rp.style.strokeDasharray  = C;
+rp.style.strokeDashoffset = C;
+
+let fontReady = false;
+document.fonts.ready.then(() => { fontReady = true; });
+
+// ─── PHASE 1: logo intro ───
+function runPhase1() {
+  // progress bar
+  const bar = document.getElementById('progress-bar');
+  setTimeout(() => { bar.style.width = '100%'; }, 50);
+
+  // terminal
+  setTimeout(() => {
+    terminal.style.transition = 'opacity .4s';
+    terminal.style.opacity = '1';
+    typeLine();
+  }, 800);
+
+  // ring appear
+  setTimeout(() => {
+    rw.style.transition = 'opacity .5s ease, transform .7s cubic-bezier(0.34,1.56,0.64,1)';
+    rw.style.opacity = '1';
+    rw.style.transform = 'translate(-50%,-50%) scale(1)';
+  }, 200);
+
+  // ring sweep
+  setTimeout(() => {
+    rp.style.transition = 'stroke-dashoffset 1.9s cubic-bezier(0.25,0.46,0.45,0.94)';
+    rp.style.strokeDashoffset = '0';
+  }, 500);
+
+  // ring zoom in
+  setTimeout(() => {
+    rw.style.transition = 'transform .7s cubic-bezier(0.4,0,0.2,1)';
+    rw.style.transform  = 'translate(-50%,-50%) scale(1.85)';
+  }, 2500);
+
+  // ring move to O
+  setTimeout(() => {
+    const r  = lo.getBoundingClientRect();
+    const oCX = r.left + r.width  / 2;
+    const oCY = r.top  + r.height / 2;
+    const dx  = oCX - window.innerWidth  / 2;
+    const dy  = oCY - window.innerHeight / 2;
+    const capH = r.height * 0.72;
+    const sc  = capH / ((R + SW / 2) * 2);
+
+    rw.style.transition = 'transform .9s cubic-bezier(0.4,0,0.2,1)';
+    rw.style.transform  = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(${sc})`;
+  }, 3400);
+
+  // letters cascade
+  setTimeout(() => {
+    letters.forEach((l, i) => {
+      setTimeout(() => {
+        l.style.transition = 'opacity .55s ease, transform .55s cubic-bezier(0.4,0,0.2,1)';
+        l.style.opacity = '1';
+        l.style.transform = 'translateY(0)';
+      }, i * 75);
+    });
+  }, 4400);
+
+  // tagline
+  setTimeout(() => {
+    tg.style.transition = 'opacity .9s ease, transform .9s ease';
+    tg.style.opacity = '1';
+    tg.style.transform = 'translateY(0)';
+  }, 5200);
+
+  // ── transition to phase 2 ──
+  setTimeout(() => {
+    // fade out phase1 content
+    const p1 = document.getElementById('phase1');
+    p1.style.transition = 'opacity .9s ease';
+    p1.style.opacity = '0';
+
+    // fade ring out
+    rw.style.transition = 'opacity .9s ease';
+    rw.style.opacity = '0';
+
+    // progress bar done
+    bar.style.transition = 'opacity .5s';
+    bar.style.opacity = '0';
+
+    // terminal out
+    terminal.style.opacity = '0';
+
+    // particles visible
+    canvas.style.opacity = '.12';
+
+    // phase2 starts to appear
+    const p2 = document.getElementById('phase2');
+    p2.style.pointerEvents = 'auto';
+    p2.style.transition = 'opacity .8s ease';
+    p2.style.opacity = '1';
+
+    runPhase2();
+  }, 6800);
+}
+
+// ─── responsive scene scale ───
+function getFinalScale() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  if (vw < 640) {
+    // mobile: scene sits in middle slot (top 200px → bottom 120px = ~vh-320px)
+    const availH = Math.max(vh - 320, 200);
+    return Math.min((vw * 0.92) / 900, availH / 600);
+  }
+  if (vw < 1024) {
+    // tablet: leave room for side panels
+    return Math.min((vw * 0.58) / 900, (vh * 0.72) / 600);
+  }
+  // desktop: centered, slight padding
+  return Math.min((vw * 0.52) / 900, (vh * 0.82) / 600);
+}
+
+// ─── PHASE 2: hero reveal ───
+function runPhase2() {
+  const finalScale = getFinalScale();
+  const tl = gsap.timeline({ delay: .2, onComplete: initManifesto });
+
+  // zoom out scene
+  tl.to('#scene-inner', {
+    scale: finalScale,
+    duration: 2.2,
+    ease: 'power3.inOut'
+  });
+
+  // fade selection handles
+  tl.to('#selection-box', {
+    opacity: 0,
+    duration: .6,
+    ease: 'power2.out'
+  }, '-=1.8');
+
+  // fade tool badge
+  tl.to('#tool-badge', {
+    opacity: 0,
+    duration: .4,
+    ease: 'power2.out'
+  }, '-=1.6');
+
+  // nav
+  tl.to('#nav', {
+    opacity: 1,
+    duration: .7,
+    ease: 'power2.out'
+  }, '-=.8');
+
+  // brand
+  tl.fromTo('#ui-brand', { opacity: 0, x: -28 }, {
+    opacity: 1, x: 0,
+    duration: .9,
+    ease: 'power3.out'
+  }, '-=.5');
+
+  // copy
+  tl.fromTo('#ui-copy', { opacity: 0, x: 28 }, {
+    opacity: 1, x: 0,
+    duration: .9,
+    ease: 'power3.out'
+  }, '-=.8');
+
+  // sidebar
+  tl.to('#sidebar-label', { opacity: 1, duration: .5 }, '-=.6');
+
+  // props
+  tl.to('.prop', {
+    opacity: 1,
+    duration: .5,
+    stagger: .1,
+    ease: 'power2.out'
+  }, '-=.5');
+
+  // sys-status + scroll + badge
+  tl.to(['#sys-status', '#scroll-hint', '#logo-badge'], {
+    opacity: 1,
+    duration: .5,
+    stagger: .1
+  }, '-=.3');
+
+  // ambient drift
+  gsap.to('#scene-inner', {
+    x: 8, y: -5,
+    duration: 9,
+    ease: 'sine.inOut',
+    yoyo: true,
+    repeat: -1,
+    delay: 3.5
+  });
+}
+
+// ─── initManifesto ───
+function initManifesto() {
+  gsap.registerPlugin(ScrollTrigger);
+
+  document.documentElement.style.height   = 'auto';
+  document.documentElement.style.overflow = 'auto';
+  document.body.style.height   = 'auto';
+  document.body.style.overflow = 'auto';
+
+  const spacer = document.createElement('div');
+  spacer.style.cssText = 'height:4000vh;width:100%;pointer-events:none;';
+  document.body.appendChild(spacer);
+  window.scrollTo(0, 0);
+
+  const VH         = window.innerHeight;
+  const BASE_SCALE = getFinalScale();
+
+  // ── manifesto label: big centered → scale-to-corner ──
+  const mlEl = document.getElementById('manifesto-label');
+  const mW   = mlEl.offsetWidth;
+  const mH   = mlEl.offsetHeight;
+  gsap.set(mlEl, {
+    transformOrigin: 'top left',
+    x: (window.innerWidth - mW) / 2,
+    y: (VH - mH) / 2,
+    scale: 1,
+    opacity: 0
+  });
+  gsap.timeline({ scrollTrigger: { start: 0, end: VH * 1.3, scrub: 1.6 } })
+    .to(mlEl, { opacity: .88, duration: .22 }, 0)
+    .to(mlEl, { x: 46, y: 84, scale: 25 / mH, duration: 1.08, ease: 'power3.inOut' }, .22);
+
+  // ── hero exit (0 → 1×VH): fade ui + zoom out scene once into manifesto ──
+  gsap.timeline({ scrollTrigger: { start: 0, end: VH, scrub: 1.5 } })
+    .to('#pcb-surface',  { opacity: 0, duration: 1 }, 0)
+    .to('#pcb-traces',   { opacity: 0, duration: 1 }, 0)
+    .to('#ruler-marks',  { opacity: 0, duration: .7 }, 0)
+    .to('.prop',         { opacity: 0, duration: .5, stagger: .05 }, 0)
+    .to('#ui-brand',     { opacity: 0, x: -22, duration: .8 }, 0)
+    .to('#ui-copy',      { opacity: 0, x:  22, duration: .8 }, 0)
+    .to(['#nav','#sys-status','#scroll-hint','#logo-badge','#sidebar-label'], { opacity: 0, duration: .5 }, 0)
+    .to('#scene-inner',  { scale: BASE_SCALE * 0.68, duration: 1, ease: 'power2.inOut' }, 0)
+    .to('#watch-wrap',   { opacity: .28, duration: 1.2 }, .2);
+
+  // ── 4 beats: left + right text flanking watch, backlight per beat ──
+  const STEP   = VH * 2;
+  const MSTART = VH * 1.5;
+  const BEATS  = ['#mb0', '#mb1', '#mb2', '#mb3'];
+
+  BEATS.forEach((sel, i) => {
+    const zs = MSTART + i * STEP;
+    const el = document.querySelector(sel);
+    if (!el) return;
+    const lEl = el.querySelector('.m-left');
+    const rEl = el.querySelector('.m-right');
+
+    ScrollTrigger.create({
+      start: zs, end: zs + STEP, scrub: 1.4,
+      onUpdate({ progress: p }) {
+        // opacity: ramp up first 20%, hold, ramp down last 22%
+        const op  = p < .2 ? p / .2 : p < .78 ? 1 : 1 - (p - .78) / .22;
+        const c   = Math.max(0, Math.min(1, op));
+        // slide: left in from left, right in from right
+        const raw = p < .2 ? (1 - p / .2) : p > .78 ? (p - .78) / .22 : 0;
+        const xd  = raw * 38;
+
+        gsap.set(lEl, { opacity: c, x: -xd });
+        gsap.set(rEl, { opacity: c, x:  xd });
+
+        // backlight: watch glows bright as text appears, dims as it fades
+        gsap.set('#watch-wrap', {
+          opacity: .28 + c * .62,
+          filter: `drop-shadow(0 0 ${26 + c * 92}px rgba(184,255,60,${.04 + c * .44})) drop-shadow(0 24px 60px rgba(0,0,0,.9))`
+        });
+      }
+    });
+  });
+
+  // ── final hold glow + label fade-out (after last beat) ──
+  const glowStart = MSTART + BEATS.length * STEP;
+  ScrollTrigger.create({
+    start: glowStart, end: glowStart + VH * 0.5, scrub: 1,
+    onUpdate({ progress: p }) {
+      gsap.set(mlEl, { opacity: Math.max(0, 1 - p * 2) });
+    }
+  });
+  ScrollTrigger.create({
+    start: glowStart, end: glowStart + VH, scrub: 1,
+    onUpdate({ progress: p }) {
+      gsap.set('#watch-wrap', {
+        opacity: .9 + p * .1,
+        filter: `drop-shadow(0 0 ${40 + p * 90}px rgba(184,255,60,${.12 + p * .45})) drop-shadow(0 24px 60px rgba(0,0,0,.9))`
+      });
+    }
+  });
+
+  // ── watch exit: scale down → disappear (after final glow) ──
+  const exitStart = glowStart + VH;  // = 10.5×VH
+  ScrollTrigger.create({
+    start: exitStart, end: exitStart + VH, scrub: 1.6,
+    onUpdate({ progress: p }) {
+      const ease = p * p;                                  // ease-in: slow start, fast vanish
+      gsap.set('#scene-inner', { scale: BASE_SCALE * 0.68 * (1 - ease) });
+      gsap.set('#watch-wrap',  { opacity: Math.max(0, 1 - p * 1.8) });
+    }
+  });
+
+  window.addEventListener('resize', () => ScrollTrigger.refresh());
+
+  initChallenge();
+  initShift();
+}
+
+// ─── click to replay ───
+document.getElementById('phase1').addEventListener('click', () => {
+  location.reload();
+});
+
+// ─── resize: re-scale scene after animation settles ───
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const p2 = document.getElementById('phase2');
+    if (parseFloat(p2.style.opacity) > 0) {
+      gsap.to('#scene-inner', {
+        scale: getFinalScale(),
+        duration: .6,
+        ease: 'power2.out'
+      });
+    }
+    initCanvas();
+    createNodes(window.innerWidth < 640 ? 30 : 55);
+  }, 150);
+});
+
+// ─── initChallenge ───
+function initChallenge() {
+  const VH     = window.innerHeight;
+  const W      = window.innerWidth;
+  const SPREAD   = 22;
+  const CAT_STEP = VH * 2.5;
+
+  // ── THREE renderer ──
+  const cvs = document.getElementById('challenge-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
+  renderer.setSize(W, VH);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setClearColor(0x000000, 0);
+
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, W / VH, 0.1, 500);
+  camera.position.set(-SPREAD, 0, 32);
+  camera.lookAt(-SPREAD, 0, 0);
+
+  // ── glow sprite (radial gradient on canvas → texture) ──
+  function makeSprite(r, g, b) {
+    const sz = 64, c = document.createElement('canvas');
+    c.width = c.height = sz;
+    const cx = c.getContext('2d');
+    const gr = cx.createRadialGradient(sz/2,sz/2,0, sz/2,sz/2,sz/2);
+    gr.addColorStop(0,    `rgba(${r},${g},${b},1)`);
+    gr.addColorStop(0.35, `rgba(${r},${g},${b},0.55)`);
+    gr.addColorStop(1,    `rgba(${r},${g},${b},0)`);
+    cx.fillStyle = gr; cx.fillRect(0, 0, sz, sz);
+    return new THREE.CanvasTexture(c);
+  }
+  const texGov = makeSprite(80, 160, 255);
+  const texEnt = makeSprite(255, 165, 50);
+  const texCom = makeSprite(184, 255, 60);
+
+  function makePoints(posArr, tex, size, opacity) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
+    return new THREE.Points(geo, new THREE.PointsMaterial({
+      size, map: tex, transparent: true,
+      blending: THREE.AdditiveBlending, depthWrite: false, opacity
+    }));
+  }
+
+  function makeLines(verts, color, opacity) {
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(verts), 3));
+    return new THREE.LineSegments(geo, new THREE.LineBasicMaterial({
+      color, transparent: true, opacity, blending: THREE.AdditiveBlending
+    }));
+  }
+
+  // ── GOVERNMENT: 7×7 grid, ~45% edges severed ──
+  function buildGov() {
+    const grp = new THREE.Group();
+    grp.position.x = -SPREAD;
+    const R = 7, C = 7, GAP = 2.2;
+    const pts = [];
+    for (let r = 0; r < R; r++)
+      for (let c = 0; c < C; c++)
+        pts.push((c-(C-1)/2)*GAP, (r-(R-1)/2)*GAP, 0);
+    const pa = new Float32Array(pts);
+    grp.add(makePoints(pa, texGov, 0.5, 0.9));
+    grp.add(makePoints(pa, texGov, 1.7, 0.18));
+    const ev = [];
+    for (let r = 0; r < R; r++) {
+      for (let c = 0; c < C; c++) {
+        const i = (r*C+c)*3;
+        if (c < C-1 && Math.random() > 0.44) ev.push(pts[i],pts[i+1],pts[i+2], pts[i+3],pts[i+4],pts[i+5]);
+        if (r < R-1 && Math.random() > 0.44) ev.push(pts[i],pts[i+1],pts[i+2], pts[i+C*3],pts[i+C*3+1],pts[i+C*3+2]);
+      }
+    }
+    grp.add(makeLines(ev, 0x3377ee, 0.22));
+    scene.add(grp); return grp;
+  }
+
+  // ── ENTERPRISE: 200 scattered nodes, zero edges ──
+  function buildEnt() {
+    const grp = new THREE.Group();
+    grp.position.x = 0;
+    const N = 200, pts = new Float32Array(N * 3);
+    for (let i = 0; i < N; i++) {
+      const th = Math.random() * Math.PI * 2;
+      const ph = Math.acos(2 * Math.random() - 1);
+      const r  = 5 + Math.random() * 8;
+      pts[i*3]   = r * Math.sin(ph) * Math.cos(th);
+      pts[i*3+1] = r * Math.sin(ph) * Math.sin(th) * 0.55;
+      pts[i*3+2] = r * Math.cos(ph) * 0.4;
+    }
+    grp.add(makePoints(pts, texEnt, 0.36, 0.75));
+    grp.add(makePoints(pts, texEnt, 1.1, 0.14));
+    scene.add(grp); return grp;
+  }
+
+  // ── COMMUNITIES: concentric rings, hollow center, broken arcs ──
+  function buildCom() {
+    const grp = new THREE.Group();
+    grp.position.x = SPREAD;
+    const rings = [{n:28,r:9.5},{n:18,r:6.5},{n:8,r:3.5}];
+    const pts = [];
+    rings.forEach(({n, r}) => {
+      for (let i = 0; i < n; i++) {
+        const a = (i/n) * Math.PI * 2;
+        pts.push(Math.cos(a)*r, Math.sin(a)*r, 0);
+      }
+    });
+    const pa = new Float32Array(pts);
+    grp.add(makePoints(pa, texCom, 0.5, 0.9));
+    grp.add(makePoints(pa, texCom, 1.7, 0.18));
+    const ev = [];
+    const keepRate = [0.75, 0.52, 0.28];
+    let off = 0;
+    rings.forEach(({n}, ri) => {
+      for (let i = 0; i < n; i++) {
+        if (Math.random() < keepRate[ri]) {
+          const ai = (off + i) * 3, bi = (off + (i+1) % n) * 3;
+          ev.push(pts[ai],pts[ai+1],pts[ai+2], pts[bi],pts[bi+1],pts[bi+2]);
+        }
+      }
+      off += n;
+    });
+    grp.add(makeLines(ev, 0x88ff22, 0.22));
+    scene.add(grp); return grp;
+  }
+
+  const govGrp = buildGov();
+  const entGrp = buildEnt();
+  const comGrp = buildCom();
+
+  // ── render loop — eager start ──
+  const clock = new THREE.Clock();
+  (function tick() {
+    requestAnimationFrame(tick);
+    const t = clock.getElapsedTime();
+    govGrp.rotation.z = Math.sin(t * 0.14) * 0.04;
+    entGrp.rotation.y = t * 0.035;
+    comGrp.rotation.z = Math.sin(t * 0.11 + 1.2) * 0.05;
+    renderer.render(scene, camera);
+  })();
+
+  // ── scroll anchors ──
+  // watch exit ends at 11.5×VH → challenge starts clean after that
+  const CANVAS_IN  = VH * 11.5;   // constellation fades in
+  const LABEL_IN   = VH * 11.5;   // THE CHALLENGE label scales to corner
+  const BEATS_IN   = VH * 12.5;   // text beats start
+  const CAM_START  = VH * 12.2;   // camera begins moving
+
+  // ── CHALLENGE label: scale-to-corner ──
+  const clEl = document.getElementById('challenge-label');
+  const cLW  = clEl.offsetWidth;
+  const cLH  = clEl.offsetHeight;
+  gsap.set(clEl, {
+    transformOrigin: 'top left',
+    x: (W - cLW) / 2, y: (VH - cLH) / 2,
+    scale: 1, opacity: 0
+  });
+  gsap.timeline({ scrollTrigger: { start: LABEL_IN, end: LABEL_IN + VH * 1.2, scrub: 1.6 } })
+    .to(clEl, { opacity: .88, duration: .22 }, 0)
+    .to(clEl, { x: 46, y: 84, scale: 25 / cLH, duration: 1.08, ease: 'power3.inOut' }, .22);
+
+  // ── canvas fade in (clean — watch already gone from exit zone) ──
+  ScrollTrigger.create({
+    start: CANVAS_IN, end: CANVAS_IN + VH * 1.0, scrub: 1.5,
+    onUpdate({ progress: p }) {
+      cvs.style.opacity = Math.min(1, p * 1.4).toString();
+    }
+  });
+
+  // ── camera tracks scroll across 3 constellations ──
+  const CAM_XS = [-SPREAD, 0, SPREAD];
+  ScrollTrigger.create({
+    start: CAM_START, end: CAM_START + VH * 0.5 + 3 * CAT_STEP, scrub: 2.2,
+    onUpdate({ progress: p }) {
+      const raw  = p * 3;
+      const zone = Math.min(2, Math.floor(raw));
+      const lp   = raw - zone;
+      const fromX = zone > 0 ? CAM_XS[zone - 1] : CAM_XS[0] - 8;
+      const cx    = fromX + (CAM_XS[zone] - fromX) * Math.min(1, lp * 2.6);
+      camera.position.x = cx;
+      camera.lookAt(cx, 0, 0);
+    }
+  });
+
+  // ── per-category text beats ──
+  ['#ch0','#ch1','#ch2'].forEach((sel, i) => {
+    const el = document.querySelector(sel);
+    const zs = BEATS_IN + i * CAT_STEP;
+    ScrollTrigger.create({
+      start: zs, end: zs + CAT_STEP, scrub: 1.4,
+      onUpdate({ progress: p }) {
+        const c  = p < .2 ? p/.2 : p < .78 ? 1 : 1-(p-.78)/.22;
+        const cl = Math.max(0, Math.min(1, c));
+        const xd = (p < .2 ? (1-p/.2) : p > .78 ? (p-.78)/.22 : 0) * 32;
+        gsap.set(el.querySelector('.ch-num'),      { opacity: cl });
+        gsap.set(el.querySelector('.ch-domain'),   { opacity: cl, x: -xd });
+        gsap.set(el.querySelector('.ch-headline'), { opacity: cl, x:  xd });
+        gsap.set(el.querySelector('.ch-body'),     { opacity: cl * .7, x: xd });
+      }
+    });
+  });
+
+  // ── outro: fade canvas + label ──
+  const outStart = BEATS_IN + 3 * CAT_STEP;
+  ScrollTrigger.create({
+    start: outStart, end: outStart + VH, scrub: 1,
+    onUpdate({ progress: p }) {
+      cvs.style.opacity = (1 - p).toString();
+      gsap.set(clEl, { opacity: Math.max(0, 0.88 * (1 - p)) });
+    }
+  });
+
+  // resize
+  window.addEventListener('resize', () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  });
+}
+
+// ─── initShift ───
+function initShift() {
+  const VH = window.innerHeight;
+  const W  = window.innerWidth;
+
+  // ── scroll anchors ──
+  // Challenge outro ends ~VH*21; buffer VH*22 before shift
+  const SHIFT_IN    = VH * 22;
+  const SHIFT_START = VH * 23;
+  const SHIFT_STEP  = VH * 3.0;     // per stage (5 stages = 15VH)
+  const SHIFT_OUT   = SHIFT_START + 5 * SHIFT_STEP;  // VH*38
+
+  // ── Three.js ──
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, W / VH, 0.1, 300);
+  camera.position.set(0, 0, 20);
+
+  const cvs = document.getElementById('shift-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
+  renderer.setSize(W, VH);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+  // ── formations ──
+  const N = 7000;
+
+  function makeSphere(n, r) {
+    const a = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi   = Math.acos(2 * Math.random() - 1);
+      const rr    = r * Math.cbrt(Math.random());
+      a[i*3]   = rr * Math.sin(phi) * Math.cos(theta);
+      a[i*3+1] = rr * Math.sin(phi) * Math.sin(theta);
+      a[i*3+2] = rr * Math.cos(phi);
+    }
+    return a;
+  }
+
+  function makeClusters(n) {
+    const ctrs = [[-5.5, 2.5, -1], [4.8, -3, 1.5], [0.4, 4.2, -2]];
+    const a = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const c = ctrs[i % 3];
+      const r = Math.random() * 2.0;
+      const t = Math.random() * Math.PI * 2;
+      const p = Math.random() * Math.PI;
+      a[i*3]   = c[0] + r * Math.sin(p) * Math.cos(t);
+      a[i*3+1] = c[1] + r * Math.sin(p) * Math.sin(t);
+      a[i*3+2] = c[2] + r * Math.cos(p);
+    }
+    return a;
+  }
+
+  function makeTorusKnot(n) {
+    const a = new Float32Array(n * 3);
+    const P = 2, Q = 3, R = 4.5, r = 1.8;
+    for (let i = 0; i < n; i++) {
+      const t   = (i / n) * Math.PI * 2;
+      const phi = Q * t / P;
+      const x   = (R + r * Math.cos(phi)) * Math.cos(t);
+      const y   = (R + r * Math.cos(phi)) * Math.sin(t);
+      const z   = r * Math.sin(phi);
+      const ns  = 0.14;
+      a[i*3]   = x + (Math.random() - .5) * ns;
+      a[i*3+1] = y + (Math.random() - .5) * ns;
+      a[i*3+2] = z + (Math.random() - .5) * ns;
+    }
+    return a;
+  }
+
+  function makeStarBurst(n) {
+    const RAYS = 5, a = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const ray   = i % RAYS;
+      const t     = Math.floor(i / RAYS) / (n / RAYS);
+      const angle = (ray / RAYS) * Math.PI * 2 - Math.PI / 2;
+      const len   = 1.5 + t * 7.5;
+      const sp    = (1 - t * t) * 0.9;
+      a[i*3]   = Math.cos(angle) * len + (Math.random() - .5) * sp;
+      a[i*3+1] = Math.sin(angle) * len + (Math.random() - .5) * sp;
+      a[i*3+2] = (Math.random() - .5) * sp * 0.5;
+    }
+    return a;
+  }
+
+  function makeBeam(n) {
+    const a = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const t      = i / n;
+      const radius = (1 - t) * 1.6 * Math.random();
+      const angle  = Math.random() * Math.PI * 2;
+      a[i*3]   = Math.cos(angle) * radius;
+      a[i*3+1] = Math.sin(angle) * radius;
+      a[i*3+2] = -(t * 18) + 4;   // tunnel into screen
+    }
+    return a;
+  }
+
+  const targets = [
+    makeSphere(N, 10),   // 0 — Information
+    makeClusters(N),     // 1 — Context
+    makeTorusKnot(N),    // 2 — Intelligence
+    makeStarBurst(N),    // 3 — Decision
+    makeBeam(N),         // 4 — Action
+  ];
+
+  // ── BufferGeometry ──
+  const geo    = new THREE.BufferGeometry();
+  const posArr = new Float32Array(N * 3);
+  posArr.set(targets[0]);
+  geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
+
+  const colArr = new Float32Array(N * 3);
+  geo.setAttribute('color', new THREE.BufferAttribute(colArr, 3));
+
+  const mat = new THREE.PointsMaterial({
+    size: 0.07, vertexColors: true,
+    transparent: true, opacity: 0.85,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+    sizeAttenuation: true,
+  });
+  scene.add(new THREE.Points(geo, mat));
+
+  // ── color palettes per stage [r,g,b] 0–1 ──
+  const palettes = [
+    [0.40, 0.43, 0.38],  // dim warm white — Information
+    [0.05, 0.65, 0.78],  // cyan           — Context
+    [0.72, 1.00, 0.24],  // lime #b8ff3c   — Intelligence
+    [0.30, 0.85, 0.48],  // green-cyan     — Decision
+    [0.72, 1.00, 0.24],  // lime bright    — Action
+  ];
+
+  // ── RAF: slow camera orbit ──
+  let orbitAngle = 0, shiftActive = false;
+  function shiftTick() {
+    if (!shiftActive) return;
+    requestAnimationFrame(shiftTick);
+    orbitAngle += 0.0013;
+    camera.position.x = Math.sin(orbitAngle) * 2.8;
+    camera.position.y = Math.cos(orbitAngle * 0.6) * 1.5;
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
+  }
+
+  // ── morph helpers ──
+  function eio(t) { return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
+
+  function updateMorph(p) {
+    const stageF = Math.min(p * 4, 3.9999);
+    const si     = Math.floor(stageF);
+    const st     = eio(stageF - si);
+
+    const from = targets[si], to = targets[si + 1];
+    const pa   = geo.attributes.position.array;
+    for (let i = 0; i < N * 3; i++) pa[i] = from[i] + (to[i] - from[i]) * st;
+    geo.attributes.position.needsUpdate = true;
+
+    const fc = palettes[si], tc = palettes[si + 1];
+    const ca = geo.attributes.color.array;
+    for (let i = 0; i < N; i++) {
+      ca[i*3]   = fc[0] + (tc[0] - fc[0]) * st;
+      ca[i*3+1] = fc[1] + (tc[1] - fc[1]) * st;
+      ca[i*3+2] = fc[2] + (tc[2] - fc[2]) * st;
+    }
+    geo.attributes.color.needsUpdate = true;
+
+    // camera pulls back for torus, zooms in for beam
+    camera.position.z = 20 - si * 0.8 + (1 - st) * 0.8;
+
+    // pipeline HUD
+    const active = Math.min(Math.floor(p * 5), 4);
+    document.getElementById('sp-fill-bar').style.height = (p * 100) + '%';
+    for (let k = 0; k < 5; k++) {
+      const nd = document.getElementById('spn' + k);
+      nd.classList.toggle('active', k === active);
+      nd.classList.toggle('done',   k < active);
+    }
+  }
+
+  // ── ScrollTriggers ──
+
+  // 1. Fade in canvas + UI
+  ScrollTrigger.create({
+    start: SHIFT_IN, end: SHIFT_IN + VH * 0.9, scrub: 1.5,
+    onUpdate({ progress: p }) {
+      cvs.style.opacity = p.toString();
+      document.getElementById('shift-hud').style.opacity     = p.toString();
+      document.getElementById('shift-content').style.opacity = p.toString();
+    },
+    onEnter() { shiftActive = true; shiftTick(); },
+  });
+
+  // 2. Label: center → corner (mirrors challenge style)
+  const slEl = document.getElementById('shift-label');
+  const slW  = slEl.offsetWidth  || 90;
+  const slH  = slEl.offsetHeight || 14;
+  gsap.set(slEl, { transformOrigin: 'top left', x: (W - slW) / 2, y: (VH - slH) / 2, scale: 1, opacity: 0 });
+  gsap.timeline({ scrollTrigger: { start: SHIFT_IN, end: SHIFT_IN + VH * 1.2, scrub: 1.6 } })
+    .to(slEl, { opacity: .88, duration: .22 }, 0)
+    .to(slEl, { x: 46, y: 50, scale: 25 / slH, duration: 1.08, ease: 'power3.inOut' }, .22);
+
+  // 3. Particle morphing — scrub across all 5 stages
+  ScrollTrigger.create({
+    start: SHIFT_START, end: SHIFT_OUT, scrub: 2.2,
+    onUpdate({ progress: p }) { updateMorph(p); },
+  });
+
+  // 4. Per-stage text beats
+  ['sc0','sc1','sc2','sc3','sc4'].forEach((id, idx) => {
+    const sStart = SHIFT_START + idx * SHIFT_STEP;
+    ScrollTrigger.create({
+      start: sStart - VH * 0.15, end: sStart + SHIFT_STEP, scrub: 1.5,
+      onUpdate({ progress: p }) {
+        const cl = p < .12 ? p / .12 : p > .82 ? 1 - (p - .82) / .18 : 1;
+        const xd = (p < .12 ? (1 - p / .12) : p > .82 ? (p - .82) / .18 : 0) * 30;
+        const el = document.getElementById(id);
+        el.style.opacity   = cl.toString();
+        el.style.transform = `translateX(${-xd}px)`;
+      },
+    });
+  });
+
+  // 5. Fade out
+  ScrollTrigger.create({
+    start: SHIFT_OUT, end: SHIFT_OUT + VH * 0.9, scrub: 1,
+    onUpdate({ progress: p }) {
+      const fade = 1 - p;
+      cvs.style.opacity  = fade.toString();
+      slEl.style.opacity = (0.88 * fade).toString();
+      document.getElementById('shift-hud').style.opacity     = fade.toString();
+      document.getElementById('shift-content').style.opacity = fade.toString();
+    },
+    onLeave() { shiftActive = false; triggerTransition(); },
+    onEnterBack() { if (!shiftActive) { shiftActive = true; shiftTick(); } },
+  });
+
+  // initial render so canvas isn't blank on first scroll into view
+  updateMorph(0);
+  renderer.render(scene, camera);
+
+  window.addEventListener('resize', () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  });
+
+  // Fallback: trigger transition when user reaches page bottom
+  let _txBottomFired = false;
+  window.addEventListener('scroll', () => {
+    if (_txBottomFired) return;
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    if (window.scrollY >= maxScroll - 8 && window.scrollY > SHIFT_OUT) {
+      _txBottomFired = true;
+      setTimeout(triggerTransition, 500);
+    }
+  }, { passive: true });
+
+  // Bidirectional: hide LA when scrolling back above The Shift, re-reveal when scrolling down
+  window.addEventListener('scroll', () => {
+    if (document.getElementById('tx-overlay').classList.contains('active')) return;
+    if (window._sdActive) return;   // Section 6 active — ignore scroll position changes
+    const scrollY = window.scrollY;
+    if (_laVisible && scrollY < SHIFT_OUT - VH * 0.5) {
+      // Scrolled back above LA entry — restore Shift visibility based on actual scroll position
+      concealLA();
+      if (!shiftActive) { shiftActive = true; shiftTick(); }
+      _trackingShiftAfterLA = true;
+      // Compute correct opacity: 0 outside Shift zone, ramp in fade-in zone, 1 in body
+      const fadeInLen = VH * 0.9;
+      let op = 0;
+      if (scrollY >= SHIFT_IN + fadeInLen && scrollY <= SHIFT_OUT) {
+        op = 1;
+      } else if (scrollY >= SHIFT_IN && scrollY < SHIFT_IN + fadeInLen) {
+        op = (scrollY - SHIFT_IN) / fadeInLen;
+      }
+      op = Math.max(0, Math.min(1, op));
+      document.getElementById('shift-canvas').style.opacity  = op;
+      document.getElementById('shift-hud').style.opacity     = op;
+      document.getElementById('shift-content').style.opacity = op;
+      document.getElementById('shift-label').style.opacity   = (op * 0.88).toString();
+    } else if (_trackingShiftAfterLA && !_laVisible) {
+      // GSAP scrubs for shift are dead (killed by overwrite:true in revealLA) — keep opacity in sync manually
+      const fadeInLen = VH * 0.9;
+      let op = 0;
+      if (scrollY >= SHIFT_IN + fadeInLen && scrollY <= SHIFT_OUT) {
+        op = 1;
+      } else if (scrollY >= SHIFT_IN && scrollY < SHIFT_IN + fadeInLen) {
+        op = (scrollY - SHIFT_IN) / fadeInLen;
+      }
+      op = Math.max(0, Math.min(1, op));
+      document.getElementById('shift-canvas').style.opacity  = op;
+      document.getElementById('shift-hud').style.opacity     = op;
+      document.getElementById('shift-content').style.opacity = op;
+      document.getElementById('shift-label').style.opacity   = (op * 0.88).toString();
+    } else if (!_laVisible && _txBottomFired && scrollY >= SHIFT_OUT) {
+      // Scrolled back down to LA — reveal without overlay
+      revealLA();
+      gsap.to(['#shift-canvas','#shift-hud','#shift-content','#shift-label'], {
+        opacity: 0, duration: 0.2, overwrite: true
+      });
+    }
+  }, { passive: true });
+}
+
+// ─── start ───
+runPhase1();
+
+// ── Living Architecture transition ──
+let _laVisible = false;
+let _trackingShiftAfterLA = false;
+
+function revealLA() {
+  if (_laVisible) return;
+  _laVisible = true;
+  _trackingShiftAfterLA = false;
+  if (typeof window.initLivingArchitecture === 'function') {
+    window.initLivingArchitecture();
+  }
+  /* hide Shift elements (may have leaked through during scroll) */
+  gsap.to(['#shift-canvas','#shift-hud','#shift-content','#shift-label'], {
+    opacity: 0, duration: 0.2, overwrite: true
+  });
+  const cvs = document.getElementById('la-canvas');
+  cvs.classList.add('active');
+  gsap.to(cvs, { opacity: 1, duration: 0.4, ease: 'power2.out' });
+  /* restore text elements (may have been hidden by laToSD or concealLA) */
+  gsap.to(['#la-section-label','#la-text-block','#la-statusbar'], {
+    opacity: 1, duration: 0.6, delay: 0.2, overwrite: true
+  });
+}
+
+function concealLA() {
+  if (!_laVisible) return;
+  _laVisible = false;
+  const cvs = document.getElementById('la-canvas');
+  gsap.to(cvs, { opacity: 0, duration: 0.3, ease: 'power2.in',
+    onComplete() { cvs.classList.remove('active'); }
+  });
+  gsap.to(['#la-section-label','#la-text-block','#la-statusbar','#la-close-hint'], {
+    opacity: 0, duration: 0.2
+  });
+}
+
+/* expose for SD module to sync state */
+window.revealLA     = revealLA;
+window.setLaVisible = function(v) { _laVisible = v; };
+
+function triggerTransition() {
+  const overlay = document.getElementById('tx-overlay');
+  if (overlay.classList.contains('active')) return;
+  if (_laVisible) return;
+  overlay.classList.add('active');
+
+  gsap.to(['#shift-canvas','#shift-hud','#shift-content','#shift-label'], {
+    opacity: 0, duration: 0.25, overwrite: true
+  });
+
+  gsap.set('.tx-num', { y: 10, opacity: 0 });
+  gsap.set('.tx-sub', { opacity: 0, y: 8 });
+  gsap.set('.tx-rule', { scaleX: 0 });
+  gsap.set(['#tx-w1','#tx-w2'], { y: '100%' });
+  gsap.set('.tx-prog', { scaleX: 0 });
+
+  gsap.timeline({
+    onComplete() {
+      gsap.to('#tx-flash', { opacity: 1, duration: 0.25, ease: 'power2.in',
+        onComplete() {
+          // Init + reveal LA now (at flash peak so setup is hidden)
+          revealLA();
+          // Dismiss overlay — no overflow lock
+          gsap.to(['#tx-overlay','#tx-flash'], { opacity: 0, duration: 0.5, ease: 'power2.out',
+            onComplete() {
+              overlay.classList.remove('active');
+              overlay.style.pointerEvents = 'none';
+              document.getElementById('la-close-hint').classList.add('visible');
+            }
+          });
+        }
+      });
+    }
+  })
+    .to('#tx-overlay',  { opacity: 1, duration: 0.55, ease: 'power2.inOut' })
+    .to('.tx-num',      { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, '+=0.15')
+    .to('.tx-rule',     { scaleX: 1, duration: 0.65, ease: 'power2.inOut' }, '+=0.08')
+    .to('#tx-w1',       { y: '0%', duration: 0.6, ease: 'power3.out' }, '+=0.06')
+    .to('#tx-w2',       { y: '0%', duration: 0.6, ease: 'power3.out' }, '-=0.38')
+    .to('.tx-sub',      { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, '+=0.12')
+    .to('.tx-prog',     { scaleX: 1, duration: 1.0, ease: 'power2.inOut' }, '+=0.1');
+}
+</script>

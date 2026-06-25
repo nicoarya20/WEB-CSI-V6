@@ -1,0 +1,428 @@
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass }     from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass }     from 'three/addons/postprocessing/OutputPass.js';
+
+const NODES = [
+  { id:'intelligence', label:'Intelligence', idx:'00', pos:[0,0,0], color:'#e8f4ff', size:0.44, pulseSpeed:1.4,
+    desc:'The cognitive core. Synthesizes all inputs across every domain into unified, real-time organizational understanding.',
+    peers:['citizen','operations','knowledge','infrastructure','decision','action'] },
+  { id:'citizen', label:'Citizen', idx:'01', pos:[-3.8,1.8,-0.6], color:'#b8ff3c', size:0.27, pulseSpeed:0.72,
+    desc:'Direct interface with the community. Captures real-time feedback, service requests, and civic signals at every touchpoint.',
+    peers:['intelligence','operations'] },
+  { id:'operations', label:'Operations', idx:'02', pos:[3.6,1.5,0.5], color:'#00d4ff', size:0.30, pulseSpeed:0.88,
+    desc:'Operational intelligence hub. Streamlines workflows, resource allocation, and field coordination with precision.',
+    peers:['intelligence','infrastructure','citizen'] },
+  { id:'knowledge', label:'Knowledge', idx:'03', pos:[-3.3,-1.7,0.8], color:'#ffaa33', size:0.27, pulseSpeed:0.61,
+    desc:'Institutional memory. Stores, indexes, and surfaces critical organizational insights exactly when decisions require them.',
+    peers:['intelligence','decision'] },
+  { id:'infrastructure', label:'Infrastructure', idx:'04', pos:[3.2,-2.0,-0.5], color:'#9966ff', size:0.29, pulseSpeed:0.76,
+    desc:'The backbone. Monitors and manages physical and digital assets with predictive intelligence and live telemetry.',
+    peers:['intelligence','operations'] },
+  { id:'decision', label:'Decision', idx:'05', pos:[-0.9,3.1,1.2], color:'#ff6b35', size:0.27, pulseSpeed:0.67,
+    desc:'Strategic synthesis engine. Translates multi-source intelligence into clear, prioritized, accountable action pathways.',
+    peers:['intelligence','action','knowledge'] },
+  { id:'action', label:'Action', idx:'06', pos:[1.3,-3.1,0.7], color:'#00ffaa', size:0.27, pulseSpeed:0.93,
+    desc:'Execution layer. Closes the loop from insight to verifiable, measured outcomes — keeping the system alive.',
+    peers:['intelligence','decision'] }
+];
+
+const CONNECTIONS = [
+  ['intelligence','citizen'], ['intelligence','operations'], ['intelligence','knowledge'],
+  ['intelligence','infrastructure'], ['intelligence','decision'], ['intelligence','action'],
+  ['citizen','operations'], ['knowledge','decision'], ['operations','infrastructure'],
+  ['decision','action'],
+];
+
+const NODE_VERT = `
+varying vec3 vNormal; varying vec3 vViewDir;
+void main() {
+  vec4 mvPos = modelViewMatrix * vec4(position,1.0);
+  vViewDir = normalize(-mvPos.xyz);
+  vNormal = normalize(normalMatrix * normal);
+  gl_Position = projectionMatrix * mvPos;
+}`;
+const NODE_FRAG = `
+uniform vec3 uColor; uniform float uTime,uSpeed,uHover,uFire;
+varying vec3 vNormal,vViewDir;
+void main() {
+  float f = pow(1.0 - clamp(dot(vNormal,vViewDir),0.0,1.0),3.2);
+  float pulse = sin(uTime*uSpeed*2.1)*0.06+0.94;
+  float boost = 1.0+uHover*0.55+uFire*0.65;
+  vec3 rim = uColor*(f*1.6*pulse*boost);
+  float alpha = 0.04+f*0.72*(0.6+uHover*0.3+uFire*0.2);
+  gl_FragColor = vec4(uColor*0.03+rim,alpha);
+}`;
+const HALO_FRAG = `
+uniform vec3 uColor; uniform float uTime,uSpeed,uHover,uFire;
+varying vec3 vNormal,vViewDir;
+void main() {
+  float f = pow(1.0-clamp(dot(vNormal,vViewDir),0.0,1.0),1.6);
+  float pulse = sin(uTime*uSpeed*1.4+0.8)*0.08+0.92;
+  float boost = 1.0+uHover*0.45+uFire*0.55;
+  gl_FragColor = vec4(uColor*f*pulse*boost, f*0.13*pulse*boost);
+}`;
+const EDGE_VERT = `
+attribute float aProgress; varying float vProgress;
+void main() { vProgress=aProgress; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+const EDGE_FRAG = `
+uniform vec3 uColor; uniform float uTime,uPhase,uOpacity; varying float vProgress;
+float pulse(float pos,float t,float w){ return smoothstep(pos-w,pos,t)*smoothstep(pos+w,pos,t); }
+void main() {
+  float base=0.09; float pos=mod(uTime*0.14+uPhase,1.0);
+  float glow=pulse(pos,vProgress,0.055)*1.1;
+  gl_FragColor = vec4(uColor*(base+glow), (base*0.45+glow*0.55)*uOpacity);
+}`;
+
+let _laInitialised = false;
+
+window.initLivingArchitecture = function() {
+  if (_laInitialised) return;
+  _laInitialised = true;
+
+  const cvs = document.getElementById('la-canvas');
+  const W = window.innerWidth, H = window.innerHeight;
+
+  const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(W, H);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.9;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color('#060807');
+  scene.fog = new THREE.Fog('#060807', 12, 28);
+
+  const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 50);
+  camera.position.set(0, 0, 9);
+
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  composer.addPass(new UnrealBloomPass(new THREE.Vector2(W, H), 0.5, 0.35, 0.42));
+  composer.addPass(new OutputPass());
+
+  // Grid
+  const grid = new THREE.GridHelper(30, 30, 0x182413, 0x182413);
+  grid.position.y = -5; grid.material.opacity = 0.35; grid.material.transparent = true;
+  scene.add(grid);
+
+  // Bg particles
+  const bgPos = new Float32Array(400 * 3);
+  for (let i = 0; i < 400; i++) {
+    bgPos[i*3]   = (Math.random()-.5)*22;
+    bgPos[i*3+1] = (Math.random()-.5)*18;
+    bgPos[i*3+2] = (Math.random()-.5)*12;
+  }
+  const bgGeom = new THREE.BufferGeometry();
+  bgGeom.setAttribute('position', new THREE.BufferAttribute(bgPos, 3));
+  const bgMat = new THREE.PointsMaterial({ color:0x4a7a10, size:0.025, transparent:true, opacity:0.18, blending:THREE.AdditiveBlending, depthWrite:false });
+  scene.add(new THREE.Points(bgGeom, bgMat));
+
+  const nodeMap = {};
+  NODES.forEach(n => { nodeMap[n.id] = n; });
+
+  const nodeObjects = [], allCoreMeshes = [];
+
+  NODES.forEach((nd, i) => {
+    const color = new THREE.Color(nd.color);
+    const group = new THREE.Group();
+    group.position.set(...nd.pos);
+
+    const coreMat = new THREE.ShaderMaterial({
+      uniforms: { uColor:{value:color.clone()}, uTime:{value:0}, uSpeed:{value:nd.pulseSpeed}, uHover:{value:0}, uFire:{value:0} },
+      vertexShader: NODE_VERT, fragmentShader: NODE_FRAG,
+      transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, side:THREE.DoubleSide
+    });
+    const coreMesh = new THREE.Mesh(new THREE.IcosahedronGeometry(nd.size, 2), coreMat);
+    coreMesh.userData.nodeIdx = i;
+    group.add(coreMesh);
+    allCoreMeshes.push(coreMesh);
+
+    group.add(new THREE.Mesh(new THREE.IcosahedronGeometry(nd.size*1.02, 1), new THREE.MeshBasicMaterial({
+      color:new THREE.Color(nd.color), wireframe:true, transparent:true, opacity:0.22,
+      blending:THREE.AdditiveBlending, depthWrite:false
+    })));
+
+    const haloMat = new THREE.ShaderMaterial({
+      uniforms: { uColor:{value:color.clone()}, uTime:{value:0}, uSpeed:{value:nd.pulseSpeed}, uHover:{value:0}, uFire:{value:0} },
+      vertexShader: NODE_VERT, fragmentShader: HALO_FRAG,
+      transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, side:THREE.BackSide
+    });
+    // halo sphere removed — keep only planet core + torus rings
+
+    const rings = [];
+    const ringCount = nd.id === 'intelligence' ? 3 : 1;
+    for (let r = 0; r < ringCount; r++) {
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(nd.size*(1.55+r*0.55), 0.007, 3, 56),
+        new THREE.MeshBasicMaterial({ color:new THREE.Color(nd.color), transparent:true, opacity:r===0?0.38:0.18-r*0.04, blending:THREE.AdditiveBlending, depthWrite:false })
+      );
+      ring.rotation.x = [Math.PI/2.8, Math.PI/5, Math.PI/1.9][r];
+      ring.rotation.y = [0, Math.PI/3, Math.PI/7][r];
+      group.add(ring); rings.push(ring);
+    }
+
+    const [px,py,pz] = nd.pos;
+    const label = document.createElement('div');
+    label.className = 'la-node-label';
+    label.innerHTML = `<span class="nl-name">${nd.label}</span>`;
+    document.body.appendChild(label);
+
+    const bracket = document.createElement('div');
+    const isHub = nd.id === 'intelligence';
+    bracket.className = `la-hud-wrap ${isHub?'large hub':'small'}`;
+    bracket.style.color = nd.color;
+    bracket.innerHTML = '<div class="la-hud-tl"></div><div class="la-hud-tr"></div><div class="la-hud-bl"></div><div class="la-hud-br"></div>';
+    document.body.appendChild(bracket);
+
+    group.scale.setScalar(0);
+    scene.add(group);
+    nodeObjects.push({ group, coreMesh, coreMat, haloMat, label, bracket, rings, data: nd });
+    // wireMat stored for potential future use (from v2)
+  });
+
+  const edgeObjects = [];
+  CONNECTIONS.forEach(([aId, bId], i) => {
+    const nA = nodeMap[aId], nB = nodeMap[bId];
+    const pA = new THREE.Vector3(...nA.pos), pB = new THREE.Vector3(...nB.pos);
+    const mid = pA.clone().add(pB).multiplyScalar(0.5);
+    const dist = pA.distanceTo(pB);
+    mid.x += (Math.random()-.5)*dist*0.18;
+    mid.y += (Math.random()-.5)*dist*0.12;
+    mid.z += (Math.random()-.5)*dist*0.1;
+    const curve = new THREE.CatmullRomCurve3([pA, mid, pB]);
+    const N = 90; const pts = curve.getPoints(N);
+    const geom = new THREE.BufferGeometry().setFromPoints(pts);
+    const progress = new Float32Array(N+1);
+    for (let k = 0; k <= N; k++) progress[k] = k/N;
+    geom.setAttribute('aProgress', new THREE.BufferAttribute(progress, 1));
+    const cA = new THREE.Color(nA.color), cB = new THREE.Color(nB.color);
+    const mat = new THREE.ShaderMaterial({
+      uniforms: { uColor:{value:cA.lerp(cB,0.5)}, uTime:{value:0}, uPhase:{value:i*0.13}, uOpacity:{value:0} },
+      vertexShader:EDGE_VERT, fragmentShader:EDGE_FRAG,
+      transparent:true, blending:THREE.AdditiveBlending, depthWrite:false
+    });
+    scene.add(new THREE.Line(geom, mat));
+    edgeObjects.push({ mat });
+  });
+
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  const targetOrbit = new THREE.Vector2(), currentOrbit = new THREE.Vector2();
+  const tempV = new THREE.Vector3();
+  let hoveredIdx = -1, selectedIdx = -1;
+  const fireState = new Float32Array(NODES.length);
+  let nextFireTime = 3;
+
+  window.addEventListener('mousemove', e => {
+    mouse.x =  (e.clientX/window.innerWidth)*2-1;
+    mouse.y = -(e.clientY/window.innerHeight)*2+1;
+    targetOrbit.x = mouse.x*0.4;
+    targetOrbit.y = -mouse.y*0.25;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(allCoreMeshes);
+    if (hits.length > 0) {
+      const idx = hits[0].object.userData.nodeIdx;
+      if (idx !== hoveredIdx) {
+        hoveredIdx = idx;
+        document.body.classList.add('la-hovering');
+      }
+    } else {
+      hoveredIdx = -1;
+      document.body.classList.remove('la-hovering');
+    }
+  });
+
+  window.addEventListener('click', () => {
+    if (!_laInitialised || !document.getElementById('la-canvas').classList.contains('active')) return;
+    if (hoveredIdx >= 0 && hoveredIdx !== selectedIdx) { selectedIdx = hoveredIdx; openPanel(selectedIdx); }
+    else if (hoveredIdx < 0 && selectedIdx >= 0) { closePanel(); }
+  });
+
+  document.getElementById('la-close-hint').addEventListener('click', closePanel);
+
+  function openPanel(idx) {
+    const nd = NODES[idx];
+    document.getElementById('la-p-index').textContent = nd.idx;
+    document.getElementById('la-p-name').textContent  = nd.label;
+    document.getElementById('la-p-desc').textContent  = nd.desc;
+    const cl = document.getElementById('la-p-conn-list');
+    cl.innerHTML = '';
+    nd.peers.filter(p => p !== nd.id).forEach(peerId => {
+      const span = document.createElement('span');
+      span.className = 'la-p-conn-tag';
+      span.textContent = nodeMap[peerId].label;
+      cl.appendChild(span);
+    });
+    const panel = document.getElementById('la-panel');
+    panel.classList.add('visible');
+    gsap.to(panel, { opacity:1, x:0, duration:.45, ease:'power3.out' });
+    gsap.to('#la-close-hint', { opacity:1, duration:.3, delay:.2 });
+  }
+
+  function closePanel() {
+    selectedIdx = -1;
+    const panel = document.getElementById('la-panel');
+    gsap.to(panel, { opacity:0, x:40, duration:.35, ease:'power2.in', onComplete:()=>panel.classList.remove('visible') });
+    gsap.to('#la-close-hint', { opacity:0, duration:.2 });
+  }
+
+  // ── reveal (v2 style: separated function) ──
+  function reveal() {
+    nodeObjects.forEach((obj, i) => {
+      const nd = NODES[i];
+      const fp = new THREE.Vector3(...nd.pos);
+      const spread = 7;
+      obj.group.position.set(
+        fp.x + (Math.random() - .5) * spread,
+        fp.y + (Math.random() - .5) * spread,
+        fp.z + (Math.random() - .5) * 3
+      );
+      obj.group.scale.setScalar(0);
+    });
+
+    nodeObjects.forEach((obj, i) => {
+      const nd = NODES[i];
+      const fp = new THREE.Vector3(...nd.pos);
+      const delay = i === 0 ? 0.2 : 0.4 + i * 0.18;
+      gsap.to(obj.group.position, { x:fp.x, y:fp.y, z:fp.z, duration:1.6, delay, ease:'power3.out' });
+      gsap.to(obj.group.scale,    { x:1, y:1, z:1, duration:1.1, delay:delay+0.05, ease:'back.out(1.6)' });
+    });
+
+    edgeObjects.forEach((e, i) => {
+      gsap.to(e.mat.uniforms.uOpacity, { value:1, duration:1.2, delay:1.8+i*0.07, ease:'power2.out' });
+    });
+
+    nodeObjects.forEach((obj, i) => {
+      const delay = 1.4 + i * 0.1;
+      gsap.fromTo(obj.bracket, { scale:1.35 }, { scale:1, duration:.5, delay, ease:'power2.out' });
+    });
+
+    gsap.to('#la-section-label', { opacity:1, y:0, duration:.8, delay:.3, ease:'power2.out' });
+    gsap.to('#la-text-block',    { opacity:1, y:0, duration:1.0, delay:.6, ease:'power3.out' });
+    gsap.to('#la-statusbar',     { opacity:1,      duration:.8, delay:2.8 });
+  }
+
+  // ── fireNode (v2 style: separated function) ──
+  function fireNode(idx) {
+    fireState[idx] = 1;
+    setTimeout(() => { fireState[0] = 0.5; }, 300 + Math.random() * 200);
+  }
+
+  const clock = new THREE.Clock();
+
+  (function animate() {
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta(), t = clock.getElapsedTime();
+
+    currentOrbit.x += (targetOrbit.x - currentOrbit.x) * 0.04;
+    currentOrbit.y += (targetOrbit.y - currentOrbit.y) * 0.04;
+    camera.position.x = currentOrbit.x;
+    camera.position.y = currentOrbit.y;
+    camera.lookAt(scene.position);
+
+    nextFireTime -= delta;
+    if (nextFireTime <= 0) {
+      const nonHub = nodeObjects.filter((_,i) => i !== 0);
+      const tIdx = nodeObjects.indexOf(nonHub[Math.floor(Math.random()*nonHub.length)]);
+      fireNode(tIdx);
+      nextFireTime = 5 + Math.random() * 6;
+    }
+
+    nodeObjects.forEach((obj, i) => {
+      const isHovered  = hoveredIdx === i;
+      const isSelected = selectedIdx === i;
+
+      const hoverTarget = (isHovered || isSelected) ? 1 : 0;
+      obj.coreMat.uniforms.uHover.value += (hoverTarget - obj.coreMat.uniforms.uHover.value) * 0.1;
+      obj.haloMat.uniforms.uHover.value  = obj.coreMat.uniforms.uHover.value;
+
+      obj.coreMat.uniforms.uFire.value += (fireState[i] - obj.coreMat.uniforms.uFire.value) * 0.15;
+      obj.haloMat.uniforms.uFire.value  = obj.coreMat.uniforms.uFire.value;
+
+      obj.coreMat.uniforms.uTime.value = t;
+      obj.haloMat.uniforms.uTime.value = t;
+      if (fireState[i] > 0) fireState[i] = Math.max(0, fireState[i] - delta * 1.2);
+
+      const breathe = 1 + Math.sin(t * NODES[i].pulseSpeed * 1.5 + i) * 0.012;
+      const hoverSc = 1 + obj.coreMat.uniforms.uHover.value * 0.12;
+      obj.group.scale.setScalar(breathe * hoverSc);
+      obj.rings.forEach((ring, r) => { ring.rotation.z += delta * (0.18 + r * 0.09) * (r%2===0?1:-1); });
+
+      tempV.copy(obj.group.position);
+      tempV.project(camera);
+      const sx = (tempV.x * .5 + .5) * window.innerWidth;
+      const sy = (-tempV.y * .5 + .5) * window.innerHeight;
+      const laActive = cvs.classList.contains('active');
+      const visible = laActive && tempV.z < 1 && obj.group.scale.x > 0.08;
+      const lOff = NODES[i].size * 90 + 14;
+
+      obj.label.style.transform = `translate(-50%,-50%) translate(${sx}px,${sy+lOff}px)`;
+      obj.label.style.opacity = visible ? '1' : '0';
+      obj.bracket.style.transform = `translate(-50%,-50%) translate(${sx}px,${sy}px)`;
+      obj.bracket.style.opacity = visible ? String(0.3 + obj.coreMat.uniforms.uHover.value * 0.5) : '0';
+    });
+
+    edgeObjects.forEach(e => { e.mat.uniforms.uTime.value = t; });
+    bgMat.size = 0.03 + Math.sin(t * 0.3) * 0.005;
+    composer.render();
+  })();
+
+  reveal();
+
+  window.addEventListener('resize', () => {
+    const w = window.innerWidth, h = window.innerHeight;
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    renderer.setSize(w, h); composer.setSize(w, h);
+  });
+};
+</script>
+
+<!-- ══ SECTION 5 — LIVING ARCHITECTURE ══ -->
+<canvas id="la-canvas"></canvas>
+
+<div id="la-section-label">
+  <span class="la-sl-num">05</span>
+  <span class="la-sl-sep">/</span>
+  <span class="la-sl-title">Living Architecture</span>
+</div>
+
+<div id="la-text-block">
+  <div id="la-headline">A Living Architecture<br>For Decisions.</div>
+  <div id="la-description">We connect signals, context, knowledge, and workflows into adaptive systems that help organizations move from awareness to action.</div>
+</div>
+
+<div id="la-panel">
+  <div class="la-p-section">Node Detail</div>
+  <div class="la-p-index" id="la-p-index">—</div>
+  <div class="la-p-name" id="la-p-name">—</div>
+  <div class="la-p-bar"></div>
+  <div class="la-p-desc" id="la-p-desc">—</div>
+  <div class="la-p-conn-label">Connects to</div>
+  <div class="la-p-conn-list" id="la-p-conn-list"></div>
+</div>
+
+<div id="la-close-hint"><span>✕</span> CLICK TO CLOSE</div>
+
+<div id="la-statusbar">
+  <span class="la-sb-item">7 NODES</span>
+  <span class="la-sb-dot">·</span>
+  <span class="la-sb-item">10 CONNECTIONS</span>
+  <span class="la-sb-dot">·</span>
+  <span class="la-sb-item" id="la-sb-active">SYSTEM ACTIVE</span>
+</div>
+
+<!-- ── Living Architecture transition overlay ── -->
+<div id="tx-overlay">
+  <div class="tx-num">05</div>
+  <div class="tx-rule"></div>
+  <div class="tx-title-wrap"><div class="tx-word" id="tx-w1">Living</div></div>
+  <div class="tx-title-wrap"><div class="tx-word" id="tx-w2">Architecture</div></div>
+  <div class="tx-sub">A unified intelligence ecosystem</div>
+  <div class="tx-prog-wrap"><div class="tx-prog"></div></div>
+</div>
+<div id="tx-flash"></div>
