@@ -190,14 +190,22 @@ html, body {
 
 /* nav */
 #nav {
-  position: absolute;
+  position: fixed;
   top: 0; left: 0; right: 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 22px 44px;
-  z-index: 300;
+  z-index: 7000;
   opacity: 0;
+  transition: background .35s ease, backdrop-filter .35s ease, border-color .35s ease;
+  border-bottom: 1px solid transparent;
+}
+#nav.nav-glass {
+  background: rgba(4, 8, 4, 0.72);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  border-bottom-color: rgba(184,255,60,0.07);
 }
 .nav-logo {
   font-size: 12px;
@@ -218,6 +226,18 @@ html, body {
   transition: color .2s;
 }
 .nav-links a:hover { color: var(--text); }
+.nav-links a.active {
+  color: var(--accent);
+  position: relative;
+}
+.nav-links a.active::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -3px;
+  height: 1px;
+  background: var(--accent);
+  opacity: .6;
+}
 .nav-cta {
   font-size: 10px;
   font-weight: 600;
@@ -1653,18 +1673,6 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 <!-- ══ PHASE 2 — hero ══ -->
 <div id="phase2">
 
-  <!-- nav -->
-  <nav id="nav">
-    <div class="nav-logo">Cogniti</div>
-    <ul class="nav-links">
-      <li><a href="#">Intro</a></li>
-      <li><a href="#">Systems</a></li>
-      <li><a href="#">Product</a></li>
-      <li><a href="#">Contact</a></li>
-    </ul>
-    <a href="#" class="nav-cta">Talk to us</a>
-  </nav>
-
   <!-- sidebar -->
   <div id="sidebar-label">Cogniti-1 &nbsp;·&nbsp; System</div>
 
@@ -2096,6 +2104,18 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 
 </div><!-- /phase2 -->
 
+<!-- nav — fixed overlay, independent dari phase2 -->
+<nav id="nav">
+  <div class="nav-logo">Cogniti</div>
+  <ul class="nav-links">
+    <li><a href="javascript:void(0)" data-nav="intro">Intro</a></li>
+    <li><a href="javascript:void(0)" data-nav="systems">Systems</a></li>
+    <li><a href="javascript:void(0)" data-nav="product">Product</a></li>
+    <li><a href="javascript:void(0)" data-nav="contact">Contact</a></li>
+  </ul>
+  <a href="#" class="nav-cta">Talk to us</a>
+</nav>
+
 <!-- ══ MANIFESTO — section 2 ══ -->
 <div id="manifesto">
   <div class="m-beat" id="mb0">
@@ -2393,6 +2413,7 @@ function runPhase1() {
     const p1 = document.getElementById('phase1');
     p1.style.transition = 'opacity .9s ease';
     p1.style.opacity = '0';
+    p1.style.pointerEvents = 'none';
 
     // fade ring out
     rw.style.transition = 'opacity .9s ease';
@@ -2551,7 +2572,7 @@ function initManifesto() {
     .to('.prop',         { opacity: 0, duration: .5, stagger: .05 }, 0)
     .to('#ui-brand',     { opacity: 0, x: -22, duration: .8 }, 0)
     .to('#ui-copy',      { opacity: 0, x:  22, duration: .8 }, 0)
-    .to(['#nav','#sys-status','#scroll-hint','#logo-badge','#sidebar-label'], { opacity: 0, duration: .5 }, 0)
+    .to(['#sys-status','#scroll-hint','#logo-badge','#sidebar-label'], { opacity: 0, duration: .5 }, 0)
     .to('#scene-inner',  { scale: BASE_SCALE * 0.68, duration: 1, ease: 'power2.inOut' }, 0)
     .to('#watch-wrap',   { opacity: .28, duration: 1.2 }, .2);
 
@@ -5181,25 +5202,26 @@ window.addEventListener('resize', () => {
 #ct-footer {
   position:fixed; bottom:0; left:0; right:0; z-index:820;
   display:flex; justify-content:space-between; align-items:center;
-  padding:13px 44px;
+  padding:18px 44px;
   border-top:1px solid var(--grid-line);
   background:var(--bg);
   opacity:0;
+  font-family:'Space Mono',monospace; font-size:9px;
 }
 .ct-ft-logo {
   font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.28em;
   color:var(--accent-dim); text-transform:uppercase;
 }
 .ct-ft-right {
-  display:flex; align-items:center; gap:10px;
+  display:flex; align-items:center; gap:16px;
 }
 .ct-ft-copy {
-  font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.1em;
+  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.08em;
   color:var(--muted);
 }
-.ct-ft-sep { color:#2a3a20; font-size:10px; }
+.ct-ft-sep { color:#2a3a20; font-size:9px; }
 .ct-ft-link {
-  font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.1em;
+  font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.12em;
   color:var(--muted); text-decoration:none; text-transform:uppercase;
   transition:color 150ms;
 }
@@ -5218,8 +5240,8 @@ window.addEventListener('resize', () => {
   #ct-sub  { max-width:100%; }
   .ct-pill { font-size:8px; padding:5px 10px; }
   #ct-submit { width:100%; justify-content:center; }
-  #ct-footer { padding:11px 24px; flex-direction:column; gap:6px; align-items:flex-start; }
-  .ct-ft-right { gap:8px; }
+  #ct-footer { padding:14px 24px; flex-direction:column; gap:8px; align-items:flex-start; }
+  .ct-ft-right { gap:10px; }
 }
 </style>
 
@@ -5488,6 +5510,121 @@ document.getElementById('ct-form').addEventListener('submit', e => {
 /* ── Expose globals ── */
 window.revealContact  = revealContact;
 window.concealContact = concealContact;
+</script>
+
+<script>
+/* ── Nav active state + click navigation ── */
+(function () {
+  const NAV_LINKS = document.querySelectorAll('.nav-links a[data-nav]');
+  const NAV_EL    = document.getElementById('nav');
+
+  function setNavActive(key) {
+    NAV_LINKS.forEach(a => a.classList.toggle('active', a.dataset.nav === key));
+  }
+
+  function ensureNavVisible() {
+    gsap.set(NAV_EL, { opacity: 1 });
+    NAV_EL.classList.add('nav-glass');
+  }
+
+  /* ── Glassmorphism on scroll ── */
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 50) {
+      NAV_EL.classList.add('nav-glass');
+    } else {
+      NAV_EL.classList.remove('nav-glass');
+    }
+  }, { passive: true });
+
+  /* ── Wrap reveal fns so nav updates when sections open normally ── */
+  const REVEAL_MAP = {
+    revealLA:      'systems',
+    revealSD:      'systems',
+    revealPhil:    'product',
+    revealCar:     'product',
+    revealContact: 'contact',
+    concealContact:'product',
+  };
+
+  function wrapReveal(name, navKey) {
+    const orig = window[name];
+    window[name] = function (...args) {
+      const result = typeof orig === 'function' ? orig.apply(this, args) : undefined;
+      setNavActive(navKey);
+      return result;
+    };
+  }
+
+  Object.entries(REVEAL_MAP).forEach(([name, key]) => {
+    const tryWrap = () => {
+      if (typeof window[name] === 'function') { wrapReveal(name, key); return; }
+      const t = setInterval(() => {
+        if (typeof window[name] === 'function') { clearInterval(t); wrapReveal(name, key); }
+      }, 50);
+    };
+    tryWrap();
+  });
+
+  /* ── Hide all overlay sections (for jump-to-intro) ── */
+  function hideAllOverlays() {
+    const overlayEls = [
+      '#la-canvas','#la-section-label','#la-text-block','#la-statusbar','#la-close-hint',
+      '#sd-canvas','#sd-section-label','#sd-categories','#sd-copy','#sd-headline-block','#sd-statusbar','#sd-back',
+      '#phil-canvas','#phil-section-label','#phil-statement','#phil-nav',
+      '#car-canvas','#car-section-label','#car-headline','#car-roles','#car-cta',
+      '#ct-container','#ct-section-label','#ct-footer','#ct-back-hint','#ct-back-progress-wrap',
+    ];
+    overlayEls.forEach(sel => {
+      const el = document.querySelector(sel);
+      if (el) gsap.to(el, { opacity: 0, duration: 0.3, overwrite: true });
+    });
+    /* reset state flags */
+    window._sdActive    = false;
+    window._philVisible = false;
+    window._carVisible  = false;
+    if (typeof window.setLaVisible === 'function') window.setLaVisible(false);
+    document.body.style.overflow = '';
+  }
+
+  /* ── Click handlers ── */
+  NAV_LINKS.forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const key = a.dataset.nav;
+
+      ensureNavVisible();
+
+      if (key === 'intro') {
+        hideAllOverlays();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setNavActive('intro');
+
+      } else if (key === 'systems') {
+        /* revealLA() is undone by scroll listener if scrollY < SHIFT_OUT.
+           Block the listener with _sdActive=true instead of scrollTo (which caused reload). */
+        hideAllOverlays();
+        window._sdActive = true;
+        document.body.style.overflow = 'hidden';
+        if (typeof window.revealLA === 'function') window.revealLA();
+
+      } else if (key === 'product') {
+        /* Phil/Car use overflow:hidden lock + _sdActive to block the main scroll listener */
+        hideAllOverlays();
+        window._sdActive = true;
+        document.body.style.overflow = 'hidden';
+        if (typeof window.revealPhil === 'function') window.revealPhil();
+
+      } else if (key === 'contact') {
+        hideAllOverlays();
+        document.body.style.overflow = 'hidden';
+        if (typeof window.revealContact === 'function') window.revealContact();
+      }
+    });
+  });
+
+  /* Initial state */
+  setNavActive('intro');
+})();
 </script>
 
 
