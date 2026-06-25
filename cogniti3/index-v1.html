@@ -927,7 +927,7 @@ html, body {
 }
 .ch-num {
   position: absolute;
-  top: 12vh; left: 5vw;
+  top: 20vh; left: 5vw;
   font-family: 'Space Mono', monospace;
   font-size: 9px;
   letter-spacing: .22em;
@@ -937,7 +937,7 @@ html, body {
 .ch-domain {
   position: absolute;
   left: 5vw;
-  top: calc(12vh + 22px);
+  top: calc(20vh + 22px);
   font-size: clamp(22px, 3.5vw, 54px);
   font-weight: 700;
   letter-spacing: .04em;
@@ -2145,19 +2145,19 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 <div id="challenge-label">THE CHALLENGE</div>
 <div id="challenge">
   <div class="ch-cat" id="ch0">
-    <div class="ch-num">01 / GOVERNMENT</div>
+    <div class="ch-num">01</div>
     <div class="ch-domain">Government</div>
     <div class="ch-headline">Millions of interactions.<br>Fragmented decisions.</div>
     <div class="ch-body">Agencies process vast streams of citizen engagement — reports, requests, data feeds — yet decisions happen in silos, disconnected from the whole.</div>
   </div>
   <div class="ch-cat" id="ch1">
-    <div class="ch-num">02 / ENTERPRISE</div>
+    <div class="ch-num">02</div>
     <div class="ch-domain">Enterprise</div>
     <div class="ch-headline">Data is everywhere.<br>Visibility is not.</div>
     <div class="ch-body">CRMs, analytics, pipelines, tools — organizations drown in data but starve for clarity. No single view of what actually matters.</div>
   </div>
   <div class="ch-cat" id="ch2">
-    <div class="ch-num">03 / COMMUNITIES</div>
+    <div class="ch-num">03</div>
     <div class="ch-domain">Communities</div>
     <div class="ch-headline">Communication grows.<br>Coordination breaks.</div>
     <div class="ch-body">Channels multiply, voices increase — but alignment collapses. Groups communicate at the edges while the center goes dark.</div>
@@ -2562,7 +2562,7 @@ function initManifesto() {
   });
   gsap.timeline({ scrollTrigger: { start: 0, end: VH * 1.3, scrub: 1.6 } })
     .to(mlEl, { opacity: .88, duration: .22 }, 0)
-    .to(mlEl, { x: 46, y: 50, scale: 25 / mH, duration: 1.08, ease: 'power3.inOut' }, .22);
+    .to(mlEl, { x: 46, y: 84, scale: 25 / mH, duration: 1.08, ease: 'power3.inOut' }, .22);
 
   // ── hero exit (0 → 1×VH): fade ui + zoom out scene once into manifesto ──
   gsap.timeline({ scrollTrigger: { start: 0, end: VH, scrub: 1.5 } })
@@ -2826,7 +2826,7 @@ function initChallenge() {
   });
   gsap.timeline({ scrollTrigger: { start: LABEL_IN, end: LABEL_IN + VH * 1.2, scrub: 1.6 } })
     .to(clEl, { opacity: .88, duration: .22 }, 0)
-    .to(clEl, { x: 46, y: 50, scale: 25 / cLH, duration: 1.08, ease: 'power3.inOut' }, .22);
+    .to(clEl, { x: 46, y: 84, scale: 25 / cLH, duration: 1.08, ease: 'power3.inOut' }, .22);
 
   // ── canvas fade in (clean — watch already gone from exit zone) ──
   ScrollTrigger.create({
@@ -3153,7 +3153,22 @@ function initShift() {
       // Scrolled back above LA entry — restore Shift visibility based on actual scroll position
       concealLA();
       if (!shiftActive) { shiftActive = true; shiftTick(); }
+      _trackingShiftAfterLA = true;
       // Compute correct opacity: 0 outside Shift zone, ramp in fade-in zone, 1 in body
+      const fadeInLen = VH * 0.9;
+      let op = 0;
+      if (scrollY >= SHIFT_IN + fadeInLen && scrollY <= SHIFT_OUT) {
+        op = 1;
+      } else if (scrollY >= SHIFT_IN && scrollY < SHIFT_IN + fadeInLen) {
+        op = (scrollY - SHIFT_IN) / fadeInLen;
+      }
+      op = Math.max(0, Math.min(1, op));
+      document.getElementById('shift-canvas').style.opacity  = op;
+      document.getElementById('shift-hud').style.opacity     = op;
+      document.getElementById('shift-content').style.opacity = op;
+      document.getElementById('shift-label').style.opacity   = (op * 0.88).toString();
+    } else if (_trackingShiftAfterLA && !_laVisible) {
+      // GSAP scrubs for shift are dead (killed by overwrite:true in revealLA) — keep opacity in sync manually
       const fadeInLen = VH * 0.9;
       let op = 0;
       if (scrollY >= SHIFT_IN + fadeInLen && scrollY <= SHIFT_OUT) {
@@ -3181,10 +3196,12 @@ runPhase1();
 
 // ── Living Architecture transition ──
 let _laVisible = false;
+let _trackingShiftAfterLA = false;
 
 function revealLA() {
   if (_laVisible) return;
   _laVisible = true;
+  _trackingShiftAfterLA = false;
   if (typeof window.initLivingArchitecture === 'function') {
     window.initLivingArchitecture();
   }
