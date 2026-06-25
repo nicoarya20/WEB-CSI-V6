@@ -7,6 +7,14 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
 <style>
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -958,6 +966,482 @@ html, body {
   }
   #challenge-label { font-size: clamp(24px, 7.5vw, 44px); }
 }
+
+/* ══════════════════════════════
+   SECTION 4 — THE SHIFT
+══════════════════════════════ */
+#shift-canvas {
+  position: fixed; inset: 0;
+  z-index: 2; opacity: 0; pointer-events: none;
+}
+#shift-label {
+  position: fixed; top: 50px; left: 46px;
+  font-family: 'Space Mono', monospace;
+  font-size: 11px; letter-spacing: .22em;
+  color: var(--accent); z-index: 50; opacity: 0;
+  text-transform: uppercase; pointer-events: none;
+}
+#shift-hud {
+  position: fixed; right: 52px; top: 50%;
+  transform: translateY(-50%);
+  z-index: 50; opacity: 0; pointer-events: none;
+}
+#shift-pipe {
+  position: relative; height: 260px; width: 120px;
+  display: flex; flex-direction: column; align-items: flex-start;
+}
+.sp-track {
+  position: absolute; top: 0; bottom: 0; left: 4px;
+  width: 1px; background: var(--grid-line);
+}
+.sp-fill {
+  position: absolute; top: 0; left: 4px;
+  width: 1px; height: 0%;
+  background: var(--accent);
+  transition: height .04s linear;
+}
+.sp-node {
+  position: absolute; left: 0;
+  display: flex; align-items: center; gap: 12px;
+  cursor: default;
+}
+.sp-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  border: 1px solid var(--muted); background: var(--bg);
+  flex-shrink: 0;
+  transition: border-color .35s, background .35s, box-shadow .35s;
+}
+.sp-node.active .sp-dot {
+  border-color: var(--accent); background: var(--accent);
+  box-shadow: 0 0 14px var(--accent);
+}
+.sp-node.done .sp-dot {
+  border-color: var(--accent-dim); background: var(--accent-dim);
+}
+.sp-lbl {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px; letter-spacing: .14em;
+  color: var(--muted); text-transform: uppercase;
+  white-space: nowrap;
+  transition: color .35s;
+}
+.sp-node.active .sp-lbl { color: var(--accent); }
+
+#shift-content { position: fixed; inset: 0; z-index: 50; pointer-events: none; opacity: 0; }
+.sc-stage {
+  position: absolute; bottom: 80px; left: 7vw;
+  opacity: 0; pointer-events: none;
+  will-change: transform, opacity;
+}
+.sc-eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px; letter-spacing: .28em;
+  color: var(--accent); margin-bottom: 18px;
+  text-transform: uppercase;
+}
+.sc-headline {
+  font-size: clamp(36px, 5.8vw, 76px);
+  font-weight: 300; line-height: 1.08;
+  color: var(--text); margin-bottom: 22px;
+  letter-spacing: -.025em;
+}
+.sc-body {
+  font-size: 13px; font-weight: 300;
+  line-height: 1.9; color: var(--muted);
+  max-width: 400px;
+}
+
+/* ── Living Architecture scene — z-index above ALL sections (max 9xxx) ── */
+#la-canvas {
+  position: fixed; inset: 0;
+  display: block; z-index: 9000;
+  opacity: 0; pointer-events: none;
+}
+#la-canvas.active { pointer-events: all; }
+#la-section-label {
+  position: fixed; top: 36px; left: 44px;
+  z-index: 9100; display: flex; align-items: baseline; gap: 10px;
+  opacity: 0; transform: translateY(-8px); pointer-events: none;
+}
+.la-sl-num { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em; color:#4a7a10; }
+.la-sl-sep { font-size:10px; color:#2a3a20; }
+.la-sl-title { font-family:'Inter',sans-serif; font-weight:200; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:#6a7864; }
+#la-text-block {
+  position: fixed; bottom: 88px; left: 44px;
+  z-index: 9100; max-width: 440px;
+  opacity: 0; transform: translateY(18px); pointer-events: none;
+}
+#la-headline {
+  font-family: 'Inter', sans-serif;
+  font-size: clamp(26px, 3.4vw, 50px);
+  font-weight: 200; line-height: 1.1;
+  letter-spacing: -.025em; color: #edeae2;
+  margin-bottom: 18px;
+}
+#la-description {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px; font-weight: 300;
+  line-height: 1.85; color: #6a7864;
+  max-width: 380px;
+}
+.la-node-label {
+  position: fixed; pointer-events: none; z-index: 9050;
+  text-align: center; opacity: 0;
+}
+.la-node-label .nl-name {
+  font-family: 'Space Mono', monospace; font-size: 8px; font-weight: 400;
+  letter-spacing: .22em; text-transform: uppercase; color: #a0b89a;
+  display: block;
+  text-shadow: 0 0 10px rgba(0,0,0,1);
+  background: rgba(6,8,7,.55);
+  padding: 3px 7px;
+  border-left: 1px solid rgba(184,255,60,.25);
+}
+.la-hud-wrap {
+  position:fixed; pointer-events:none; z-index:9045;
+  transform:translate(-50%,-50%); opacity:0;
+}
+.la-hud-wrap.large { width:72px; height:72px; }
+.la-hud-wrap.small { width:48px; height:48px; }
+.la-hud-tl,.la-hud-tr,.la-hud-bl,.la-hud-br {
+  position:absolute; width:9px; height:9px;
+}
+.la-hud-tl { top:0; left:0; border-top:1px solid; border-left:1px solid; }
+.la-hud-tr { top:0; right:0; border-top:1px solid; border-right:1px solid; }
+.la-hud-bl { bottom:0; left:0; border-bottom:1px solid; border-left:1px solid; }
+.la-hud-br { bottom:0; right:0; border-bottom:1px solid; border-right:1px solid; }
+.la-hud-wrap.hub::before,.la-hud-wrap.hub::after {
+  content:''; position:absolute; background:currentColor; opacity:.25;
+}
+.la-hud-wrap.hub::before { width:1px; height:100%; left:50%; top:0; }
+.la-hud-wrap.hub::after  { height:1px; width:100%; top:50%; left:0; }
+#la-panel {
+  position:fixed; top:0; right:0; width:320px; height:100%;
+  z-index:9200; display:flex; flex-direction:column; justify-content:center;
+  padding:48px 44px; opacity:0; transform:translateX(40px);
+  pointer-events:none;
+  border-left:1px solid rgba(24,36,19,.8);
+  background:linear-gradient(to left,rgba(6,8,7,.95),rgba(6,8,7,.6));
+  backdrop-filter:blur(12px);
+}
+#la-panel.visible { pointer-events:all; }
+.la-p-section { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.2em; color:#4a7a10; text-transform:uppercase; margin-bottom:6px; }
+.la-p-index   { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.15em; color:#4a7a10; margin-bottom:4px; }
+.la-p-name    { font-family:'Inter',sans-serif; font-weight:200; font-size:36px; letter-spacing:-.02em; line-height:1; margin-bottom:20px; color:#edeae2; }
+.la-p-bar     { height:1px; background:linear-gradient(to right,#4a7a10,transparent); margin-bottom:20px; opacity:.5; }
+.la-p-desc    { font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:300; line-height:1.7; color:#6a7864; margin-bottom:28px; }
+.la-p-conn-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.2em; color:#4a7a10; text-transform:uppercase; margin-bottom:10px; }
+.la-p-conn-list  { display:flex; flex-wrap:wrap; gap:6px; }
+.la-p-conn-tag   { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.1em; color:#4a7a10; border:1px solid rgba(74,122,16,.3); padding:3px 8px; border-radius:2px; text-transform:uppercase; }
+#la-statusbar {
+  position:fixed; bottom:28px; left:44px; z-index:9100;
+  display:flex; align-items:center; gap:12px; opacity:0; pointer-events:none;
+}
+.la-sb-item { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.18em; color:#6a7864; text-transform:uppercase; }
+.la-sb-dot  { color:#2a3a20; font-size:10px; }
+#la-sb-active { color:#b8ff3c; position:relative; padding-left:12px; }
+#la-sb-active::before {
+  content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:5px; height:5px; border-radius:50%;
+  background:#b8ff3c; box-shadow:0 0 6px #b8ff3c;
+  animation:blink 2s ease infinite;
+}
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+#la-close-hint {
+  position:fixed; top:36px; right:44px; z-index:9400;
+  font-family:'Space Mono',monospace; font-size:9px;
+  letter-spacing:.15em; color:#6a7864; cursor:none; opacity:0;
+  display:flex; align-items:center; gap:8px; pointer-events:none;
+}
+#la-close-hint.visible { pointer-events:all; }
+#la-close-hint span {
+  width:16px; height:16px; border:1px solid rgba(106,120,100,.3);
+  display:inline-flex; align-items:center; justify-content:center;
+  font-size:10px; color:#6a7864; border-radius:2px;
+}
+
+/* ── LA cursor hover state (from v2) ── */
+body.la-hovering #cursor { width:10px; height:10px; }
+body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,255,60,.5); }
+
+/* ── Living Architecture transition overlay ── */
+#tx-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #060807;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+#tx-overlay.active { pointer-events: all; }
+
+.tx-num {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  letter-spacing: .22em;
+  color: #4a7a10;
+  margin-bottom: 14px;
+  opacity: 0;
+}
+.tx-rule {
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(to right, #4a7a10, transparent);
+  margin-bottom: 28px;
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+.tx-title-wrap {
+  overflow: hidden;
+  line-height: 1;
+}
+.tx-word {
+  font-family: 'Inter', sans-serif;
+  font-weight: 200;
+  font-size: clamp(52px, 8vw, 96px);
+  letter-spacing: -.02em;
+  color: #edeae2;
+  display: block;
+  transform: translateY(100%);
+}
+.tx-word:first-child { margin-bottom: 4px; }
+.tx-sub {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 12px;
+  font-weight: 300;
+  letter-spacing: .18em;
+  color: #6a7864;
+  text-transform: uppercase;
+  margin-top: 28px;
+  opacity: 0;
+}
+.tx-prog-wrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: #182413;
+}
+.tx-prog {
+  height: 100%;
+  background: linear-gradient(to right, #4a7a10, #b8ff3c);
+  transform-origin: left center;
+  transform: scaleX(0);
+}
+#tx-flash {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  background: #060807;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ════════════════════════════════════════
+   SECTION 6 — SELECTED DEPLOYMENTS
+════════════════════════════════════════ */
+#sd-canvas {
+  position: fixed; inset: 0;
+  z-index: 9500; opacity: 0;
+  pointer-events: none; display: block;
+}
+#sd-canvas.active { pointer-events: all; }
+
+#sd-section-label {
+  position: fixed; top: 36px; left: 44px;
+  z-index: 9600; display: flex; align-items: baseline; gap: 10px;
+  opacity: 0; transform: translateY(-8px); pointer-events: none;
+}
+.sd-sl-num   { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em; color:#4a7a10; }
+.sd-sl-sep   { font-size:10px; color:#2a3a20; }
+.sd-sl-title { font-family:'Inter',sans-serif; font-weight:200; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:#6a7864; }
+
+/* category list */
+#sd-categories {
+  position: fixed; left: 44px; top: 50%;
+  transform: translateY(-50%);
+  z-index: 9600; opacity: 0; pointer-events: none;
+  display: flex; flex-direction: column;
+}
+#sd-categories.active { pointer-events: all; }
+.sd-cat-item {
+  display: flex; align-items: center; gap: 14px;
+  cursor: none; padding: 9px 16px;
+  border-left: 1.5px solid transparent;
+  transition: border-color .35s;
+}
+.sd-cat-item:hover .sd-cat-name { color: var(--muted); }
+.sd-cat-item.active { border-left-color: var(--accent); }
+.sd-cat-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #2a3a20; flex-shrink: 0;
+  transition: background .35s, box-shadow .35s;
+}
+.sd-cat-item.active .sd-cat-dot {
+  background: var(--accent); box-shadow: 0 0 8px var(--accent);
+}
+.sd-cat-name {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  letter-spacing: .18em; text-transform: uppercase;
+  color: #3a4e34; transition: color .35s; white-space: nowrap;
+}
+.sd-cat-item.active .sd-cat-name { color: var(--text); }
+
+/* copy block */
+#sd-copy {
+  position: fixed; right: 56px; top: 50%;
+  transform: translateY(-50%);
+  z-index: 9600; max-width: 360px; width: 30vw;
+  opacity: 0; pointer-events: none;
+}
+.sd-copy-num {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  letter-spacing: .22em; color: rgba(184,255,60,.55);
+  text-transform: uppercase; margin-bottom: 6px;
+}
+.sd-copy-name {
+  font-family: 'Inter', sans-serif; font-weight: 200;
+  font-size: clamp(28px, 3.2vw, 46px);
+  line-height: 1.05; letter-spacing: -.025em;
+  color: var(--text); margin-bottom: 22px;
+}
+.sd-copy-bar {
+  height: 1px; background: linear-gradient(to right, rgba(184,255,60,.4), transparent);
+  margin-bottom: 22px;
+}
+.sd-copy-body {
+  font-family: 'Space Grotesk', sans-serif; font-size: 13px;
+  font-weight: 300; line-height: 1.9; color: rgba(237,234,226,.65); margin-bottom: 24px;
+}
+.sd-copy-region {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'Space Mono', monospace; font-size: 8px;
+  letter-spacing: .22em; color: rgba(184,255,60,.7); text-transform: uppercase;
+  border: 1px solid rgba(184,255,60,.3); padding: 5px 14px; border-radius: 2px;
+}
+.sd-copy-region::before {
+  content: ''; width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(184,255,60,.7); flex-shrink: 0;
+}
+
+/* headline block */
+#sd-headline-block {
+  position: fixed; bottom: 64px; left: 44px;
+  z-index: 9600; opacity: 0; pointer-events: none;
+}
+#sd-headline {
+  font-family: 'Inter', sans-serif; font-weight: 200;
+  font-size: clamp(28px, 3.8vw, 58px);
+  letter-spacing: -.03em; color: #edeae2;
+  line-height: 1; margin-bottom: 8px;
+}
+#sd-subline {
+  font-size: 10px; font-weight: 300;
+  font-family: 'Space Grotesk', sans-serif;
+  color: rgba(237,234,226,.45); letter-spacing: .04em;
+  line-height: 1.7; max-width: 400px;
+}
+
+/* status bar */
+#sd-statusbar {
+  position: fixed; bottom: 28px; right: 56px;
+  z-index: 9600; display: flex; align-items: center; gap: 12px;
+  opacity: 0; pointer-events: none;
+}
+.sd-sb-item { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.18em; color:rgba(184,255,60,.45); text-transform:uppercase; }
+.sd-sb-sep  { color:rgba(184,255,60,.2); }
+#sd-sb-status { color:#b8ff3c; padding-left:12px; position:relative; }
+#sd-sb-status::before {
+  content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
+  width:5px; height:5px; border-radius:50%;
+  background:#b8ff3c; box-shadow:0 0 5px #b8ff3c;
+  animation:blink 2s ease infinite;
+}
+
+/* sd-nav hint (shown in Section 5) */
+#sd-nav {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%);
+  z-index: 9250; opacity: 0; pointer-events: none;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  cursor: none;
+}
+#sd-nav.visible { pointer-events: all; }
+.sd-nav-label {
+  font-family: 'Space Mono', monospace; font-size: 8px;
+  letter-spacing: .2em; color: var(--muted); text-transform: uppercase;
+}
+.sd-nav-arrow {
+  width: 24px; height: 24px;
+  border: 1px solid rgba(184,255,60,.35);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--muted); border-radius: 2px;
+  transition: border-color .2s, color .2s;
+}
+#sd-nav:hover .sd-nav-arrow { border-color: rgba(184,255,60,.7); color: var(--accent); }
+#sd-nav:hover .sd-nav-label { color: var(--accent); }
+
+/* back button */
+#sd-back {
+  position: fixed; top: 36px; right: 44px;
+  z-index: 9700; opacity: 0; pointer-events: none;
+  display: flex; align-items: center; gap: 8px; cursor: none;
+}
+#sd-back.visible { pointer-events: all; }
+.sd-back-icon  { font-size: 12px; color: #3a4e34; transition: color .2s; }
+.sd-back-label {
+  font-family: 'Space Mono', monospace; font-size: 9px;
+  letter-spacing: .15em; color: #3a4e34; text-transform: uppercase;
+  transition: color .2s;
+}
+#sd-back:hover .sd-back-label, #sd-back:hover .sd-back-icon { color: var(--muted); }
+
+/* SD transition overlay */
+#sd-tx-overlay {
+  position: fixed; inset: 0; z-index: 11000;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+}
+#sd-tx-overlay.active { pointer-events: all; }
+.sd-tx-num {
+  font-family: 'Space Mono', monospace; font-size: 11px;
+  letter-spacing: .22em; color: #4a7a10; margin-bottom: 14px; opacity: 0;
+}
+.sd-tx-rule {
+  width: 120px; height: 1px;
+  background: linear-gradient(to right, #4a7a10, transparent);
+  margin-bottom: 28px; transform-origin: left center; transform: scaleX(0);
+}
+.sd-tx-title-wrap { overflow: hidden; line-height: 1; }
+.sd-tx-word {
+  font-family: 'Inter', sans-serif; font-weight: 200;
+  font-size: clamp(44px, 7vw, 88px);
+  letter-spacing: -.02em; color: var(--text);
+  display: block; transform: translateY(100%);
+}
+.sd-tx-sub {
+  font-family: 'Space Grotesk', sans-serif; font-size: 12px;
+  font-weight: 300; letter-spacing: .18em; color: #6a7864;
+  text-transform: uppercase; margin-top: 28px; opacity: 0;
+}
+.sd-tx-prog-wrap {
+  position: fixed; bottom: 0; left: 0; width: 100%; height: 1px; background: #182413;
+}
+.sd-tx-prog {
+  height: 100%; background: linear-gradient(to right, #4a7a10, #b8ff3c);
+  transform-origin: left center; transform: scaleX(0);
+}
+#sd-flash {
+  position: fixed; inset: 0; z-index: 11001;
+  background: var(--bg); opacity: 0; pointer-events: none;
+}
 </style>
 </head>
 <body>
@@ -1517,6 +2001,60 @@ html, body {
   </div>
 </div>
 
+<!-- ══ SECTION 4 — THE SHIFT ══ -->
+<canvas id="shift-canvas"></canvas>
+<div id="shift-label">THE SHIFT</div>
+
+<div id="shift-hud">
+  <div id="shift-pipe">
+    <div class="sp-track"></div>
+    <div class="sp-fill" id="sp-fill-bar"></div>
+    <div class="sp-node" id="spn0" style="top:0%">
+      <div class="sp-dot"></div><span class="sp-lbl">Information</span>
+    </div>
+    <div class="sp-node" id="spn1" style="top:25%">
+      <div class="sp-dot"></div><span class="sp-lbl">Context</span>
+    </div>
+    <div class="sp-node" id="spn2" style="top:50%">
+      <div class="sp-dot"></div><span class="sp-lbl">Intelligence</span>
+    </div>
+    <div class="sp-node" id="spn3" style="top:75%">
+      <div class="sp-dot"></div><span class="sp-lbl">Decision</span>
+    </div>
+    <div class="sp-node" id="spn4" style="top:100%">
+      <div class="sp-dot"></div><span class="sp-lbl">Action</span>
+    </div>
+  </div>
+</div>
+
+<div id="shift-content">
+  <div class="sc-stage" id="sc0">
+    <div class="sc-eyebrow">01 / Information</div>
+    <div class="sc-headline">Raw signals.<br>Uninterpreted.</div>
+    <div class="sc-body">Data arrives from every source — structured, unstructured, streaming, latent. No meaning yet. Only volume.</div>
+  </div>
+  <div class="sc-stage" id="sc1">
+    <div class="sc-eyebrow">02 / Context</div>
+    <div class="sc-headline">Patterns emerge.<br>Clusters form.</div>
+    <div class="sc-body">Related signals find each other. Semantic proximity collapses distance. Meaning begins its assembly.</div>
+  </div>
+  <div class="sc-stage" id="sc2">
+    <div class="sc-eyebrow">03 / Intelligence</div>
+    <div class="sc-headline">Relationships<br>crystallize.</div>
+    <div class="sc-body">The system synthesizes across domains, time, and contradiction. Insight — not just information — emerges.</div>
+  </div>
+  <div class="sc-stage" id="sc3">
+    <div class="sc-eyebrow">04 / Decision</div>
+    <div class="sc-headline">Options surface.<br>Priorities lock.</div>
+    <div class="sc-body">The intelligence layer evaluates, ranks, and surfaces the precise paths that matter most.</div>
+  </div>
+  <div class="sc-stage" id="sc4">
+    <div class="sc-eyebrow">05 / Action</div>
+    <div class="sc-headline">One signal.<br>Deployed.</div>
+    <div class="sc-body">From chaos to clarity to consequence. A single, precise output — at the right moment, to the right place.</div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
@@ -1840,7 +2378,7 @@ function initManifesto() {
   document.body.style.overflow = 'auto';
 
   const spacer = document.createElement('div');
-  spacer.style.cssText = 'height:2300vh;width:100%;pointer-events:none;';
+  spacer.style.cssText = 'height:4000vh;width:100%;pointer-events:none;';
   document.body.appendChild(spacer);
   window.scrollTo(0, 0);
 
@@ -1940,6 +2478,7 @@ function initManifesto() {
   window.addEventListener('resize', () => ScrollTrigger.refresh());
 
   initChallenge();
+  initShift();
 }
 
 // ─── click to replay ───
@@ -2184,8 +2723,1185 @@ function initChallenge() {
   });
 }
 
+// ─── initShift ───
+function initShift() {
+  const VH = window.innerHeight;
+  const W  = window.innerWidth;
+
+  // ── scroll anchors ──
+  // Challenge outro ends ~VH*21; buffer VH*22 before shift
+  const SHIFT_IN    = VH * 22;
+  const SHIFT_START = VH * 23;
+  const SHIFT_STEP  = VH * 3.0;     // per stage (5 stages = 15VH)
+  const SHIFT_OUT   = SHIFT_START + 5 * SHIFT_STEP;  // VH*38
+
+  // ── Three.js ──
+  const scene  = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(55, W / VH, 0.1, 300);
+  camera.position.set(0, 0, 20);
+
+  const cvs = document.getElementById('shift-canvas');
+  const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: true });
+  renderer.setSize(W, VH);
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+  // ── formations ──
+  const N = 7000;
+
+  function makeSphere(n, r) {
+    const a = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const theta = Math.random() * Math.PI * 2;
+      const phi   = Math.acos(2 * Math.random() - 1);
+      const rr    = r * Math.cbrt(Math.random());
+      a[i*3]   = rr * Math.sin(phi) * Math.cos(theta);
+      a[i*3+1] = rr * Math.sin(phi) * Math.sin(theta);
+      a[i*3+2] = rr * Math.cos(phi);
+    }
+    return a;
+  }
+
+  function makeClusters(n) {
+    const ctrs = [[-5.5, 2.5, -1], [4.8, -3, 1.5], [0.4, 4.2, -2]];
+    const a = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const c = ctrs[i % 3];
+      const r = Math.random() * 2.0;
+      const t = Math.random() * Math.PI * 2;
+      const p = Math.random() * Math.PI;
+      a[i*3]   = c[0] + r * Math.sin(p) * Math.cos(t);
+      a[i*3+1] = c[1] + r * Math.sin(p) * Math.sin(t);
+      a[i*3+2] = c[2] + r * Math.cos(p);
+    }
+    return a;
+  }
+
+  function makeTorusKnot(n) {
+    const a = new Float32Array(n * 3);
+    const P = 2, Q = 3, R = 4.5, r = 1.8;
+    for (let i = 0; i < n; i++) {
+      const t   = (i / n) * Math.PI * 2;
+      const phi = Q * t / P;
+      const x   = (R + r * Math.cos(phi)) * Math.cos(t);
+      const y   = (R + r * Math.cos(phi)) * Math.sin(t);
+      const z   = r * Math.sin(phi);
+      const ns  = 0.14;
+      a[i*3]   = x + (Math.random() - .5) * ns;
+      a[i*3+1] = y + (Math.random() - .5) * ns;
+      a[i*3+2] = z + (Math.random() - .5) * ns;
+    }
+    return a;
+  }
+
+  function makeStarBurst(n) {
+    const RAYS = 5, a = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const ray   = i % RAYS;
+      const t     = Math.floor(i / RAYS) / (n / RAYS);
+      const angle = (ray / RAYS) * Math.PI * 2 - Math.PI / 2;
+      const len   = 1.5 + t * 7.5;
+      const sp    = (1 - t * t) * 0.9;
+      a[i*3]   = Math.cos(angle) * len + (Math.random() - .5) * sp;
+      a[i*3+1] = Math.sin(angle) * len + (Math.random() - .5) * sp;
+      a[i*3+2] = (Math.random() - .5) * sp * 0.5;
+    }
+    return a;
+  }
+
+  function makeBeam(n) {
+    const a = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) {
+      const t      = i / n;
+      const radius = (1 - t) * 1.6 * Math.random();
+      const angle  = Math.random() * Math.PI * 2;
+      a[i*3]   = Math.cos(angle) * radius;
+      a[i*3+1] = Math.sin(angle) * radius;
+      a[i*3+2] = -(t * 18) + 4;   // tunnel into screen
+    }
+    return a;
+  }
+
+  const targets = [
+    makeSphere(N, 10),   // 0 — Information
+    makeClusters(N),     // 1 — Context
+    makeTorusKnot(N),    // 2 — Intelligence
+    makeStarBurst(N),    // 3 — Decision
+    makeBeam(N),         // 4 — Action
+  ];
+
+  // ── BufferGeometry ──
+  const geo    = new THREE.BufferGeometry();
+  const posArr = new Float32Array(N * 3);
+  posArr.set(targets[0]);
+  geo.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
+
+  const colArr = new Float32Array(N * 3);
+  geo.setAttribute('color', new THREE.BufferAttribute(colArr, 3));
+
+  const mat = new THREE.PointsMaterial({
+    size: 0.07, vertexColors: true,
+    transparent: true, opacity: 0.85,
+    blending: THREE.AdditiveBlending, depthWrite: false,
+    sizeAttenuation: true,
+  });
+  scene.add(new THREE.Points(geo, mat));
+
+  // ── color palettes per stage [r,g,b] 0–1 ──
+  const palettes = [
+    [0.40, 0.43, 0.38],  // dim warm white — Information
+    [0.05, 0.65, 0.78],  // cyan           — Context
+    [0.72, 1.00, 0.24],  // lime #b8ff3c   — Intelligence
+    [0.30, 0.85, 0.48],  // green-cyan     — Decision
+    [0.72, 1.00, 0.24],  // lime bright    — Action
+  ];
+
+  // ── RAF: slow camera orbit ──
+  let orbitAngle = 0, shiftActive = false;
+  function shiftTick() {
+    if (!shiftActive) return;
+    requestAnimationFrame(shiftTick);
+    orbitAngle += 0.0013;
+    camera.position.x = Math.sin(orbitAngle) * 2.8;
+    camera.position.y = Math.cos(orbitAngle * 0.6) * 1.5;
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
+  }
+
+  // ── morph helpers ──
+  function eio(t) { return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
+
+  function updateMorph(p) {
+    const stageF = Math.min(p * 4, 3.9999);
+    const si     = Math.floor(stageF);
+    const st     = eio(stageF - si);
+
+    const from = targets[si], to = targets[si + 1];
+    const pa   = geo.attributes.position.array;
+    for (let i = 0; i < N * 3; i++) pa[i] = from[i] + (to[i] - from[i]) * st;
+    geo.attributes.position.needsUpdate = true;
+
+    const fc = palettes[si], tc = palettes[si + 1];
+    const ca = geo.attributes.color.array;
+    for (let i = 0; i < N; i++) {
+      ca[i*3]   = fc[0] + (tc[0] - fc[0]) * st;
+      ca[i*3+1] = fc[1] + (tc[1] - fc[1]) * st;
+      ca[i*3+2] = fc[2] + (tc[2] - fc[2]) * st;
+    }
+    geo.attributes.color.needsUpdate = true;
+
+    // camera pulls back for torus, zooms in for beam
+    camera.position.z = 20 - si * 0.8 + (1 - st) * 0.8;
+
+    // pipeline HUD
+    const active = Math.min(Math.floor(p * 5), 4);
+    document.getElementById('sp-fill-bar').style.height = (p * 100) + '%';
+    for (let k = 0; k < 5; k++) {
+      const nd = document.getElementById('spn' + k);
+      nd.classList.toggle('active', k === active);
+      nd.classList.toggle('done',   k < active);
+    }
+  }
+
+  // ── ScrollTriggers ──
+
+  // 1. Fade in canvas + UI
+  ScrollTrigger.create({
+    start: SHIFT_IN, end: SHIFT_IN + VH * 0.9, scrub: 1.5,
+    onUpdate({ progress: p }) {
+      cvs.style.opacity = p.toString();
+      document.getElementById('shift-hud').style.opacity     = p.toString();
+      document.getElementById('shift-content').style.opacity = p.toString();
+    },
+    onEnter() { shiftActive = true; shiftTick(); },
+  });
+
+  // 2. Label: center → corner (mirrors challenge style)
+  const slEl = document.getElementById('shift-label');
+  const slW  = slEl.offsetWidth  || 90;
+  const slH  = slEl.offsetHeight || 14;
+  gsap.set(slEl, { transformOrigin: 'top left', x: (W - slW) / 2, y: (VH - slH) / 2, scale: 1, opacity: 0 });
+  gsap.timeline({ scrollTrigger: { start: SHIFT_IN, end: SHIFT_IN + VH * 1.2, scrub: 1.6 } })
+    .to(slEl, { opacity: .88, duration: .22 }, 0)
+    .to(slEl, { x: 46, y: 50, scale: 25 / slH, duration: 1.08, ease: 'power3.inOut' }, .22);
+
+  // 3. Particle morphing — scrub across all 5 stages
+  ScrollTrigger.create({
+    start: SHIFT_START, end: SHIFT_OUT, scrub: 2.2,
+    onUpdate({ progress: p }) { updateMorph(p); },
+  });
+
+  // 4. Per-stage text beats
+  ['sc0','sc1','sc2','sc3','sc4'].forEach((id, idx) => {
+    const sStart = SHIFT_START + idx * SHIFT_STEP;
+    ScrollTrigger.create({
+      start: sStart - VH * 0.15, end: sStart + SHIFT_STEP, scrub: 1.5,
+      onUpdate({ progress: p }) {
+        const cl = p < .12 ? p / .12 : p > .82 ? 1 - (p - .82) / .18 : 1;
+        const xd = (p < .12 ? (1 - p / .12) : p > .82 ? (p - .82) / .18 : 0) * 30;
+        const el = document.getElementById(id);
+        el.style.opacity   = cl.toString();
+        el.style.transform = `translateX(${-xd}px)`;
+      },
+    });
+  });
+
+  // 5. Fade out
+  ScrollTrigger.create({
+    start: SHIFT_OUT, end: SHIFT_OUT + VH * 0.9, scrub: 1,
+    onUpdate({ progress: p }) {
+      const fade = 1 - p;
+      cvs.style.opacity  = fade.toString();
+      slEl.style.opacity = (0.88 * fade).toString();
+      document.getElementById('shift-hud').style.opacity     = fade.toString();
+      document.getElementById('shift-content').style.opacity = fade.toString();
+    },
+    onLeave() { shiftActive = false; triggerTransition(); },
+  });
+
+  // initial render so canvas isn't blank on first scroll into view
+  updateMorph(0);
+  renderer.render(scene, camera);
+
+  window.addEventListener('resize', () => {
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+  });
+
+  // Fallback: trigger transition when user reaches page bottom
+  let _txBottomFired = false;
+  window.addEventListener('scroll', () => {
+    if (_txBottomFired) return;
+    const maxScroll = document.body.scrollHeight - window.innerHeight;
+    if (window.scrollY >= maxScroll - 8 && window.scrollY > SHIFT_OUT) {
+      _txBottomFired = true;
+      setTimeout(triggerTransition, 500);
+    }
+  }, { passive: true });
+
+  // Bidirectional: hide LA when scrolling back above The Shift, re-reveal when scrolling down
+  window.addEventListener('scroll', () => {
+    if (document.getElementById('tx-overlay').classList.contains('active')) return;
+    const scrollY = window.scrollY;
+    if (_laVisible && scrollY < SHIFT_OUT - VH * 0.5) {
+      // Scrolled back above LA entry — show shift content again
+      concealLA();
+      gsap.to(['#shift-canvas','#shift-hud','#shift-content','#shift-label'], {
+        opacity: 1, duration: 0.35, ease: 'power2.out'
+      });
+    } else if (!_laVisible && _txBottomFired && scrollY >= SHIFT_OUT) {
+      // Scrolled back down to LA — reveal without overlay
+      revealLA();
+      gsap.to(['#shift-canvas','#shift-hud','#shift-content','#shift-label'], {
+        opacity: 0, duration: 0.2, overwrite: true
+      });
+    }
+  }, { passive: true });
+}
+
 // ─── start ───
 runPhase1();
+
+// ── Living Architecture transition ──
+let _laVisible = false;
+
+function revealLA() {
+  if (_laVisible) return;
+  _laVisible = true;
+  if (typeof window.initLivingArchitecture === 'function') {
+    window.initLivingArchitecture();
+  }
+  const cvs = document.getElementById('la-canvas');
+  cvs.classList.add('active');
+  gsap.to(cvs, { opacity: 1, duration: 0.4, ease: 'power2.out' });
+}
+
+function concealLA() {
+  if (!_laVisible) return;
+  _laVisible = false;
+  const cvs = document.getElementById('la-canvas');
+  gsap.to(cvs, { opacity: 0, duration: 0.3, ease: 'power2.in',
+    onComplete() { cvs.classList.remove('active'); }
+  });
+  gsap.to(['#la-section-label','#la-text-block','#la-statusbar','#la-close-hint'], {
+    opacity: 0, duration: 0.2
+  });
+}
+
+function triggerTransition() {
+  const overlay = document.getElementById('tx-overlay');
+  if (overlay.classList.contains('active')) return;
+  overlay.classList.add('active');
+
+  gsap.to(['#shift-canvas','#shift-hud','#shift-content','#shift-label'], {
+    opacity: 0, duration: 0.25, overwrite: true
+  });
+
+  gsap.set('.tx-num', { y: 10, opacity: 0 });
+  gsap.set('.tx-sub', { opacity: 0, y: 8 });
+  gsap.set('.tx-rule', { scaleX: 0 });
+  gsap.set(['#tx-w1','#tx-w2'], { y: '100%' });
+  gsap.set('.tx-prog', { scaleX: 0 });
+
+  gsap.timeline({
+    onComplete() {
+      gsap.to('#tx-flash', { opacity: 1, duration: 0.25, ease: 'power2.in',
+        onComplete() {
+          // Init + reveal LA now (at flash peak so setup is hidden)
+          revealLA();
+          // Dismiss overlay — no overflow lock
+          gsap.to(['#tx-overlay','#tx-flash'], { opacity: 0, duration: 0.5, ease: 'power2.out',
+            onComplete() {
+              overlay.classList.remove('active');
+              overlay.style.pointerEvents = 'none';
+              document.getElementById('la-close-hint').classList.add('visible');
+            }
+          });
+        }
+      });
+    }
+  })
+    .to('#tx-overlay',  { opacity: 1, duration: 0.55, ease: 'power2.inOut' })
+    .to('.tx-num',      { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, '+=0.15')
+    .to('.tx-rule',     { scaleX: 1, duration: 0.65, ease: 'power2.inOut' }, '+=0.08')
+    .to('#tx-w1',       { y: '0%', duration: 0.6, ease: 'power3.out' }, '+=0.06')
+    .to('#tx-w2',       { y: '0%', duration: 0.6, ease: 'power3.out' }, '-=0.38')
+    .to('.tx-sub',      { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, '+=0.12')
+    .to('.tx-prog',     { scaleX: 1, duration: 1.0, ease: 'power2.inOut' }, '+=0.1');
+}
 </script>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass }     from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass }     from 'three/addons/postprocessing/OutputPass.js';
+
+const NODES = [
+  { id:'intelligence', label:'Intelligence', idx:'00', pos:[0,0,0], color:'#e8f4ff', size:0.44, pulseSpeed:1.4,
+    desc:'The cognitive core. Synthesizes all inputs across every domain into unified, real-time organizational understanding.',
+    peers:['citizen','operations','knowledge','infrastructure','decision','action'] },
+  { id:'citizen', label:'Citizen', idx:'01', pos:[-3.8,1.8,-0.6], color:'#b8ff3c', size:0.27, pulseSpeed:0.72,
+    desc:'Direct interface with the community. Captures real-time feedback, service requests, and civic signals at every touchpoint.',
+    peers:['intelligence','operations'] },
+  { id:'operations', label:'Operations', idx:'02', pos:[3.6,1.5,0.5], color:'#00d4ff', size:0.30, pulseSpeed:0.88,
+    desc:'Operational intelligence hub. Streamlines workflows, resource allocation, and field coordination with precision.',
+    peers:['intelligence','infrastructure','citizen'] },
+  { id:'knowledge', label:'Knowledge', idx:'03', pos:[-3.3,-1.7,0.8], color:'#ffaa33', size:0.27, pulseSpeed:0.61,
+    desc:'Institutional memory. Stores, indexes, and surfaces critical organizational insights exactly when decisions require them.',
+    peers:['intelligence','decision'] },
+  { id:'infrastructure', label:'Infrastructure', idx:'04', pos:[3.2,-2.0,-0.5], color:'#9966ff', size:0.29, pulseSpeed:0.76,
+    desc:'The backbone. Monitors and manages physical and digital assets with predictive intelligence and live telemetry.',
+    peers:['intelligence','operations'] },
+  { id:'decision', label:'Decision', idx:'05', pos:[-0.9,3.1,1.2], color:'#ff6b35', size:0.27, pulseSpeed:0.67,
+    desc:'Strategic synthesis engine. Translates multi-source intelligence into clear, prioritized, accountable action pathways.',
+    peers:['intelligence','action','knowledge'] },
+  { id:'action', label:'Action', idx:'06', pos:[1.3,-3.1,0.7], color:'#00ffaa', size:0.27, pulseSpeed:0.93,
+    desc:'Execution layer. Closes the loop from insight to verifiable, measured outcomes — keeping the system alive.',
+    peers:['intelligence','decision'] }
+];
+
+const CONNECTIONS = [
+  ['intelligence','citizen'], ['intelligence','operations'], ['intelligence','knowledge'],
+  ['intelligence','infrastructure'], ['intelligence','decision'], ['intelligence','action'],
+  ['citizen','operations'], ['knowledge','decision'], ['operations','infrastructure'],
+  ['decision','action'],
+];
+
+const NODE_VERT = `
+varying vec3 vNormal; varying vec3 vViewDir;
+void main() {
+  vec4 mvPos = modelViewMatrix * vec4(position,1.0);
+  vViewDir = normalize(-mvPos.xyz);
+  vNormal = normalize(normalMatrix * normal);
+  gl_Position = projectionMatrix * mvPos;
+}`;
+const NODE_FRAG = `
+uniform vec3 uColor; uniform float uTime,uSpeed,uHover,uFire;
+varying vec3 vNormal,vViewDir;
+void main() {
+  float f = pow(1.0 - clamp(dot(vNormal,vViewDir),0.0,1.0),3.2);
+  float pulse = sin(uTime*uSpeed*2.1)*0.06+0.94;
+  float boost = 1.0+uHover*0.55+uFire*0.65;
+  vec3 rim = uColor*(f*1.6*pulse*boost);
+  float alpha = 0.04+f*0.72*(0.6+uHover*0.3+uFire*0.2);
+  gl_FragColor = vec4(uColor*0.03+rim,alpha);
+}`;
+const HALO_FRAG = `
+uniform vec3 uColor; uniform float uTime,uSpeed,uHover,uFire;
+varying vec3 vNormal,vViewDir;
+void main() {
+  float f = pow(1.0-clamp(dot(vNormal,vViewDir),0.0,1.0),1.6);
+  float pulse = sin(uTime*uSpeed*1.4+0.8)*0.08+0.92;
+  float boost = 1.0+uHover*0.45+uFire*0.55;
+  gl_FragColor = vec4(uColor*f*pulse*boost, f*0.13*pulse*boost);
+}`;
+const EDGE_VERT = `
+attribute float aProgress; varying float vProgress;
+void main() { vProgress=aProgress; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`;
+const EDGE_FRAG = `
+uniform vec3 uColor; uniform float uTime,uPhase,uOpacity; varying float vProgress;
+float pulse(float pos,float t,float w){ return smoothstep(pos-w,pos,t)*smoothstep(pos+w,pos,t); }
+void main() {
+  float base=0.09; float pos=mod(uTime*0.14+uPhase,1.0);
+  float glow=pulse(pos,vProgress,0.055)*1.1;
+  gl_FragColor = vec4(uColor*(base+glow), (base*0.45+glow*0.55)*uOpacity);
+}`;
+
+let _laInitialised = false;
+
+window.initLivingArchitecture = function() {
+  if (_laInitialised) return;
+  _laInitialised = true;
+
+  const cvs = document.getElementById('la-canvas');
+  const W = window.innerWidth, H = window.innerHeight;
+
+  const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true, alpha: false });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(W, H);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.9;
+
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color('#060807');
+  scene.fog = new THREE.Fog('#060807', 12, 28);
+
+  const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 50);
+  camera.position.set(0, 0, 9);
+
+  const composer = new EffectComposer(renderer);
+  composer.addPass(new RenderPass(scene, camera));
+  composer.addPass(new UnrealBloomPass(new THREE.Vector2(W, H), 0.5, 0.35, 0.42));
+  composer.addPass(new OutputPass());
+
+  // Grid
+  const grid = new THREE.GridHelper(30, 30, 0x182413, 0x182413);
+  grid.position.y = -5; grid.material.opacity = 0.35; grid.material.transparent = true;
+  scene.add(grid);
+
+  // Bg particles
+  const bgPos = new Float32Array(400 * 3);
+  for (let i = 0; i < 400; i++) {
+    bgPos[i*3]   = (Math.random()-.5)*22;
+    bgPos[i*3+1] = (Math.random()-.5)*18;
+    bgPos[i*3+2] = (Math.random()-.5)*12;
+  }
+  const bgGeom = new THREE.BufferGeometry();
+  bgGeom.setAttribute('position', new THREE.BufferAttribute(bgPos, 3));
+  const bgMat = new THREE.PointsMaterial({ color:0x4a7a10, size:0.025, transparent:true, opacity:0.18, blending:THREE.AdditiveBlending, depthWrite:false });
+  scene.add(new THREE.Points(bgGeom, bgMat));
+
+  const nodeMap = {};
+  NODES.forEach(n => { nodeMap[n.id] = n; });
+
+  const nodeObjects = [], allCoreMeshes = [];
+
+  NODES.forEach((nd, i) => {
+    const color = new THREE.Color(nd.color);
+    const group = new THREE.Group();
+    group.position.set(...nd.pos);
+
+    const coreMat = new THREE.ShaderMaterial({
+      uniforms: { uColor:{value:color.clone()}, uTime:{value:0}, uSpeed:{value:nd.pulseSpeed}, uHover:{value:0}, uFire:{value:0} },
+      vertexShader: NODE_VERT, fragmentShader: NODE_FRAG,
+      transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, side:THREE.DoubleSide
+    });
+    const coreMesh = new THREE.Mesh(new THREE.IcosahedronGeometry(nd.size, 2), coreMat);
+    coreMesh.userData.nodeIdx = i;
+    group.add(coreMesh);
+    allCoreMeshes.push(coreMesh);
+
+    group.add(new THREE.Mesh(new THREE.IcosahedronGeometry(nd.size*1.02, 1), new THREE.MeshBasicMaterial({
+      color:new THREE.Color(nd.color), wireframe:true, transparent:true, opacity:0.22,
+      blending:THREE.AdditiveBlending, depthWrite:false
+    })));
+
+    const haloMat = new THREE.ShaderMaterial({
+      uniforms: { uColor:{value:color.clone()}, uTime:{value:0}, uSpeed:{value:nd.pulseSpeed}, uHover:{value:0}, uFire:{value:0} },
+      vertexShader: NODE_VERT, fragmentShader: HALO_FRAG,
+      transparent:true, depthWrite:false, blending:THREE.AdditiveBlending, side:THREE.BackSide
+    });
+    // halo sphere removed — keep only planet core + torus rings
+
+    const rings = [];
+    const ringCount = nd.id === 'intelligence' ? 3 : 1;
+    for (let r = 0; r < ringCount; r++) {
+      const ring = new THREE.Mesh(
+        new THREE.TorusGeometry(nd.size*(1.55+r*0.55), 0.007, 3, 56),
+        new THREE.MeshBasicMaterial({ color:new THREE.Color(nd.color), transparent:true, opacity:r===0?0.38:0.18-r*0.04, blending:THREE.AdditiveBlending, depthWrite:false })
+      );
+      ring.rotation.x = [Math.PI/2.8, Math.PI/5, Math.PI/1.9][r];
+      ring.rotation.y = [0, Math.PI/3, Math.PI/7][r];
+      group.add(ring); rings.push(ring);
+    }
+
+    const [px,py,pz] = nd.pos;
+    const label = document.createElement('div');
+    label.className = 'la-node-label';
+    label.innerHTML = `<span class="nl-name">${nd.label}</span>`;
+    document.body.appendChild(label);
+
+    const bracket = document.createElement('div');
+    const isHub = nd.id === 'intelligence';
+    bracket.className = `la-hud-wrap ${isHub?'large hub':'small'}`;
+    bracket.style.color = nd.color;
+    bracket.innerHTML = '<div class="la-hud-tl"></div><div class="la-hud-tr"></div><div class="la-hud-bl"></div><div class="la-hud-br"></div>';
+    document.body.appendChild(bracket);
+
+    group.scale.setScalar(0);
+    scene.add(group);
+    nodeObjects.push({ group, coreMesh, coreMat, haloMat, label, bracket, rings, data: nd });
+    // wireMat stored for potential future use (from v2)
+  });
+
+  const edgeObjects = [];
+  CONNECTIONS.forEach(([aId, bId], i) => {
+    const nA = nodeMap[aId], nB = nodeMap[bId];
+    const pA = new THREE.Vector3(...nA.pos), pB = new THREE.Vector3(...nB.pos);
+    const mid = pA.clone().add(pB).multiplyScalar(0.5);
+    const dist = pA.distanceTo(pB);
+    mid.x += (Math.random()-.5)*dist*0.18;
+    mid.y += (Math.random()-.5)*dist*0.12;
+    mid.z += (Math.random()-.5)*dist*0.1;
+    const curve = new THREE.CatmullRomCurve3([pA, mid, pB]);
+    const N = 90; const pts = curve.getPoints(N);
+    const geom = new THREE.BufferGeometry().setFromPoints(pts);
+    const progress = new Float32Array(N+1);
+    for (let k = 0; k <= N; k++) progress[k] = k/N;
+    geom.setAttribute('aProgress', new THREE.BufferAttribute(progress, 1));
+    const cA = new THREE.Color(nA.color), cB = new THREE.Color(nB.color);
+    const mat = new THREE.ShaderMaterial({
+      uniforms: { uColor:{value:cA.lerp(cB,0.5)}, uTime:{value:0}, uPhase:{value:i*0.13}, uOpacity:{value:0} },
+      vertexShader:EDGE_VERT, fragmentShader:EDGE_FRAG,
+      transparent:true, blending:THREE.AdditiveBlending, depthWrite:false
+    });
+    scene.add(new THREE.Line(geom, mat));
+    edgeObjects.push({ mat });
+  });
+
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+  const targetOrbit = new THREE.Vector2(), currentOrbit = new THREE.Vector2();
+  const tempV = new THREE.Vector3();
+  let hoveredIdx = -1, selectedIdx = -1;
+  const fireState = new Float32Array(NODES.length);
+  let nextFireTime = 3;
+
+  window.addEventListener('mousemove', e => {
+    mouse.x =  (e.clientX/window.innerWidth)*2-1;
+    mouse.y = -(e.clientY/window.innerHeight)*2+1;
+    targetOrbit.x = mouse.x*0.4;
+    targetOrbit.y = -mouse.y*0.25;
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(allCoreMeshes);
+    if (hits.length > 0) {
+      const idx = hits[0].object.userData.nodeIdx;
+      if (idx !== hoveredIdx) {
+        hoveredIdx = idx;
+        document.body.classList.add('la-hovering');
+      }
+    } else {
+      hoveredIdx = -1;
+      document.body.classList.remove('la-hovering');
+    }
+  });
+
+  window.addEventListener('click', () => {
+    if (!_laInitialised || !document.getElementById('la-canvas').classList.contains('active')) return;
+    if (hoveredIdx >= 0 && hoveredIdx !== selectedIdx) { selectedIdx = hoveredIdx; openPanel(selectedIdx); }
+    else if (hoveredIdx < 0 && selectedIdx >= 0) { closePanel(); }
+  });
+
+  document.getElementById('la-close-hint').addEventListener('click', closePanel);
+
+  function openPanel(idx) {
+    const nd = NODES[idx];
+    document.getElementById('la-p-index').textContent = nd.idx;
+    document.getElementById('la-p-name').textContent  = nd.label;
+    document.getElementById('la-p-desc').textContent  = nd.desc;
+    const cl = document.getElementById('la-p-conn-list');
+    cl.innerHTML = '';
+    nd.peers.filter(p => p !== nd.id).forEach(peerId => {
+      const span = document.createElement('span');
+      span.className = 'la-p-conn-tag';
+      span.textContent = nodeMap[peerId].label;
+      cl.appendChild(span);
+    });
+    const panel = document.getElementById('la-panel');
+    panel.classList.add('visible');
+    gsap.to(panel, { opacity:1, x:0, duration:.45, ease:'power3.out' });
+    gsap.to('#la-close-hint', { opacity:1, duration:.3, delay:.2 });
+  }
+
+  function closePanel() {
+    selectedIdx = -1;
+    const panel = document.getElementById('la-panel');
+    gsap.to(panel, { opacity:0, x:40, duration:.35, ease:'power2.in', onComplete:()=>panel.classList.remove('visible') });
+    gsap.to('#la-close-hint', { opacity:0, duration:.2 });
+  }
+
+  // ── reveal (v2 style: separated function) ──
+  function reveal() {
+    nodeObjects.forEach((obj, i) => {
+      const nd = NODES[i];
+      const fp = new THREE.Vector3(...nd.pos);
+      const spread = 7;
+      obj.group.position.set(
+        fp.x + (Math.random() - .5) * spread,
+        fp.y + (Math.random() - .5) * spread,
+        fp.z + (Math.random() - .5) * 3
+      );
+      obj.group.scale.setScalar(0);
+    });
+
+    nodeObjects.forEach((obj, i) => {
+      const nd = NODES[i];
+      const fp = new THREE.Vector3(...nd.pos);
+      const delay = i === 0 ? 0.2 : 0.4 + i * 0.18;
+      gsap.to(obj.group.position, { x:fp.x, y:fp.y, z:fp.z, duration:1.6, delay, ease:'power3.out' });
+      gsap.to(obj.group.scale,    { x:1, y:1, z:1, duration:1.1, delay:delay+0.05, ease:'back.out(1.6)' });
+    });
+
+    edgeObjects.forEach((e, i) => {
+      gsap.to(e.mat.uniforms.uOpacity, { value:1, duration:1.2, delay:1.8+i*0.07, ease:'power2.out' });
+    });
+
+    nodeObjects.forEach((obj, i) => {
+      const delay = 1.4 + i * 0.1;
+      gsap.fromTo(obj.bracket, { scale:1.35 }, { scale:1, duration:.5, delay, ease:'power2.out' });
+    });
+
+    gsap.to('#la-section-label', { opacity:1, y:0, duration:.8, delay:.3, ease:'power2.out' });
+    gsap.to('#la-text-block',    { opacity:1, y:0, duration:1.0, delay:.6, ease:'power3.out' });
+    gsap.to('#la-statusbar',     { opacity:1,      duration:.8, delay:2.8 });
+  }
+
+  // ── fireNode (v2 style: separated function) ──
+  function fireNode(idx) {
+    fireState[idx] = 1;
+    setTimeout(() => { fireState[0] = 0.5; }, 300 + Math.random() * 200);
+  }
+
+  const clock = new THREE.Clock();
+
+  (function animate() {
+    requestAnimationFrame(animate);
+    const delta = clock.getDelta(), t = clock.getElapsedTime();
+
+    currentOrbit.x += (targetOrbit.x - currentOrbit.x) * 0.04;
+    currentOrbit.y += (targetOrbit.y - currentOrbit.y) * 0.04;
+    camera.position.x = currentOrbit.x;
+    camera.position.y = currentOrbit.y;
+    camera.lookAt(scene.position);
+
+    nextFireTime -= delta;
+    if (nextFireTime <= 0) {
+      const nonHub = nodeObjects.filter((_,i) => i !== 0);
+      const tIdx = nodeObjects.indexOf(nonHub[Math.floor(Math.random()*nonHub.length)]);
+      fireNode(tIdx);
+      nextFireTime = 5 + Math.random() * 6;
+    }
+
+    nodeObjects.forEach((obj, i) => {
+      const isHovered  = hoveredIdx === i;
+      const isSelected = selectedIdx === i;
+
+      const hoverTarget = (isHovered || isSelected) ? 1 : 0;
+      obj.coreMat.uniforms.uHover.value += (hoverTarget - obj.coreMat.uniforms.uHover.value) * 0.1;
+      obj.haloMat.uniforms.uHover.value  = obj.coreMat.uniforms.uHover.value;
+
+      obj.coreMat.uniforms.uFire.value += (fireState[i] - obj.coreMat.uniforms.uFire.value) * 0.15;
+      obj.haloMat.uniforms.uFire.value  = obj.coreMat.uniforms.uFire.value;
+
+      obj.coreMat.uniforms.uTime.value = t;
+      obj.haloMat.uniforms.uTime.value = t;
+      if (fireState[i] > 0) fireState[i] = Math.max(0, fireState[i] - delta * 1.2);
+
+      const breathe = 1 + Math.sin(t * NODES[i].pulseSpeed * 1.5 + i) * 0.012;
+      const hoverSc = 1 + obj.coreMat.uniforms.uHover.value * 0.12;
+      obj.group.scale.setScalar(breathe * hoverSc);
+      obj.rings.forEach((ring, r) => { ring.rotation.z += delta * (0.18 + r * 0.09) * (r%2===0?1:-1); });
+
+      tempV.copy(obj.group.position);
+      tempV.project(camera);
+      const sx = (tempV.x * .5 + .5) * window.innerWidth;
+      const sy = (-tempV.y * .5 + .5) * window.innerHeight;
+      const laActive = cvs.classList.contains('active');
+      const visible = laActive && tempV.z < 1 && obj.group.scale.x > 0.08;
+      const lOff = NODES[i].size * 90 + 14;
+
+      obj.label.style.transform = `translate(-50%,-50%) translate(${sx}px,${sy+lOff}px)`;
+      obj.label.style.opacity = visible ? '1' : '0';
+      obj.bracket.style.transform = `translate(-50%,-50%) translate(${sx}px,${sy}px)`;
+      obj.bracket.style.opacity = visible ? String(0.3 + obj.coreMat.uniforms.uHover.value * 0.5) : '0';
+    });
+
+    edgeObjects.forEach(e => { e.mat.uniforms.uTime.value = t; });
+    bgMat.size = 0.03 + Math.sin(t * 0.3) * 0.005;
+    composer.render();
+  })();
+
+  reveal();
+
+  window.addEventListener('resize', () => {
+    const w = window.innerWidth, h = window.innerHeight;
+    camera.aspect = w/h; camera.updateProjectionMatrix();
+    renderer.setSize(w, h); composer.setSize(w, h);
+  });
+};
+</script>
+
+<!-- ══ SECTION 5 — LIVING ARCHITECTURE ══ -->
+<canvas id="la-canvas"></canvas>
+
+<div id="la-section-label">
+  <span class="la-sl-num">05</span>
+  <span class="la-sl-sep">/</span>
+  <span class="la-sl-title">Living Architecture</span>
+</div>
+
+<div id="la-text-block">
+  <div id="la-headline">A Living Architecture<br>For Decisions.</div>
+  <div id="la-description">We connect signals, context, knowledge, and workflows into adaptive systems that help organizations move from awareness to action.</div>
+</div>
+
+<div id="la-panel">
+  <div class="la-p-section">Node Detail</div>
+  <div class="la-p-index" id="la-p-index">—</div>
+  <div class="la-p-name" id="la-p-name">—</div>
+  <div class="la-p-bar"></div>
+  <div class="la-p-desc" id="la-p-desc">—</div>
+  <div class="la-p-conn-label">Connects to</div>
+  <div class="la-p-conn-list" id="la-p-conn-list"></div>
+</div>
+
+<div id="la-close-hint"><span>✕</span> CLICK TO CLOSE</div>
+
+<div id="la-statusbar">
+  <span class="la-sb-item">7 NODES</span>
+  <span class="la-sb-dot">·</span>
+  <span class="la-sb-item">10 CONNECTIONS</span>
+  <span class="la-sb-dot">·</span>
+  <span class="la-sb-item" id="la-sb-active">SYSTEM ACTIVE</span>
+</div>
+
+<!-- ── Living Architecture transition overlay ── -->
+<div id="tx-overlay">
+  <div class="tx-num">05</div>
+  <div class="tx-rule"></div>
+  <div class="tx-title-wrap"><div class="tx-word" id="tx-w1">Living</div></div>
+  <div class="tx-title-wrap"><div class="tx-word" id="tx-w2">Architecture</div></div>
+  <div class="tx-sub">A unified intelligence ecosystem</div>
+  <div class="tx-prog-wrap"><div class="tx-prog"></div></div>
+</div>
+<div id="tx-flash"></div>
+
+<!-- ══ SECTION 6 — SELECTED DEPLOYMENTS ══ -->
+
+<!-- nav hint shown inside Section 5 -->
+<div id="sd-nav">
+  <div class="sd-nav-label">Selected Deployments</div>
+  <div class="sd-nav-arrow">↓</div>
+</div>
+
+<canvas id="sd-canvas"></canvas>
+
+<div id="sd-section-label">
+  <span class="sd-sl-num">06</span>
+  <span class="sd-sl-sep">/</span>
+  <span class="sd-sl-title">Selected Deployments</span>
+</div>
+
+<div id="sd-categories"></div>
+
+<div id="sd-copy">
+  <div class="sd-copy-num" id="sd-copy-num">01 / 05</div>
+  <div class="sd-copy-name" id="sd-copy-name">Public Services</div>
+  <div class="sd-copy-bar"></div>
+  <div class="sd-copy-body" id="sd-copy-body"></div>
+  <div class="sd-copy-region" id="sd-copy-region">Indonesia</div>
+</div>
+
+<div id="sd-headline-block">
+  <div id="sd-headline">In The Field.</div>
+  <div id="sd-subline">Five environments where Cogniti is operational.<br>Not demos — live systems making real decisions.</div>
+</div>
+
+<div id="sd-statusbar">
+  <span class="sd-sb-item" id="sd-sb-env">ENVIRONMENT 1 / 5</span>
+  <span class="sd-sb-sep">·</span>
+  <span class="sd-sb-item" id="sd-sb-status">ACTIVE</span>
+</div>
+
+<div id="sd-back">
+  <span class="sd-back-icon">←</span>
+  <span class="sd-back-label">Architecture</span>
+</div>
+
+<!-- SD transition overlay -->
+<div id="sd-tx-overlay">
+  <div class="sd-tx-num">06</div>
+  <div class="sd-tx-rule"></div>
+  <div class="sd-tx-title-wrap"><div class="sd-tx-word">Selected</div></div>
+  <div class="sd-tx-title-wrap"><div class="sd-tx-word">Deployments</div></div>
+  <div class="sd-tx-sub">In the field. Not demos.</div>
+  <div class="sd-tx-prog-wrap"><div class="sd-tx-prog"></div></div>
+</div>
+<div id="sd-flash"></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass }     from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+/* ── category data ── */
+const CATS = [
+  {
+    name: 'Public Services', num: '01', region: 'Indonesia',
+    body: 'Government agencies manage at scale and decide under pressure. We embed inside those environments — connecting citizen data, operational visibility, and coordination workflows so institutions move from knowing to acting.'
+  },
+  {
+    name: 'Infrastructure', num: '02', region: 'Indonesia',
+    body: "Critical systems don't fail loudly — they degrade quietly until something breaks. We connect the signals operators miss: asset status, environmental conditions, operational patterns. Awareness before incidents."
+  },
+  {
+    name: 'Logistics', num: '03', region: 'International',
+    body: "Every shipment is a sequence of decisions. We sit at the routing layer — where exceptions stack, visibility drops, and delays compound. Not another dashboard. Intelligence that moves with the load."
+  },
+  {
+    name: 'Hospitality', num: '04', region: 'Southeast Asia',
+    body: "Guests don't say what they need. We help teams read the patterns early — service signals, engagement gaps, moments before friction becomes feedback."
+  },
+  {
+    name: 'Communities', num: '05', region: 'Indonesia',
+    body: "More channels made coordination harder, not easier. We help communities hear what's actually being said, find where engagement lives, and act before signal turns to noise."
+  },
+];
+
+/* ── state ── */
+let _sdInit = false, _sdVisible = false;
+let fromCat = 0, toCat = 0, morphT = 1.0;
+
+/* ── build category tabs ── */
+const catEl = document.getElementById('sd-categories');
+CATS.forEach((c, i) => {
+  const el = document.createElement('div');
+  el.className = 'sd-cat-item' + (i === 0 ? ' active' : '');
+  el.innerHTML = `<div class="sd-cat-dot"></div><div class="sd-cat-name">${c.name}</div>`;
+  el.addEventListener('click', () => goToCategory(i));
+  catEl.appendChild(el);
+});
+
+/* ── renderer ── */
+const cvs = document.getElementById('sd-canvas');
+const renderer = new THREE.WebGLRenderer({ canvas: cvs, antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.1;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#060807');
+
+const cam = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 200);
+cam.position.set(0, 15, 13);
+cam.lookAt(0, 0, 0);
+
+/* ── terrain geometry ── */
+const SEG = 90, SZ = 18;
+const geo = new THREE.PlaneGeometry(SZ, SZ, SEG, SEG);
+geo.rotateX(-Math.PI / 2);   // flat on XZ plane, Y = height
+
+const pos = geo.attributes.position;
+const N   = pos.count;
+
+// normalized XZ coords per vertex (after rotation)
+const VX = new Float32Array(N);
+const VZ = new Float32Array(N);
+for (let i = 0; i < N; i++) {
+  VX[i] = pos.getX(i) / (SZ * 0.5);
+  VZ[i] = pos.getZ(i) / (SZ * 0.5);
+}
+
+/* ── 5 height maps ── */
+const HEIGHTS = Array.from({ length: 5 }, () => new Float32Array(N));
+for (let i = 0; i < N; i++) {
+  const x = VX[i], z = VZ[i];
+
+  // H0 Public Services — stepped plateaus (quantized waves)
+  const r0 = 0.65 * Math.sin(x * Math.PI * 1.9) * Math.cos(z * Math.PI * 1.6)
+            + 0.30 * Math.sin(x * Math.PI * 4.2 + z * Math.PI * 3.1);
+  HEIGHTS[0][i] = Math.round(r0 * 5) / 5 * 2.6;
+
+  // H1 Infrastructure — sharp grid spikes
+  const gx = Math.abs(Math.cos(x * Math.PI * 5));
+  const gz = Math.abs(Math.cos(z * Math.PI * 5));
+  HEIGHTS[1][i] = Math.pow(gx * gz, 7) * 5.8 + 0.1 * Math.sin(x * 2.5 + z * 1.8);
+
+  // H2 Logistics — diagonal flow ridges
+  const ch1 = 2.4 * Math.exp(-Math.pow((x + z * 0.55 + 0.15) * 4.2, 2));
+  const ch2 = 1.9 * Math.exp(-Math.pow((x - z * 0.45 - 0.40) * 3.6, 2));
+  const ch3 = 2.1 * Math.exp(-Math.pow((x * 0.5 - z + 0.25) * 3.9, 2));
+  HEIGHTS[2][i] = ch1 + ch2 + ch3;
+
+  // H3 Hospitality — gentle dome clusters
+  const hC = [[-0.42,-0.28],[0.38,0.44],[-0.12,0.56],[0.52,-0.22],[0.02,0.08]];
+  HEIGHTS[3][i] = hC.reduce((s, [cx,cz]) =>
+    s + 2.3 * Math.exp(-((x-cx)**2 + (z-cz)**2) * 8.5), 0);
+
+  // H4 Communities — distributed organic hills
+  const cC = [[-0.68,0.10],[0.06,-0.63],[0.62,0.17],[-0.24,0.66],[0.44,-0.50],[-0.52,-0.38],[0.18,0.72]];
+  HEIGHTS[4][i] = cC.reduce((s, [cx,cz], j) =>
+    s + (0.9 + j * 0.13) * Math.exp(-((x-cx)**2 + (z-cz)**2) * 13), 0);
+}
+
+/* ── vertex color attribute ── */
+const colAttr = new THREE.BufferAttribute(new Float32Array(N * 3), 3);
+geo.setAttribute('color', colAttr);
+
+const LOW_C  = new THREE.Color('#0b1e12');
+const HIGH_C = new THREE.Color('#b8ff3c');
+const tmpC   = new THREE.Color();
+
+function updateColors() {
+  const arr = colAttr.array;
+  for (let i = 0; i < N; i++) {
+    const t = Math.pow(Math.min(1, Math.max(0, pos.getY(i) / 3.8)), 1.4);
+    tmpC.lerpColors(LOW_C, HIGH_C, t);
+    arr[i*3] = tmpC.r; arr[i*3+1] = tmpC.g; arr[i*3+2] = tmpC.b;
+  }
+  colAttr.needsUpdate = true;
+}
+
+/* ── terrain meshes (share geometry) ── */
+const solidMesh = new THREE.Mesh(geo,
+  new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.DoubleSide }));
+scene.add(solidMesh);
+
+const wireMesh = new THREE.Mesh(geo,
+  new THREE.MeshBasicMaterial({ color: '#b8ff3c', wireframe: true, transparent: true, opacity: 0.05 }));
+scene.add(wireMesh);
+
+/* ── deployment pins ── */
+const PIN_DEFS = [
+  [[-0.30,-0.10],[0.42,0.22],[-0.52,0.40],[0.10,-0.56]],
+  [[0.02,0.02],[0.50,0.50],[-0.50,0.50],[0.50,-0.50],[-0.50,-0.50]],
+  [[-0.62,-0.32],[-0.12,0.08],[0.32,0.34],[0.68,0.58]],
+  [[-0.42,-0.28],[0.38,0.44],[-0.12,0.56],[0.52,-0.22]],
+  [[-0.68,0.10],[0.06,-0.63],[0.62,0.17],[-0.24,0.66],[0.44,-0.50],[-0.52,-0.38]],
+];
+
+const pinGeo = new THREE.SphereGeometry(0.1, 8, 8);
+const pinMat = new THREE.MeshBasicMaterial({ color: '#b8ff3c' });
+const pinCount = 6;
+const pins      = Array.from({ length: pinCount }, () => {
+  const m = new THREE.Mesh(pinGeo, pinMat); m.visible = false; scene.add(m); return m;
+});
+const pinLights = Array.from({ length: pinCount }, () => {
+  const l = new THREE.PointLight('#b8ff3c', 0, 4, 2); scene.add(l); return l;
+});
+
+function placePins(catIdx) {
+  const defs = PIN_DEFS[catIdx];
+  pins.forEach((m, i) => { m.visible = i < defs.length; pinLights[i].intensity = 0; });
+  defs.forEach(([xn, zn], i) => {
+    let bi = 0, bd = 1e9;
+    for (let v = 0; v < N; v++) {
+      const d = (VX[v]-xn)**2 + (VZ[v]-zn)**2;
+      if (d < bd) { bd = d; bi = v; }
+    }
+    const py = HEIGHTS[catIdx][bi] + 0.3;
+    pins[i].position.set(xn * SZ * 0.5, py, zn * SZ * 0.5);
+    pins[i].scale.setScalar(0);
+    pinLights[i].position.set(xn * SZ * 0.5, py, zn * SZ * 0.5);
+    gsap.to(pins[i].scale,  { x:1,y:1,z:1,  duration:.5, delay:i*.12+.35, ease:'back.out(2)' });
+    gsap.to(pinLights[i],   { intensity:1.8, duration:.5, delay:i*.12+.35 });
+  });
+}
+
+/* ── post-processing ── */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, cam));
+composer.addPass(new UnrealBloomPass(
+  new THREE.Vector2(window.innerWidth, window.innerHeight), 0.7, 0.5, 0.8));
+
+/* ── category switch ── */
+function goToCategory(idx) {
+  if (idx === toCat) return;
+  fromCat = toCat; toCat = idx; morphT = 0;
+  const tw = { t: 0 };
+  gsap.to(tw, { t: 1, duration: 1.6, ease: 'power3.inOut', onUpdate() { morphT = tw.t; } });
+
+  document.querySelectorAll('.sd-cat-item').forEach((el, i) =>
+    el.classList.toggle('active', i === idx));
+
+  gsap.to('#sd-copy', { opacity:0, x:12, duration:.3, ease:'power2.in',
+    onComplete() {
+      const c = CATS[idx];
+      document.getElementById('sd-copy-num').textContent    = `${c.num} / 05`;
+      document.getElementById('sd-copy-name').textContent   = c.name;
+      document.getElementById('sd-copy-body').textContent   = c.body;
+      document.getElementById('sd-copy-region').textContent = c.region;
+      document.getElementById('sd-sb-env').textContent      = `ENVIRONMENT ${idx+1} / 5`;
+      gsap.to('#sd-copy', { opacity:1, x:0, duration:.5, ease:'power2.out' });
+    }
+  });
+
+  setTimeout(() => placePins(idx), 500);
+}
+
+/* ── animation loop ── */
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const t   = clock.getElapsedTime();
+  const hF  = HEIGHTS[fromCat], hT = HEIGHTS[toCat], mt = morphT;
+
+  for (let i = 0; i < N; i++) pos.setY(i, hF[i] * (1-mt) + hT[i] * mt);
+  pos.needsUpdate = true;
+  updateColors();
+
+  cam.position.x = Math.sin(t * 0.035) * 4;
+  cam.position.z = 13 + Math.cos(t * 0.028) * 2;
+  cam.lookAt(0, 0, 0);
+
+  pins.forEach((m, i) => {
+    if (!m.visible) return;
+    m.position.y += Math.sin(t * 1.5 + i * 1.1) * 0.0025;
+    pinLights[i].position.y = m.position.y;
+  });
+
+  composer.render();
+}
+
+/* ── reveal / conceal SD ── */
+function revealSD() {
+  if (_sdVisible) return;
+  _sdVisible = true;
+
+  if (!_sdInit) {
+    _sdInit = true;
+    const c = CATS[0];
+    document.getElementById('sd-copy-num').textContent    = '01 / 05';
+    document.getElementById('sd-copy-name').textContent   = c.name;
+    document.getElementById('sd-copy-body').textContent   = c.body;
+    document.getElementById('sd-copy-region').textContent = c.region;
+    placePins(0);
+    animate();
+  }
+
+  cvs.classList.add('active');
+  gsap.set('#sd-copy', { x: 20 });
+  gsap.to(cvs,                { opacity:1, duration:.5, ease:'power2.out' });
+  gsap.to('#sd-section-label',{ opacity:1, y:0,  duration:.8, delay:.3, ease:'power2.out' });
+  gsap.to('#sd-categories',   { opacity:1,       duration:.8, delay:.4  });
+  gsap.to('#sd-copy',         { opacity:1, x:0,  duration:.8, delay:.5, ease:'power3.out' });
+  gsap.to('#sd-headline-block',{ opacity:1,       duration:.7, delay:.7  });
+  gsap.to('#sd-statusbar',    { opacity:1,        duration:.6, delay:1.0 });
+  gsap.to('#sd-back',         { opacity:1,        duration:.6, delay:.6,
+    onComplete() { document.getElementById('sd-back').classList.add('visible'); }
+  });
+  document.getElementById('sd-categories').classList.add('active');
+}
+
+function concealSD() {
+  if (!_sdVisible) return;
+  _sdVisible = false;
+  gsap.to(['#sd-canvas','#sd-section-label','#sd-categories','#sd-copy',
+           '#sd-headline-block','#sd-statusbar','#sd-back'],
+    { opacity:0, duration:.4, ease:'power2.in' });
+  cvs.classList.remove('active');
+  document.getElementById('sd-back').classList.remove('visible');
+  document.getElementById('sd-categories').classList.remove('active');
+}
+
+window.revealSD  = revealSD;
+window.concealSD = concealSD;
+
+/* ── SD transition overlay ── */
+function triggerTransitionSD() {
+  const ov = document.getElementById('sd-tx-overlay');
+  if (ov.classList.contains('active')) return;
+  ov.classList.add('active');
+
+  gsap.set('.sd-tx-word',  { y: '100%' });
+  gsap.set(['.sd-tx-num','.sd-tx-sub'], { opacity:0, y:10 });
+  gsap.set('.sd-tx-rule',  { scaleX: 0 });
+  gsap.set('.sd-tx-prog',  { scaleX: 0 });
+
+  gsap.timeline({
+    onComplete() {
+      gsap.to('#sd-flash', { opacity:1, duration:.2, ease:'power2.in',
+        onComplete() {
+          revealSD();
+          gsap.to(['#sd-tx-overlay','#sd-flash'], { opacity:0, duration:.5, ease:'power2.out',
+            onComplete() { ov.classList.remove('active'); ov.style.pointerEvents = 'none'; }
+          });
+        }
+      });
+    }
+  })
+  .to(ov,            { opacity:1,         duration:.3 })
+  .to('.sd-tx-num',  { opacity:1, y:0,    duration:.4 }, '+=.1')
+  .to('.sd-tx-rule', { scaleX:1,          duration:.6, ease:'power2.out' }, '-=.2')
+  .to('.sd-tx-word', { y:'0%', stagger:.14, duration:.8, ease:'power3.out' }, '-=.3')
+  .to('.sd-tx-sub',  { opacity:1, y:0,    duration:.4 }, '-=.3')
+  .to('.sd-tx-prog', { scaleX:1,          duration:.8, ease:'power2.inOut' }, '-=.6');
+}
+
+/* ── nav hint click (from Section 5) ── */
+document.getElementById('sd-nav').addEventListener('click', () => {
+  const sdNav = document.getElementById('sd-nav');
+  sdNav.classList.remove('visible');
+  gsap.to(sdNav, { opacity:0, duration:.2 });
+
+  const laCvs = document.getElementById('la-canvas');
+  gsap.to([laCvs,'#la-section-label','#la-text-block','#la-statusbar'], {
+    opacity:0, duration:.35,
+    onComplete() { laCvs.classList.remove('active'); }
+  });
+  setTimeout(triggerTransitionSD, 250);
+});
+
+/* ── back button (return to Section 5) ── */
+document.getElementById('sd-back').addEventListener('click', () => {
+  concealSD();
+  const laCvs = document.getElementById('la-canvas');
+  laCvs.classList.add('active');
+  gsap.to(laCvs, { opacity:1, duration:.5, delay:.2 });
+  gsap.to(['#la-section-label','#la-text-block','#la-statusbar'], { opacity:1, duration:.6, delay:.3 });
+  showSdNav(.8);
+});
+
+/* ── watch for LA canvas becoming active → show sd-nav ── */
+function showSdNav(delay) {
+  const sdNav = document.getElementById('sd-nav');
+  if (sdNav.classList.contains('visible')) return;
+  sdNav.classList.add('visible');
+  gsap.to(sdNav, { opacity:1, duration:.8, delay: delay ?? 2.0, ease:'power2.out' });
+}
+const obs = new MutationObserver(() => {
+  if (document.getElementById('la-canvas').classList.contains('active')) {
+    showSdNav(2.0);
+    obs.disconnect();
+  }
+});
+obs.observe(document.getElementById('la-canvas'), { attributes:true, attributeFilter:['class'] });
+/* fallback: already active when module loads */
+if (document.getElementById('la-canvas').classList.contains('active')) showSdNav(0.5);
+
+/* ── resize ── */
+window.addEventListener('resize', () => {
+  const w = window.innerWidth, h = window.innerHeight;
+  cam.aspect = w / h; cam.updateProjectionMatrix();
+  renderer.setSize(w, h); composer.setSize(w, h);
+});
+</script>
+
 </body>
 </html>

@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Section 5 — Living Architecture · Cogniti</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg:#060807;
+  --surface:#0c150a;
+  --grid:#182413;
+  --accent:#b8ff3c;
+  --accent2:#00d4ff;
+  --accent-dim:#4a7a10;
+  --text:#edeae2;
+  --muted:#6a7864;
+  --handle:#ff6b35;
+}
+
+html,body{
+  width:100%;height:100%;
+  background:var(--bg);
+  color:var(--text);
+  overflow:hidden;
+  font-family:'Space Grotesk',sans-serif;
+  cursor:none;
+}
+
+/* ── canvas ── */
+#canvas{
+  position:fixed;inset:0;
+  display:block;
+  z-index:1;
+}
+
+/* ── scanlines ── */
+#scanlines{
+  position:fixed;inset:0;
+  pointer-events:none;z-index:9000;
+  background:repeating-linear-gradient(to bottom,transparent 0,transparent 3px,rgba(0,0,0,.07) 3px,rgba(0,0,0,.07) 4px);
+  opacity:.4;
+}
+
+/* ── cursor ── */
+#cursor{
+  position:fixed;width:5px;height:5px;
+  background:var(--accent);border-radius:50%;
+  pointer-events:none;z-index:9999;
+  transform:translate(-50%,-50%);
+  mix-blend-mode:exclusion;
+  transition:width .12s,height .12s;
+}
+#cursor-ring{
+  position:fixed;width:26px;height:26px;
+  border:1px solid rgba(184,255,60,.25);border-radius:50%;
+  pointer-events:none;z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:left .07s linear,top .07s linear,width .2s,height .2s,border-color .2s;
+}
+body.hovering #cursor{width:10px;height:10px}
+body.hovering #cursor-ring{width:42px;height:42px;border-color:rgba(184,255,60,.5)}
+
+/* ── section label ── */
+#section-label{
+  position:fixed;top:36px;left:44px;
+  z-index:200;
+  display:flex;align-items:baseline;gap:10px;
+  opacity:0;
+  transform:translateY(-8px);
+}
+.sl-num{
+  font-family:'Space Mono',monospace;
+  font-size:10px;letter-spacing:.18em;
+  color:var(--accent-dim);
+}
+.sl-sep{font-size:10px;color:#2a3a20}
+.sl-title{
+  font-family:'Inter',sans-serif;
+  font-weight:200;font-size:11px;
+  letter-spacing:.28em;text-transform:uppercase;
+  color:var(--muted);
+}
+
+/* ── subtitle ── */
+#subtitle{
+  position:fixed;top:62px;left:44px;
+  z-index:200;
+  font-family:'Inter',sans-serif;
+  font-weight:200;font-size:22px;
+  letter-spacing:-.01em;
+  color:var(--text);
+  opacity:0;
+  transform:translateY(6px);
+}
+#subtitle em{
+  font-style:normal;
+  color:var(--accent);
+}
+
+/* ── node DOM labels ── */
+.node-label{
+  position:fixed;
+  pointer-events:none;
+  z-index:150;
+  text-align:center;
+  opacity:0;
+  transition:opacity .3s;
+}
+.node-label .nl-name{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:10px;font-weight:600;
+  letter-spacing:.16em;text-transform:uppercase;
+  color:var(--text);
+  display:block;
+  text-shadow:0 0 12px rgba(0,0,0,.8);
+}
+.node-label .nl-index{
+  font-family:'Space Mono',monospace;
+  font-size:8px;
+  color:var(--accent-dim);
+  letter-spacing:.1em;
+  display:block;
+  margin-top:2px;
+}
+
+/* ── detail panel ── */
+#panel{
+  position:fixed;top:0;right:0;
+  width:320px;height:100%;
+  z-index:300;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:48px 44px;
+  opacity:0;
+  transform:translateX(40px);
+  pointer-events:none;
+  border-left:1px solid rgba(24,36,19,.8);
+  background:linear-gradient(to left,rgba(6,8,7,.95),rgba(6,8,7,.6));
+  backdrop-filter:blur(12px);
+}
+#panel.visible{pointer-events:all}
+.p-section{
+  font-family:'Space Mono',monospace;
+  font-size:9px;letter-spacing:.2em;
+  color:var(--accent-dim);
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.p-index{
+  font-family:'Space Mono',monospace;
+  font-size:10px;letter-spacing:.15em;
+  color:var(--accent-dim);
+  margin-bottom:4px;
+}
+.p-name{
+  font-family:'Inter',sans-serif;
+  font-weight:200;font-size:36px;
+  letter-spacing:-.02em;
+  line-height:1;
+  margin-bottom:20px;
+  color:var(--text);
+}
+.p-bar{
+  height:1px;
+  background:linear-gradient(to right,var(--accent-dim),transparent);
+  margin-bottom:20px;
+  opacity:.5;
+}
+.p-desc{
+  font-family:'Space Grotesk',sans-serif;
+  font-size:13px;font-weight:300;
+  line-height:1.7;
+  color:var(--muted);
+  margin-bottom:28px;
+}
+.p-conn-label{
+  font-family:'Space Mono',monospace;
+  font-size:8px;letter-spacing:.2em;
+  color:var(--accent-dim);
+  text-transform:uppercase;
+  margin-bottom:10px;
+}
+.p-conn-list{
+  display:flex;flex-wrap:wrap;gap:6px;
+}
+.p-conn-tag{
+  font-family:'Space Mono',monospace;
+  font-size:8px;letter-spacing:.1em;
+  color:var(--accent-dim);
+  border:1px solid rgba(74,122,16,.3);
+  padding:3px 8px;border-radius:2px;
+  text-transform:uppercase;
+}
+
+/* ── status bar ── */
+#statusbar{
+  position:fixed;bottom:28px;left:44px;
+  z-index:200;
+  display:flex;align-items:center;gap:12px;
+  opacity:0;
+}
+.sb-item{
+  font-family:'Space Mono',monospace;
+  font-size:8px;letter-spacing:.18em;
+  color:var(--muted);
+  text-transform:uppercase;
+}
+.sb-dot{color:#2a3a20;font-size:10px}
+#sb-active{color:var(--accent);position:relative;padding-left:12px}
+#sb-active::before{
+  content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);
+  width:5px;height:5px;border-radius:50%;
+  background:var(--accent);
+  box-shadow:0 0 6px var(--accent);
+  animation:blink 2s ease infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── close hint ── */
+#close-hint{
+  position:fixed;top:36px;right:44px;
+  z-index:400;
+  font-family:'Space Mono',monospace;font-size:9px;
+  letter-spacing:.15em;color:var(--muted);
+  cursor:none;opacity:0;
+  display:flex;align-items:center;gap:8px;
+}
+#close-hint span{
+  width:16px;height:16px;border:1px solid rgba(106,120,100,.3);
+  display:inline-flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--muted);border-radius:2px;
+}
+
+/* ── node coords ── */
+.nl-coords{
+  font-family:'Space Mono',monospace;
+  font-size:7px;letter-spacing:.06em;
+  color:#2e4a20;display:block;
+  margin-top:3px;
+}
+
+/* ── HUD targeting bracket ── */
+.hud-wrap{
+  position:fixed;pointer-events:none;z-index:145;
+  transform:translate(-50%,-50%);
+  opacity:0;
+}
+.hud-wrap.large{width:72px;height:72px}
+.hud-wrap.small{width:48px;height:48px}
+.hud-tl,.hud-tr,.hud-bl,.hud-br{
+  position:absolute;width:9px;height:9px;
+}
+.hud-tl{top:0;left:0;border-top:1px solid;border-left:1px solid}
+.hud-tr{top:0;right:0;border-top:1px solid;border-right:1px solid}
+.hud-bl{bottom:0;left:0;border-bottom:1px solid;border-left:1px solid}
+.hud-br{bottom:0;right:0;border-bottom:1px solid;border-right:1px solid}
+/* center crosshair on hub only */
+.hud-wrap.hub::before,.hud-wrap.hub::after{
+  content:'';position:absolute;background:currentColor;opacity:.25;
+}
+.hud-wrap.hub::before{width:1px;height:100%;left:50%;top:0}
+.hud-wrap.hub::after{height:1px;width:100%;top:50%;left:0}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<div id="scanlines"></div>
+
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<div id="section-label">
+  <span class="sl-num">05</span>
+  <span class="sl-sep">/</span>
+  <span class="sl-title">Living Architecture</span>
+</div>
+
+<div id="subtitle">A unified <em>intelligence</em> ecosystem</div>
+
+<div id="panel">
+  <div class="p-section">Node Detail</div>
+  <div class="p-index" id="p-index">—</div>
+  <div class="p-name" id="p-name">—</div>
+  <div class="p-bar"></div>
+  <div class="p-desc" id="p-desc">—</div>
+  <div class="p-conn-label">Connects to</div>
+  <div class="p-conn-list" id="p-conn-list"></div>
+</div>
+
+<div id="close-hint"><span>✕</span> CLICK TO CLOSE</div>
+
+<div id="statusbar">
+  <span class="sb-item">7 NODES</span>
+  <span class="sb-dot">·</span>
+  <span class="sb-item">10 CONNECTIONS</span>
+  <span class="sb-dot">·</span>
+  <span class="sb-item" id="sb-active">SYSTEM ACTIVE</span>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass }     from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass }     from 'three/addons/postprocessing/OutputPass.js';
+
+// ─────────────────────────────────────────
+// NODE DATA
+// ─────────────────────────────────────────
+const NODES = [
+  {
+    id:'intelligence', label:'Intelligence', idx:'00',
+    pos:[0,0,0], color:'#e8f4ff', size:0.44, pulseSpeed:1.4,
+    desc:'The cognitive core. Synthesizes all inputs across every domain into unified, real-time organizational understanding.',
+    peers:['citizen','operations','knowledge','infrastructure','decision','action']
+  },
+  {
+    id:'citizen', label:'Citizen', idx:'01',
+    pos:[-3.8,1.8,-0.6], color:'#b8ff3c', size:0.27, pulseSpeed:0.72,
+    desc:'Direct interface with the community. Captures real-time feedback, service requests, and civic signals at every touchpoint.',
+    peers:['intelligence','operations']
+  },
+  {
+    id:'operations', label:'Operations', idx:'02',
+    pos:[3.6,1.5,0.5], color:'#00d4ff', size:0.30, pulseSpeed:0.88,
+    desc:'Operational intelligence hub. Streamlines workflows, resource allocation, and field coordination with precision.',
+    peers:['intelligence','infrastructure','citizen']
+  },
+  {
+    id:'knowledge', label:'Knowledge', idx:'03',
+    pos:[-3.3,-1.7,0.8], color:'#ffaa33', size:0.27, pulseSpeed:0.61,
+    desc:'Institutional memory. Stores, indexes, and surfaces critical organizational insights exactly when decisions require them.',
+    peers:['intelligence','decision']
+  },
+  {
+    id:'infrastructure', label:'Infrastructure', idx:'04',
+    pos:[3.2,-2.0,-0.5], color:'#9966ff', size:0.29, pulseSpeed:0.76,
+    desc:'The backbone. Monitors and manages physical and digital assets with predictive intelligence and live telemetry.',
+    peers:['intelligence','operations']
+  },
+  {
+    id:'decision', label:'Decision', idx:'05',
+    pos:[-0.9,3.1,1.2], color:'#ff6b35', size:0.27, pulseSpeed:0.67,
+    desc:'Strategic synthesis engine. Translates multi-source intelligence into clear, prioritized, accountable action pathways.',
+    peers:['intelligence','action','knowledge']
+  },
+  {
+    id:'action', label:'Action', idx:'06',
+    pos:[1.3,-3.1,0.7], color:'#00ffaa', size:0.27, pulseSpeed:0.93,
+    desc:'Execution layer. Closes the loop from insight to verifiable, measured outcomes — keeping the system alive.',
+    peers:['intelligence','decision']
+  }
+];
+
+// ─────────────────────────────────────────
+// CONNECTIONS (unique pairs)
+// ─────────────────────────────────────────
+const CONNECTIONS = [
+  ['intelligence','citizen'],
+  ['intelligence','operations'],
+  ['intelligence','knowledge'],
+  ['intelligence','infrastructure'],
+  ['intelligence','decision'],
+  ['intelligence','action'],
+  ['citizen','operations'],
+  ['knowledge','decision'],
+  ['operations','infrastructure'],
+  ['decision','action'],
+];
+
+// ─────────────────────────────────────────
+// SHADERS
+// ─────────────────────────────────────────
+const NODE_VERT = `
+varying vec3 vNormal;
+varying vec3 vViewDir;
+void main() {
+  vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+  vViewDir = normalize(-mvPos.xyz);
+  vNormal = normalize(normalMatrix * normal);
+  gl_Position = projectionMatrix * mvPos;
+}`;
+
+const NODE_FRAG = `
+uniform vec3 uColor;
+uniform float uTime;
+uniform float uSpeed;
+uniform float uHover;
+uniform float uFire;
+varying vec3 vNormal;
+varying vec3 vViewDir;
+void main() {
+  float f = pow(1.0 - clamp(dot(vNormal, vViewDir), 0.0, 1.0), 3.2);
+  float pulse = sin(uTime * uSpeed * 2.1) * 0.06 + 0.94;
+  float boost = 1.0 + uHover * 0.55 + uFire * 0.65;
+  vec3 inner = uColor * 0.03;
+  vec3 rim   = uColor * (f * 1.6 * pulse * boost);
+  float alpha = 0.04 + f * 0.72 * (0.6 + uHover * 0.3 + uFire * 0.2);
+  gl_FragColor = vec4(inner + rim, alpha);
+}`;
+
+const HALO_VERT = `
+varying vec3 vNormal;
+varying vec3 vViewDir;
+void main() {
+  vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+  vViewDir = normalize(-mvPos.xyz);
+  vNormal = normalize(normalMatrix * normal);
+  gl_Position = projectionMatrix * mvPos;
+}`;
+
+const HALO_FRAG = `
+uniform vec3 uColor;
+uniform float uTime;
+uniform float uSpeed;
+uniform float uHover;
+uniform float uFire;
+varying vec3 vNormal;
+varying vec3 vViewDir;
+void main() {
+  float f = pow(1.0 - clamp(dot(vNormal, vViewDir), 0.0, 1.0), 1.6);
+  float pulse = sin(uTime * uSpeed * 1.4 + 0.8) * 0.08 + 0.92;
+  float boost = 1.0 + uHover * 0.45 + uFire * 0.55;
+  vec3 color = uColor * f * pulse * boost;
+  float alpha = f * 0.13 * pulse * boost;
+  gl_FragColor = vec4(color, alpha);
+}`;
+
+const EDGE_VERT = `
+attribute float aProgress;
+varying float vProgress;
+void main() {
+  vProgress = aProgress;
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+}`;
+
+const EDGE_FRAG = `
+uniform vec3 uColor;
+uniform float uTime;
+uniform float uPhase;
+uniform float uOpacity;
+varying float vProgress;
+
+float pulse(float pos, float t, float w) {
+  return smoothstep(pos - w, pos, t) * smoothstep(pos + w, pos, t);
+}
+
+void main() {
+  float base = 0.09;
+  float glow = 0.0;
+  float speed = 0.14;
+  float pos = mod(uTime * speed + uPhase, 1.0);
+  glow = pulse(pos, vProgress, 0.055) * 1.1;
+  float total = base + glow;
+  vec3 col = uColor * total;
+  float alpha = (base * 0.45 + glow * 0.55) * uOpacity;
+  gl_FragColor = vec4(col, alpha);
+}`;
+
+// ─────────────────────────────────────────
+// SETUP
+// ─────────────────────────────────────────
+const W = window.innerWidth, H = window.innerHeight;
+
+const renderer = new THREE.WebGLRenderer({
+  canvas: document.getElementById('canvas'),
+  antialias: true, alpha: false
+});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(W, H);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.9;
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color('#060807');
+scene.fog = new THREE.Fog('#060807', 12, 28);
+
+const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 50);
+camera.position.set(0, 0, 9);
+
+// ─── bloom ───
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(scene, camera));
+
+const bloomPass = new UnrealBloomPass(
+  new THREE.Vector2(W, H), 0.5, 0.35, 0.42
+);
+composer.addPass(bloomPass);
+composer.addPass(new OutputPass());
+
+// ─────────────────────────────────────────
+// BACKGROUND GRID
+// ─────────────────────────────────────────
+const gridHelper = new THREE.GridHelper(30, 30, 0x182413, 0x182413);
+gridHelper.position.y = -5;
+gridHelper.material.opacity = 0.35;
+gridHelper.material.transparent = true;
+scene.add(gridHelper);
+
+// ─── ambient particles ───
+const bgCount = 400;
+const bgPos = new Float32Array(bgCount * 3);
+for (let i = 0; i < bgCount; i++) {
+  bgPos[i*3]   = (Math.random() - .5) * 22;
+  bgPos[i*3+1] = (Math.random() - .5) * 18;
+  bgPos[i*3+2] = (Math.random() - .5) * 12;
+}
+const bgGeom = new THREE.BufferGeometry();
+bgGeom.setAttribute('position', new THREE.BufferAttribute(bgPos, 3));
+const bgMat = new THREE.PointsMaterial({
+  color: 0x4a7a10, size: 0.025,
+  transparent: true, opacity: 0.18,
+  blending: THREE.AdditiveBlending, depthWrite: false
+});
+scene.add(new THREE.Points(bgGeom, bgMat));
+
+// ─────────────────────────────────────────
+// BUILD NODE ID MAP
+// ─────────────────────────────────────────
+const nodeMap = {};
+NODES.forEach(n => { nodeMap[n.id] = n; });
+
+// ─────────────────────────────────────────
+// CREATE NODES
+// ─────────────────────────────────────────
+const nodeObjects = [];
+const allCoreMeshes = [];
+
+NODES.forEach((nd, i) => {
+  const color = new THREE.Color(nd.color);
+  const group = new THREE.Group();
+  group.position.set(...nd.pos);
+
+  // Core icosahedron
+  const coreGeom = new THREE.IcosahedronGeometry(nd.size, 2);
+  const coreMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uColor:  { value: color.clone() },
+      uTime:   { value: 0 },
+      uSpeed:  { value: nd.pulseSpeed },
+      uHover:  { value: 0 },
+      uFire:   { value: 0 }
+    },
+    vertexShader: NODE_VERT,
+    fragmentShader: NODE_FRAG,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    side: THREE.DoubleSide
+  });
+  const coreMesh = new THREE.Mesh(coreGeom, coreMat);
+  coreMesh.userData.nodeIdx = i;
+  group.add(coreMesh);
+  allCoreMeshes.push(coreMesh);
+
+  // Wireframe overlay
+  const wireGeom = new THREE.IcosahedronGeometry(nd.size * 1.02, 1);
+  const wireMat = new THREE.MeshBasicMaterial({
+    color: new THREE.Color(nd.color),
+    wireframe: true,
+    transparent: true,
+    opacity: 0.22,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+  group.add(new THREE.Mesh(wireGeom, wireMat));
+
+  // Halo sphere
+  const haloGeom = new THREE.SphereGeometry(nd.size * 2.2, 24, 24);
+  const haloMat = new THREE.ShaderMaterial({
+    uniforms: {
+      uColor:  { value: color.clone() },
+      uTime:   { value: 0 },
+      uSpeed:  { value: nd.pulseSpeed },
+      uHover:  { value: 0 },
+      uFire:   { value: 0 }
+    },
+    vertexShader: HALO_VERT,
+    fragmentShader: HALO_FRAG,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+    side: THREE.BackSide
+  });
+  group.add(new THREE.Mesh(haloGeom, haloMat));
+
+  // Orbital rings
+  const rings = [];
+  const ringCount = nd.id === 'intelligence' ? 3 : 1;
+  for (let r = 0; r < ringCount; r++) {
+    const rRadius = nd.size * (1.55 + r * 0.55);
+    const ringGeom = new THREE.TorusGeometry(rRadius, 0.007, 3, 56);
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: new THREE.Color(nd.color),
+      transparent: true,
+      opacity: r === 0 ? 0.38 : 0.18 - r * 0.04,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false
+    });
+    const ring = new THREE.Mesh(ringGeom, ringMat);
+    ring.rotation.x = [Math.PI / 2.8, Math.PI / 5, Math.PI / 1.9][r];
+    ring.rotation.y = [0,              Math.PI / 3, Math.PI / 7][r];
+    group.add(ring);
+    rings.push(ring);
+  }
+
+  // DOM label
+  const [px, py, pz] = nd.pos;
+  const label = document.createElement('div');
+  label.className = 'node-label';
+  label.innerHTML =
+    `<span class="nl-name">${nd.label}</span>` +
+    `<span class="nl-index">${nd.idx}</span>` +
+    `<span class="nl-coords">X:${px>=0?'+':''}${px.toFixed(1)} Y:${py>=0?'+':''}${py.toFixed(1)} Z:${pz>=0?'+':''}${pz.toFixed(1)}</span>`;
+  document.body.appendChild(label);
+
+  // HUD bracket
+  const bracket = document.createElement('div');
+  const isHub = nd.id === 'intelligence';
+  bracket.className = `hud-wrap ${isHub ? 'large hub' : 'small'}`;
+  bracket.style.color = nd.color;
+  bracket.innerHTML = '<div class="hud-tl"></div><div class="hud-tr"></div><div class="hud-bl"></div><div class="hud-br"></div>';
+  document.body.appendChild(bracket);
+
+  group.scale.setScalar(0);
+  scene.add(group);
+
+  nodeObjects.push({ group, coreMesh, coreMat, haloMat, wireMat, label, bracket, rings, data: nd });
+});
+
+// ─────────────────────────────────────────
+// CREATE EDGES
+// ─────────────────────────────────────────
+const edgeObjects = [];
+
+CONNECTIONS.forEach(([aId, bId], i) => {
+  const nA = nodeMap[aId];
+  const nB = nodeMap[bId];
+  const pA = new THREE.Vector3(...nA.pos);
+  const pB = new THREE.Vector3(...nB.pos);
+
+  // Midpoint with slight arc
+  const mid = pA.clone().add(pB).multiplyScalar(0.5);
+  const dist = pA.distanceTo(pB);
+  mid.x += (Math.random() - .5) * dist * 0.18;
+  mid.y += (Math.random() - .5) * dist * 0.12;
+  mid.z += (Math.random() - .5) * dist * 0.1;
+
+  const curve = new THREE.CatmullRomCurve3([pA, mid, pB]);
+  const N = 90;
+  const pts = curve.getPoints(N);
+
+  const geom = new THREE.BufferGeometry().setFromPoints(pts);
+
+  const progress = new Float32Array(N + 1);
+  for (let k = 0; k <= N; k++) progress[k] = k / N;
+  geom.setAttribute('aProgress', new THREE.BufferAttribute(progress, 1));
+
+  // Color: blend node A and B colors
+  const cA = new THREE.Color(nA.color);
+  const cB = new THREE.Color(nB.color);
+  const edgeColor = cA.lerp(cB, 0.5);
+
+  const mat = new THREE.ShaderMaterial({
+    uniforms: {
+      uColor:   { value: edgeColor },
+      uTime:    { value: 0 },
+      uPhase:   { value: i * 0.13 },
+      uOpacity: { value: 0 }
+    },
+    vertexShader: EDGE_VERT,
+    fragmentShader: EDGE_FRAG,
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false
+  });
+
+  const line = new THREE.Line(geom, mat);
+  scene.add(line);
+
+  edgeObjects.push({ line, mat, curve, aId, bId });
+});
+
+// ─────────────────────────────────────────
+// RAYCASTER & STATE
+// ─────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+const targetOrbit = new THREE.Vector2();
+const currentOrbit = new THREE.Vector2();
+const tempV = new THREE.Vector3();
+
+let hoveredIdx = -1;
+let selectedIdx = -1;
+const fireState = new Float32Array(NODES.length);
+let nextFireTime = 3;
+
+// ─────────────────────────────────────────
+// INTERACTION
+// ─────────────────────────────────────────
+window.addEventListener('mousemove', e => {
+  const cx = document.getElementById('cursor');
+  const cr = document.getElementById('cursor-ring');
+  cx.style.left = e.clientX + 'px'; cx.style.top = e.clientY + 'px';
+  cr.style.left = e.clientX + 'px'; cr.style.top  = e.clientY + 'px';
+
+  mouse.x =  (e.clientX / window.innerWidth)  * 2 - 1;
+  mouse.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+  targetOrbit.x =  mouse.x * 0.4;
+  targetOrbit.y = -mouse.y * 0.25;
+
+  raycaster.setFromCamera(mouse, camera);
+  const hits = raycaster.intersectObjects(allCoreMeshes);
+
+  if (hits.length > 0) {
+    const idx = hits[0].object.userData.nodeIdx;
+    if (idx !== hoveredIdx) {
+      hoveredIdx = idx;
+      document.body.classList.add('hovering');
+    }
+  } else {
+    hoveredIdx = -1;
+    document.body.classList.remove('hovering');
+  }
+});
+
+window.addEventListener('click', () => {
+  if (hoveredIdx >= 0 && hoveredIdx !== selectedIdx) {
+    selectedIdx = hoveredIdx;
+    openPanel(selectedIdx);
+  } else if (hoveredIdx < 0 && selectedIdx >= 0) {
+    closePanel();
+  }
+});
+
+document.getElementById('close-hint').addEventListener('click', closePanel);
+
+function openPanel(idx) {
+  const nd = NODES[idx];
+  document.getElementById('p-index').textContent = nd.idx;
+  document.getElementById('p-name').textContent  = nd.label;
+  document.getElementById('p-desc').textContent  = nd.desc;
+
+  const connList = document.getElementById('p-conn-list');
+  connList.innerHTML = '';
+  nd.peers.filter(p => p !== nd.id).forEach(peerId => {
+    const span = document.createElement('span');
+    span.className = 'p-conn-tag';
+    span.textContent = nodeMap[peerId].label;
+    connList.appendChild(span);
+  });
+
+  const panel = document.getElementById('panel');
+  panel.classList.add('visible');
+  gsap.to(panel, { opacity: 1, x: 0, duration: .45, ease: 'power3.out' });
+  gsap.to('#close-hint', { opacity: 1, duration: .3, delay: .2 });
+}
+
+function closePanel() {
+  selectedIdx = -1;
+  const panel = document.getElementById('panel');
+  gsap.to(panel, { opacity: 0, x: 40, duration: .35, ease: 'power2.in', onComplete: () => panel.classList.remove('visible') });
+  gsap.to('#close-hint', { opacity: 0, duration: .2 });
+}
+
+// ─────────────────────────────────────────
+// GSAP REVEAL
+// ─────────────────────────────────────────
+function reveal() {
+  // Scatter initial positions
+  nodeObjects.forEach((obj, i) => {
+    const nd = NODES[i];
+    const fp = new THREE.Vector3(...nd.pos);
+    const spread = 7;
+    obj.group.position.set(
+      fp.x + (Math.random() - .5) * spread,
+      fp.y + (Math.random() - .5) * spread,
+      fp.z + (Math.random() - .5) * 3
+    );
+    obj.group.scale.setScalar(0);
+  });
+
+  // Reveal each node
+  nodeObjects.forEach((obj, i) => {
+    const nd = NODES[i];
+    const fp = new THREE.Vector3(...nd.pos);
+    const delay = i === 0 ? 0.2 : 0.4 + i * 0.18;
+
+    gsap.to(obj.group.position, {
+      x: fp.x, y: fp.y, z: fp.z,
+      duration: 1.6, delay, ease: 'power3.out'
+    });
+    gsap.to(obj.group.scale, {
+      x: 1, y: 1, z: 1,
+      duration: 1.1, delay: delay + 0.05, ease: 'back.out(1.6)'
+    });
+    // label opacity controlled by animate loop (scale-based)
+  });
+
+  // Edges fade in after nodes settle
+  edgeObjects.forEach((e, i) => {
+    gsap.to(e.mat.uniforms.uOpacity, {
+      value: 1, duration: 1.2,
+      delay: 1.8 + i * 0.07, ease: 'power2.out'
+    });
+  });
+
+  // Brackets clip in (scale from 1.3 → 1)
+  nodeObjects.forEach((obj, i) => {
+    const delay = 1.4 + i * 0.1;
+    gsap.fromTo(obj.bracket, { scale: 1.35 }, { scale: 1, duration: .5, delay, ease: 'power2.out' });
+  });
+
+  // UI
+  gsap.to('#section-label', { opacity: 1, y: 0, duration: .8, delay: .3, ease: 'power2.out' });
+  gsap.to('#subtitle',      { opacity: 1, y: 0, duration: .8, delay: .5, ease: 'power2.out' });
+  gsap.to('#statusbar',     { opacity: 1,        duration: .8, delay: 2.8 });
+}
+
+// ─────────────────────────────────────────
+// ANIMATE LOOP
+// ─────────────────────────────────────────
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const delta = clock.getDelta();
+  const t     = clock.getElapsedTime();
+
+  // Camera parallax
+  currentOrbit.x += (targetOrbit.x - currentOrbit.x) * 0.04;
+  currentOrbit.y += (targetOrbit.y - currentOrbit.y) * 0.04;
+  camera.position.x = currentOrbit.x;
+  camera.position.y = currentOrbit.y;
+  camera.lookAt(scene.position);
+
+  // Spontaneous fire
+  nextFireTime -= delta;
+  if (nextFireTime <= 0) {
+    const nonHub = nodeObjects.filter((_, i) => i !== 0);
+    const target = nonHub[Math.floor(Math.random() * nonHub.length)];
+    const tIdx = nodeObjects.indexOf(target);
+    fireNode(tIdx);
+    nextFireTime = 5 + Math.random() * 6;
+  }
+
+  // Update node uniforms + scale breathing
+  nodeObjects.forEach((obj, i) => {
+    const isHovered  = hoveredIdx === i;
+    const isSelected = selectedIdx === i;
+    const isFiring   = fireState[i] > 0;
+
+    const hoverTarget = (isHovered || isSelected) ? 1 : 0;
+    const currentHover = obj.coreMat.uniforms.uHover.value;
+    obj.coreMat.uniforms.uHover.value += (hoverTarget - currentHover) * 0.1;
+    obj.haloMat.uniforms.uHover.value  = obj.coreMat.uniforms.uHover.value;
+
+    const fireTarget = fireState[i];
+    obj.coreMat.uniforms.uFire.value += (fireTarget - obj.coreMat.uniforms.uFire.value) * 0.15;
+    obj.haloMat.uniforms.uFire.value  = obj.coreMat.uniforms.uFire.value;
+
+    obj.coreMat.uniforms.uTime.value = t;
+    obj.haloMat.uniforms.uTime.value = t;
+
+    if (fireState[i] > 0) fireState[i] = Math.max(0, fireState[i] - delta * 1.2);
+
+    // Gentle breathing scale
+    const breathe = 1 + Math.sin(t * NODES[i].pulseSpeed * 1.5 + i) * 0.012;
+    const hoverScale = 1 + obj.coreMat.uniforms.uHover.value * 0.12;
+    obj.group.scale.setScalar(breathe * hoverScale);
+
+    // Rotate orbital rings
+    obj.rings.forEach((ring, r) => {
+      const spd = (0.18 + r * 0.09) * (r % 2 === 0 ? 1 : -1);
+      ring.rotation.z += delta * spd;
+    });
+
+    // Update DOM positions (label + bracket)
+    tempV.copy(obj.group.position);
+    tempV.project(camera);
+    const sx = (tempV.x * .5 + .5) * window.innerWidth;
+    const sy = (-tempV.y * .5 + .5) * window.innerHeight;
+    const visible = tempV.z < 1 && obj.group.scale.x > 0.08;
+    const labelOffset = NODES[i].size * 90 + 14;
+
+    obj.label.style.transform = `translate(-50%,-50%) translate(${sx}px,${sy + labelOffset}px)`;
+    obj.label.style.opacity = visible ? '1' : '0';
+
+    obj.bracket.style.transform = `translate(-50%,-50%) translate(${sx}px,${sy}px)`;
+    obj.bracket.style.opacity = visible ? String(0.3 + obj.coreMat.uniforms.uHover.value * 0.5) : '0';
+  });
+
+  // Update edges
+  edgeObjects.forEach(e => {
+    e.mat.uniforms.uTime.value = t;
+  });
+
+  // Ambient particles drift
+  bgMat.size = 0.03 + Math.sin(t * 0.3) * 0.005;
+
+  composer.render();
+}
+
+function fireNode(idx) {
+  fireState[idx] = 1;
+  // Also pulse the hub slightly
+  setTimeout(() => { fireState[0] = 0.5; }, 300 + Math.random() * 200);
+}
+
+// ─────────────────────────────────────────
+// RESIZE
+// ─────────────────────────────────────────
+window.addEventListener('resize', () => {
+  const w = window.innerWidth, h = window.innerHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+  composer.setSize(w, h);
+});
+
+// ─────────────────────────────────────────
+// START
+// ─────────────────────────────────────────
+reveal();
+animate();
+</script>
+</body>
+</html>
