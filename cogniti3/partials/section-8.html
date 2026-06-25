@@ -402,12 +402,10 @@ function _carToPhil() {
 
 function _carToContact() {
   concealCar();
-  // TODO(careers): wire to S9 Contact when section-9 is built
   if (typeof window.revealContact === 'function') window.revealContact();
 }
 
 window.carApply = function() {
-  // TODO(careers): wire Apply buttons to S9 Contact when section-9 is built
   _carToContact();
 };
 
