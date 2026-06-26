@@ -3002,6 +3002,16 @@ function initShift() {
       document.getElementById('shift-content').style.opacity = op;
       document.getElementById('shift-label').style.opacity   = (op * 0.88).toString();
     } else if (_trackingShiftAfterLA && !_laVisible) {
+      // Scrolled back down into LA zone — re-reveal LA (this branch otherwise shadows
+      // the revealLA branch below, leaving section 5 stuck after 5→4→5)
+      if (scrollY >= SHIFT_OUT) {
+        _trackingShiftAfterLA = false;
+        revealLA();
+        gsap.to(['#shift-canvas','#shift-hud','#shift-content','#shift-label'], {
+          opacity: 0, duration: 0.2, overwrite: true
+        });
+        return;
+      }
       // GSAP scrubs for shift are dead (killed by overwrite:true in revealLA) — keep opacity in sync manually
       const fadeInLen = VH * 0.9;
       let op = 0;
@@ -3031,11 +3041,17 @@ runPhase1();
 // ── Living Architecture transition ──
 let _laVisible = false;
 let _trackingShiftAfterLA = false;
+const LA_SETTLE_MS = 800;         // ignore residual scroll momentum after LA reveal
 
 function revealLA() {
   if (_laVisible) return;
   _laVisible = true;
   _trackingShiftAfterLA = false;
+  /* settle window (cross-scope via window): the 5→6 wheel handler lives in a
+     separate module — it reads window._laSettleLock to skip momentum-tail accumulation */
+  window._laSettleLock = true;
+  clearTimeout(window._laSettleT);
+  window._laSettleT = setTimeout(() => { window._laSettleLock = false; }, LA_SETTLE_MS);
   if (typeof window.initLivingArchitecture === 'function') {
     window.initLivingArchitecture();
   }
@@ -3862,6 +3878,11 @@ window.addEventListener('wheel', (e) => {
   /* Section 5 → scroll down → Section 6 */
   if (document.getElementById('la-canvas').classList.contains('active')) {
     if (_sdScrollLock) return;
+    if (window._laSettleLock) {       // LA just revealed — drain momentum tail, don't accumulate
+      _sdScrollAcc = 0;
+      document.getElementById('sd-nav-progress-fill').style.width = '0%';
+      return;
+    }
     if (e.deltaY > 0) {
       _sdScrollAcc = Math.min(_sdScrollAcc + e.deltaY, SD_THRESHOLD);
       document.getElementById('sd-nav-progress-fill').style.width =
