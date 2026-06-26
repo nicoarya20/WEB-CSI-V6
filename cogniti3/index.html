@@ -1184,85 +1184,6 @@ html, body {
 body.la-hovering #cursor { width:10px; height:10px; }
 body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,255,60,.5); }
 
-/* ── Living Architecture transition overlay ── */
-#tx-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  background: #060807;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-#tx-overlay.active { pointer-events: all; }
-
-.tx-num {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  letter-spacing: .22em;
-  color: #4a7a10;
-  margin-bottom: 14px;
-  opacity: 0;
-}
-.tx-rule {
-  width: 120px;
-  height: 1px;
-  background: linear-gradient(to right, #4a7a10, transparent);
-  margin-bottom: 28px;
-  transform-origin: left center;
-  transform: scaleX(0);
-}
-.tx-title-wrap {
-  overflow: hidden;
-  line-height: 1;
-}
-.tx-word {
-  font-family: 'Inter', sans-serif;
-  font-weight: 200;
-  font-size: clamp(52px, 8vw, 96px);
-  letter-spacing: -.02em;
-  color: #edeae2;
-  display: block;
-  transform: translateY(100%);
-}
-.tx-word:first-child { margin-bottom: 4px; }
-.tx-sub {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 12px;
-  font-weight: 300;
-  letter-spacing: .18em;
-  color: #6a7864;
-  text-transform: uppercase;
-  margin-top: 28px;
-  opacity: 0;
-}
-.tx-prog-wrap {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: #182413;
-}
-.tx-prog {
-  height: 100%;
-  background: linear-gradient(to right, #4a7a10, #b8ff3c);
-  transform-origin: left center;
-  transform: scaleX(0);
-}
-#tx-flash {
-  position: fixed;
-  inset: 0;
-  z-index: 10001;
-  background: #060807;
-  opacity: 0;
-  pointer-events: none;
-}
-
 /* ════════════════════════════════════════
    SECTION 6 — SELECTED DEPLOYMENTS
 ════════════════════════════════════════ */
@@ -1442,48 +1363,6 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
   transition: width .05s linear;
 }
 
-/* SD transition overlay */
-#sd-tx-overlay {
-  position: fixed; inset: 0; z-index: 11000;
-  background: var(--bg);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none;
-}
-#sd-tx-overlay.active { pointer-events: all; }
-.sd-tx-num {
-  font-family: 'Space Mono', monospace; font-size: 11px;
-  letter-spacing: .22em; color: #4a7a10; margin-bottom: 14px; opacity: 0;
-}
-.sd-tx-rule {
-  width: 120px; height: 1px;
-  background: linear-gradient(to right, #4a7a10, transparent);
-  margin-bottom: 28px; transform-origin: left center; transform: scaleX(0);
-}
-.sd-tx-title-wrap { overflow: hidden; line-height: 1; }
-.sd-tx-word {
-  font-family: 'Inter', sans-serif; font-weight: 200;
-  font-size: clamp(44px, 7vw, 88px);
-  letter-spacing: -.02em; color: var(--text);
-  display: block; transform: translateY(100%);
-}
-.sd-tx-sub {
-  font-family: 'Space Grotesk', sans-serif; font-size: 12px;
-  font-weight: 300; letter-spacing: .18em; color: #6a7864;
-  text-transform: uppercase; margin-top: 28px; opacity: 0;
-}
-.sd-tx-prog-wrap {
-  position: fixed; bottom: 0; left: 0; width: 100%; height: 1px; background: #182413;
-}
-.sd-tx-prog {
-  height: 100%; background: linear-gradient(to right, #4a7a10, #b8ff3c);
-  transform-origin: left center; transform: scaleX(0);
-}
-#sd-flash {
-  position: fixed; inset: 0; z-index: 11001;
-  background: var(--bg); opacity: 0; pointer-events: none;
-}
-
 /* ════════════════════════════════════════
    SECTION 7 — PHILOSOPHY  "The Breath"
 ════════════════════════════════════════ */
@@ -1561,50 +1440,6 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
   background: linear-gradient(to right, #4a7a10, #b8ff3c);
 }
 
-#phil-tx-overlay {
-  position: fixed; inset: 0; z-index: 10000;
-  background: #050508;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none;
-}
-#phil-tx-overlay.active { pointer-events: all; }
-.phil-tx-num {
-  font-family: 'Space Mono', monospace; font-size: 11px;
-  letter-spacing: .18em; color: #4a7a10;
-  margin-bottom: 20px; opacity: 0;
-}
-.phil-tx-rule {
-  width: 120px; height: 1px;
-  background: linear-gradient(to right, #7ab828, transparent);
-  margin-bottom: 28px;
-  transform-origin: left center; transform: scaleX(0);
-}
-.phil-tx-title-wrap { overflow: hidden; }
-.phil-tx-word {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(36px, 5vw, 72px); font-weight: 200;
-  color: #ffffff; letter-spacing: -0.02em;
-  transform: translateY(100%); display: block;
-}
-.phil-tx-sub {
-  font-family: 'Space Grotesk', sans-serif; font-size: 12px;
-  font-weight: 300; letter-spacing: .18em; color: #8a9884;
-  text-transform: uppercase; margin-top: 28px; opacity: 0;
-}
-.phil-tx-prog-wrap {
-  position: fixed; bottom: 0; left: 0;
-  width: 100%; height: 1px; background: #182413;
-}
-.phil-tx-prog {
-  height: 100%;
-  background: linear-gradient(to right, #4a7a10, #b8ff3c);
-  transform-origin: left center; transform: scaleX(0);
-}
-#phil-flash {
-  position: fixed; inset: 0; z-index: 10001;
-  background: #050508; opacity: 0; pointer-events: none;
-}
 </style>
 </head>
 <body>
@@ -3140,13 +2975,12 @@ function initShift() {
     const maxScroll = document.body.scrollHeight - window.innerHeight;
     if (window.scrollY >= maxScroll - 8 && window.scrollY > SHIFT_OUT) {
       _txBottomFired = true;
-      setTimeout(triggerTransition, 500);
+      triggerTransition();
     }
   }, { passive: true });
 
   // Bidirectional: hide LA when scrolling back above The Shift, re-reveal when scrolling down
   window.addEventListener('scroll', () => {
-    if (document.getElementById('tx-overlay').classList.contains('active')) return;
     if (window._sdActive) return;   // Section 6 active — ignore scroll position changes
     const scrollY = window.scrollY;
     if (_laVisible && scrollY < SHIFT_OUT - VH * 0.5) {
@@ -3235,46 +3069,14 @@ window.revealLA     = revealLA;
 window.setLaVisible = function(v) { _laVisible = v; };
 
 function triggerTransition() {
-  const overlay = document.getElementById('tx-overlay');
-  if (overlay.classList.contains('active')) return;
   if (_laVisible) return;
-  overlay.classList.add('active');
-
+  /* Cross-fade: Shift fade-out overlaps LA fade-in (revealLA drives both),
+     so 4→5 reads as one continuous flow instead of an interstitial card. */
   gsap.to(['#shift-canvas','#shift-hud','#shift-content','#shift-label'], {
-    opacity: 0, duration: 0.25, overwrite: true
+    opacity: 0, duration: 0.5, ease: 'power2.inOut', overwrite: true
   });
-
-  gsap.set('.tx-num', { y: 10, opacity: 0 });
-  gsap.set('.tx-sub', { opacity: 0, y: 8 });
-  gsap.set('.tx-rule', { scaleX: 0 });
-  gsap.set(['#tx-w1','#tx-w2'], { y: '100%' });
-  gsap.set('.tx-prog', { scaleX: 0 });
-
-  gsap.timeline({
-    onComplete() {
-      gsap.to('#tx-flash', { opacity: 1, duration: 0.25, ease: 'power2.in',
-        onComplete() {
-          // Init + reveal LA now (at flash peak so setup is hidden)
-          revealLA();
-          // Dismiss overlay — no overflow lock
-          gsap.to(['#tx-overlay','#tx-flash'], { opacity: 0, duration: 0.5, ease: 'power2.out',
-            onComplete() {
-              overlay.classList.remove('active');
-              overlay.style.pointerEvents = 'none';
-              document.getElementById('la-close-hint').classList.add('visible');
-            }
-          });
-        }
-      });
-    }
-  })
-    .to('#tx-overlay',  { opacity: 1, duration: 0.55, ease: 'power2.inOut' })
-    .to('.tx-num',      { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, '+=0.15')
-    .to('.tx-rule',     { scaleX: 1, duration: 0.65, ease: 'power2.inOut' }, '+=0.08')
-    .to('#tx-w1',       { y: '0%', duration: 0.6, ease: 'power3.out' }, '+=0.06')
-    .to('#tx-w2',       { y: '0%', duration: 0.6, ease: 'power3.out' }, '-=0.38')
-    .to('.tx-sub',      { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, '+=0.12')
-    .to('.tx-prog',     { scaleX: 1, duration: 1.0, ease: 'power2.inOut' }, '+=0.1');
+  revealLA();
+  document.getElementById('la-close-hint').classList.add('visible');
 }
 </script>
 
@@ -3695,17 +3497,6 @@ window.initLivingArchitecture = function() {
   <span class="la-sb-item" id="la-sb-active">SYSTEM ACTIVE</span>
 </div>
 
-<!-- ── Living Architecture transition overlay ── -->
-<div id="tx-overlay">
-  <div class="tx-num">05</div>
-  <div class="tx-rule"></div>
-  <div class="tx-title-wrap"><div class="tx-word" id="tx-w1">Living</div></div>
-  <div class="tx-title-wrap"><div class="tx-word" id="tx-w2">Architecture</div></div>
-  <div class="tx-sub">A unified intelligence ecosystem</div>
-  <div class="tx-prog-wrap"><div class="tx-prog"></div></div>
-</div>
-<div id="tx-flash"></div>
-
 <!-- ══ SECTION 6 — SELECTED DEPLOYMENTS ══ -->
 
 <!-- nav hint shown inside Section 5 — scroll-triggered -->
@@ -3751,17 +3542,6 @@ window.initLivingArchitecture = function() {
   </div>
   <div id="sd-back-progress"><div id="sd-back-progress-fill"></div></div>
 </div>
-
-<!-- SD transition overlay -->
-<div id="sd-tx-overlay">
-  <div class="sd-tx-num">06</div>
-  <div class="sd-tx-rule"></div>
-  <div class="sd-tx-title-wrap"><div class="sd-tx-word">Selected</div></div>
-  <div class="sd-tx-title-wrap"><div class="sd-tx-word">Deployments</div></div>
-  <div class="sd-tx-sub">In the field. Not demos.</div>
-  <div class="sd-tx-prog-wrap"><div class="sd-tx-prog"></div></div>
-</div>
-<div id="sd-flash"></div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -4045,36 +3825,6 @@ function concealSD() {
 window.revealSD  = revealSD;
 window.concealSD = concealSD;
 
-/* ── SD transition overlay ── */
-function triggerTransitionSD() {
-  const ov = document.getElementById('sd-tx-overlay');
-  if (ov.classList.contains('active')) return;
-  ov.classList.add('active');
-
-  gsap.set('.sd-tx-word',  { y: '100%' });
-  gsap.set(['.sd-tx-num','.sd-tx-sub'], { opacity:0, y:10 });
-  gsap.set('.sd-tx-rule',  { scaleX: 0 });
-  gsap.set('.sd-tx-prog',  { scaleX: 0 });
-
-  gsap.timeline({
-    onComplete() {
-      gsap.to('#sd-flash', { opacity:1, duration:.2, ease:'power2.in',
-        onComplete() {
-          revealSD();
-          gsap.to(['#sd-tx-overlay','#sd-flash'], { opacity:0, duration:.5, ease:'power2.out',
-            onComplete() { ov.classList.remove('active'); ov.style.pointerEvents = 'none'; }
-          });
-        }
-      });
-    }
-  })
-  .to(ov,            { opacity:1,         duration:.3 })
-  .to('.sd-tx-num',  { opacity:1, y:0,    duration:.4 }, '+=.1')
-  .to('.sd-tx-rule', { scaleX:1,          duration:.6, ease:'power2.out' }, '-=.2')
-  .to('.sd-tx-word', { y:'0%', stagger:.14, duration:.8, ease:'power3.out' }, '-=.3')
-  .to('.sd-tx-sub',  { opacity:1, y:0,    duration:.4 }, '-=.3')
-  .to('.sd-tx-prog', { scaleX:1,          duration:.8, ease:'power2.inOut' }, '-=.6');
-}
 
 /* ── bidirectional scroll: Section 5 ↔ Section 6 ── */
 const SD_THRESHOLD  = 500; // px scroll to enter/exit section (higher = less accidental)
@@ -4091,11 +3841,12 @@ function laToSD() {
   document.body.style.overflow = 'hidden';
   gsap.to('#sd-nav', { opacity:0, duration:.3 });
   const laCvs = document.getElementById('la-canvas');
+  /* fade-out LA overlaps revealSD fade-in → cross-fade, no interstitial card */
   gsap.to([laCvs,'#la-section-label','#la-text-block','#la-statusbar'], {
-    opacity:0, duration:.35,
+    opacity:0, duration:.6, ease:'power2.inOut',
     onComplete() { laCvs.classList.remove('active'); }
   });
-  setTimeout(triggerTransitionSD, 250);
+  revealSD();
 }
 
 function sdToLA() {
@@ -4242,16 +3993,6 @@ window.addEventListener('resize', () => {
 
 <div id="phil-back-hint">↑ Scroll back</div>
 <div id="phil-back-progress-wrap"><div id="phil-back-progress-fill"></div></div>
-
-<!-- Philosophy transition overlay -->
-<div id="phil-tx-overlay">
-  <div class="phil-tx-num">07</div>
-  <div class="phil-tx-rule"></div>
-  <div class="phil-tx-title-wrap"><div class="phil-tx-word">Philosophy</div></div>
-  <div class="phil-tx-sub">The interface between intelligence and decision.</div>
-  <div class="phil-tx-prog-wrap"><div class="phil-tx-prog"></div></div>
-</div>
-<div id="phil-flash"></div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -4461,41 +4202,6 @@ function concealPhil() {
 window.revealPhil  = revealPhil;
 window.concealPhil = concealPhil;
 
-/* ── Transition overlay ── */
-function triggerTransitionPhil() {
-  const ov = document.getElementById('phil-tx-overlay');
-  if (ov.classList.contains('active')) return;
-  ov.classList.add('active');
-  ov.style.pointerEvents = 'all';
-
-  gsap.set('.phil-tx-word',              { y: '100%' });
-  gsap.set(['.phil-tx-num','.phil-tx-sub'], { opacity:0, y:10 });
-  gsap.set('.phil-tx-rule',              { scaleX: 0 });
-  gsap.set('.phil-tx-prog',              { scaleX: 0 });
-
-  gsap.timeline({
-    onComplete() {
-      gsap.to('#phil-flash', { opacity:1, duration:.2, ease:'power2.in',
-        onComplete() {
-          revealPhil();
-          gsap.to(['#phil-tx-overlay','#phil-flash'], { opacity:0, duration:.5, ease:'power2.out',
-            onComplete() {
-              ov.classList.remove('active');
-              ov.style.pointerEvents = 'none';
-            }
-          });
-        }
-      });
-    }
-  })
-    .to('#phil-tx-overlay', { opacity:1, duration:.55, ease:'power2.inOut' })
-    .to('.phil-tx-num',     { opacity:1, y:0, duration:.4, ease:'power2.out' }, '+=0.15')
-    .to('.phil-tx-rule',    { scaleX:1,  duration:.65, ease:'power2.inOut' },   '+=0.08')
-    .to('.phil-tx-word',    { y:'0%',    duration:.6,  ease:'power3.out'  },    '+=0.06')
-    .to('.phil-tx-sub',     { opacity:1, y:0, duration:.45, ease:'power2.out' },'+=0.12')
-    .to('.phil-tx-prog',    { scaleX:1,  duration:1.0, ease:'power2.inOut' },   '+=0.1');
-}
-
 /* ── S6 → S7 ── */
 function sdToPhil() {
   /* concealSD resets _sdVisible + _sdActive; re-lock overflow immediately */
@@ -4503,7 +4209,8 @@ function sdToPhil() {
   document.body.style.overflow = 'hidden';
   gsap.to('#phil-nav', { opacity:0, duration:.2 });
   document.getElementById('phil-nav').classList.remove('visible');
-  setTimeout(triggerTransitionPhil, 320);
+  /* SD fade-out overlaps Phil fade-in → cross-fade, no interstitial card */
+  revealPhil();
 }
 
 /* ── S7 → S6 ── */
@@ -4692,33 +4399,7 @@ window.addEventListener('resize', () => {
 #car-nav-bar  { width:80px; height:1px; background:rgba(184,255,60,.1); position:relative; }
 #car-nav-fill { position:absolute; top:0; left:0; height:100%; width:0%; background:var(--accent); transition:width .08s linear; }
 
-/* Transition overlay */
-#car-tx-overlay {
-  position:fixed; inset:0; z-index:8000;
-  background:var(--bg);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
-  opacity:0; pointer-events:none;
-}
-#car-tx-overlay.active { pointer-events:all; }
-.car-tx-rule { width:80px; height:1px; background:var(--accent-dim); transform:scaleX(0); transform-origin:left; }
-.car-tx-num  { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.24em; color:var(--accent-dim); opacity:0; }
-.car-tx-wrap { overflow:hidden; line-height:1; }
-.car-tx-word { font-family:'Space Grotesk',sans-serif; font-size:clamp(32px,5vw,64px); font-weight:600; letter-spacing:-.03em; color:var(--text); display:block; transform:translateY(100%); }
-.car-tx-sub  { font-family:'Inter',sans-serif; font-size:12px; font-weight:300; color:var(--muted); letter-spacing:.08em; opacity:0; }
-.car-tx-bar  { width:200px; height:1px; background:rgba(255,255,255,.06); overflow:hidden; }
-.car-tx-prog { height:100%; width:100%; background:var(--accent-dim); transform:scaleX(0); transform-origin:left; }
-#car-flash   { position:fixed; inset:0; z-index:8100; background:var(--accent); opacity:0; pointer-events:none; }
 </style>
-
-<!-- ── Transition overlay (S7 → S8) ── -->
-<div id="car-tx-overlay">
-  <div class="car-tx-rule"></div>
-  <div class="car-tx-num">08 / CAREERS</div>
-  <div class="car-tx-wrap"><div class="car-tx-word">Careers</div></div>
-  <div class="car-tx-sub">The interface between potential and purpose.</div>
-  <div class="car-tx-bar"><div class="car-tx-prog"></div></div>
-</div>
-<div id="car-flash"></div>
 
 <!-- ── Canvas ── -->
 <canvas id="car-canvas"></canvas>
@@ -4993,43 +4674,12 @@ window.carApply = function() {
   _carToContact();
 };
 
-/* ── Transition overlay (S7 → S8) ── */
-function _triggerTransitionCar() {
-  const ov = document.getElementById('car-tx-overlay');
-  if (ov.classList.contains('active')) return;
-  ov.classList.add('active');
-  ov.style.pointerEvents = 'all';
-
-  gsap.set('.car-tx-word', { y: '100%' });
-  gsap.set(['.car-tx-num','.car-tx-sub'], { opacity: 0, y: 10 });
-  gsap.set('.car-tx-rule', { scaleX: 0 });
-  gsap.set('.car-tx-prog', { scaleX: 0 });
-
-  gsap.timeline({
-    onComplete() {
-      gsap.to('#car-flash', { opacity: 1, duration: .2, ease: 'power2.in',
-        onComplete() {
-          revealCar();
-          gsap.to(['#car-tx-overlay','#car-flash'], { opacity: 0, duration: .5, ease: 'power2.out',
-            onComplete() { ov.classList.remove('active'); ov.style.pointerEvents = 'none'; }
-          });
-        }
-      });
-    }
-  })
-    .to('#car-tx-overlay', { opacity: 1, duration: .4,  ease: 'power2.out' })
-    .to('.car-tx-rule',    { scaleX: 1, duration: .6,   ease: 'power2.inOut' }, '+=.05')
-    .to('.car-tx-num',     { opacity: 1, y: 0, duration: .4 }, '+=.08')
-    .to('.car-tx-word',    { y: '0%', duration: .7,     ease: 'power3.out' }, '-=.2')
-    .to('.car-tx-sub',     { opacity: 1, y: 0, duration: .5 }, '-=.3')
-    .to('.car-tx-prog',    { scaleX: 1, duration: 1.0,  ease: 'power2.inOut' }, '+=.1');
-}
-
 /* ── S7 → S8 (called from section-7.html via window.philToCar) ── */
 function philToCar() {
   if (typeof window.concealPhil === 'function') window.concealPhil();
   document.body.style.overflow = 'hidden';
-  setTimeout(_triggerTransitionCar, 320);
+  /* Phil fade-out overlaps Car fade-in → cross-fade, no interstitial card */
+  revealCar();
 }
 
 window.philToCar  = philToCar;
@@ -5198,23 +4848,6 @@ window.addEventListener('resize', () => {
 #ct-back-bar  { width:60px; height:1px; background:rgba(184,255,60,.1); position:relative; }
 #ct-back-fill { position:absolute; top:0; left:0; height:100%; width:0%; background:var(--accent-dim); transition:width .08s linear; }
 
-/* Transition overlay */
-#ct-tx-overlay {
-  position:fixed; inset:0; z-index:8000;
-  background:var(--bg);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
-  opacity:0; pointer-events:none;
-}
-#ct-tx-overlay.active { pointer-events:all; }
-.ct-tx-rule { width:80px; height:1px; background:var(--accent-dim); transform:scaleX(0); transform-origin:left; }
-.ct-tx-num  { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.24em; color:var(--accent-dim); opacity:0; }
-.ct-tx-wrap { overflow:hidden; line-height:1; }
-.ct-tx-word { font-family:'Space Grotesk',sans-serif; font-size:clamp(32px,5vw,64px); font-weight:600; letter-spacing:-.03em; color:var(--text); display:block; transform:translateY(100%); }
-.ct-tx-sub  { font-family:'Inter',sans-serif; font-size:12px; font-weight:300; color:var(--muted); letter-spacing:.08em; opacity:0; }
-.ct-tx-bar  { width:200px; height:1px; background:rgba(255,255,255,.06); overflow:hidden; }
-.ct-tx-prog { height:100%; width:100%; background:var(--accent-dim); transform:scaleX(0); transform-origin:left; }
-#ct-flash   { position:fixed; inset:0; z-index:8100; background:var(--accent); opacity:0; pointer-events:none; }
-
 /* Footer */
 #ct-footer {
   position:fixed; bottom:0; left:0; right:0; z-index:820;
@@ -5261,16 +4894,6 @@ window.addEventListener('resize', () => {
   .ct-ft-right { gap:10px; }
 }
 </style>
-
-<!-- ── Transition overlay (S8 → S9) ── -->
-<div id="ct-tx-overlay">
-  <div class="ct-tx-rule"></div>
-  <div class="ct-tx-num">09 / CONTACT</div>
-  <div class="ct-tx-wrap"><div class="ct-tx-word">Contact</div></div>
-  <div class="ct-tx-sub">Let's talk.</div>
-  <div class="ct-tx-bar"><div class="ct-tx-prog"></div></div>
-</div>
-<div id="ct-flash"></div>
 
 <!-- ── Section label ── -->
 <div id="ct-section-label">
@@ -5412,7 +5035,8 @@ function revealContact() {
   document.querySelectorAll('.ct-pill').forEach(p => p.classList.remove('active'));
   document.getElementById('ct-inquiry').value = '';
 
-  _triggerTransitionCt();
+  /* Car fade-out overlaps Contact fade-in → cross-fade, no interstitial card */
+  _showCtContent();
 }
 
 function _showCtContent() {
@@ -5433,37 +5057,6 @@ function concealContact() {
       onComplete() { container.classList.remove('active'); }
     });
   backHint.classList.remove('visible');
-}
-
-/* ── Transition overlay (S8 → S9) ── */
-function _triggerTransitionCt() {
-  const ov = document.getElementById('ct-tx-overlay');
-  if (ov.classList.contains('active')) return;
-  ov.classList.add('active');
-
-  gsap.set('.ct-tx-word', { y: '100%' });
-  gsap.set(['.ct-tx-num', '.ct-tx-sub'], { opacity: 0, y: 10 });
-  gsap.set('.ct-tx-rule', { scaleX: 0 });
-  gsap.set('.ct-tx-prog', { scaleX: 0 });
-
-  gsap.timeline({
-    onComplete() {
-      gsap.to('#ct-flash', { opacity: 1, duration: .2, ease: 'power2.in',
-        onComplete() {
-          _showCtContent();
-          gsap.to(['#ct-tx-overlay', '#ct-flash'], { opacity: 0, duration: .5, ease: 'power2.out',
-            onComplete() { ov.classList.remove('active'); }
-          });
-        }
-      });
-    }
-  })
-    .to('#ct-tx-overlay', { opacity: 1, duration: .4,  ease: 'power2.out' })
-    .to('.ct-tx-rule',    { scaleX: 1, duration: .6,   ease: 'power2.inOut' }, '+=.05')
-    .to('.ct-tx-num',     { opacity: 1, y: 0, duration: .4 }, '+=.08')
-    .to('.ct-tx-word',    { y: '0%', duration: .7,     ease: 'power3.out' }, '-=.2')
-    .to('.ct-tx-sub',     { opacity: 1, y: 0, duration: .5 }, '-=.3')
-    .to('.ct-tx-prog',    { scaleX: 1, duration: 1.0,  ease: 'power2.inOut' }, '+=.1');
 }
 
 /* ── Wheel handler — back only (terminal section) ── */
