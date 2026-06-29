@@ -19,15 +19,15 @@
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --bg:        #060807;
-  --surface:   #0c150a;
-  --grid-line: #182413;
-  --accent:    #b8ff3c;
-  --accent2:   #00d4ff;
-  --accent-dim:#4a7a10;
-  --text:      #edeae2;
-  --muted:     #6a7864;
-  --handle:    #ff6b35;
+  --bg:        #050816;
+  --surface:   #0a1024;
+  --grid-line: #16203f;
+  --accent:    #00D8FF;
+  --accent2:   #8F5CFF;
+  --accent-dim:#0a7a93;
+  --text:      #FFFFFF;
+  --muted:     #AAB4C0;
+  --handle:    #00D8FF;
   --red:       #c0392b;
 }
 
@@ -55,7 +55,7 @@ html, body {
 #cursor-ring {
   position: fixed;
   width: 28px; height: 28px;
-  border: 1px solid rgba(184,255,60,.3);
+  border: 1px solid rgba(0,216,255,.3);
   border-radius: 50%;
   pointer-events: none;
   z-index: 9998;
@@ -113,7 +113,7 @@ html, body {
   font-weight: 200;
   font-size: 88px;
   letter-spacing: 0.15em;
-  color: #d5d1c6;
+  color: #E6EBF2;
   line-height: 1;
   display: inline-block;
   opacity: 0;
@@ -173,7 +173,7 @@ html, body {
   transform: rotate(-90deg);
   overflow: visible;
 }
-.rt { fill: none; stroke: #1a2a12; stroke-width: 10; }
+.rt { fill: none; stroke: #0d1430; stroke-width: 10; }
 .rp { fill: none; stroke: var(--accent); stroke-width: 10; stroke-linecap: butt; }
 .rp-cyan { fill: none; stroke: var(--accent2); stroke-width: 1.5; stroke-linecap: butt; opacity: .4; }
 
@@ -196,16 +196,16 @@ html, body {
   justify-content: space-between;
   align-items: center;
   padding: 22px 44px;
-  z-index: 7000;
+  z-index: 9800;
   opacity: 0;
   transition: background .35s ease, backdrop-filter .35s ease, border-color .35s ease;
   border-bottom: 1px solid transparent;
 }
 #nav.nav-glass {
-  background: rgba(4, 8, 4, 0.72);
+  background: rgba(5, 8, 22, 0.72);
   backdrop-filter: blur(14px) saturate(1.3);
   -webkit-backdrop-filter: blur(14px) saturate(1.3);
-  border-bottom-color: rgba(184,255,60,0.07);
+  border-bottom-color: rgba(0,216,255,0.07);
 }
 .nav-logo {
   font-size: 12px;
@@ -305,7 +305,7 @@ html, body {
   position: absolute;
   left: 0; top: 0; bottom: 0;
   width: 36px;
-  background: #090e07;
+  background: #070b1e;
   border-right: 1px solid var(--grid-line);
 }
 #ruler-marks {
@@ -319,7 +319,7 @@ html, body {
   left: 22px;
   font-family: 'Space Mono', monospace;
   font-size: 6px;
-  color: #2a4022;
+  color: #1d2a4d;
   line-height: 1;
 }
 .tick::before {
@@ -327,7 +327,7 @@ html, body {
   position: absolute;
   right: 100%; top: 50%;
   width: 7px; height: 1px;
-  background: #2a4022;
+  background: #1d2a4d;
   margin-right: 2px;
 }
 
@@ -371,7 +371,7 @@ html, body {
   transform: translate(-50%, -50%);
   width: 300px; height: 300px;
   z-index: 10;
-  filter: drop-shadow(0 0 40px rgba(184,255,60,.12)) drop-shadow(0 24px 60px rgba(0,0,0,.9));
+  filter: drop-shadow(0 0 40px rgba(0,216,255,.12)) drop-shadow(0 24px 60px rgba(0,0,0,.9));
 }
 
 /* gear animations */
@@ -449,7 +449,7 @@ html, body {
 .brand-sub {
   margin-top: 10px;
   font-size: 10px;
-  color: #364830;
+  color: #243356;
   letter-spacing: .04em;
   line-height: 1.7;
 }
@@ -589,7 +589,7 @@ html, body {
   opacity: 0;
 }
 .badge-inner {
-  background: rgba(12,21,10,.85);
+  background: rgba(10,16,36,.85);
   border: 1px solid var(--grid-line);
   border-radius: 8px;
   padding: 8px 14px;
@@ -612,7 +612,7 @@ html, body {
 .badge-ver {
   font-size: 8px;
   font-family: 'Space Mono', monospace;
-  color: #364830;
+  color: #243356;
   letter-spacing: .1em;
 }
 
@@ -944,8 +944,8 @@ html, body {
   text-transform: uppercase;
   opacity: 0;
 }
-#ch0 .ch-domain { color: #5599ff; }
-#ch1 .ch-domain { color: #ffaa33; }
+#ch0 .ch-domain { color: #00D8FF; }
+#ch1 .ch-domain { color: #8F5CFF; }
 #ch2 .ch-domain { color: var(--accent); }
 
 .ch-headline {
@@ -1079,13 +1079,13 @@ html, body {
 }
 #la-canvas.active { pointer-events: all; }
 #la-section-label {
-  position: fixed; top: 36px; left: 44px;
+  position: fixed; top: 84px; left: 44px;
   z-index: 9100; display: flex; align-items: baseline; gap: 10px;
   opacity: 0; transform: translateY(-8px); pointer-events: none;
 }
-.la-sl-num { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em; color:#4a7a10; }
-.la-sl-sep { font-size:10px; color:#2a3a20; }
-.la-sl-title { font-family:'Inter',sans-serif; font-weight:200; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:#6a7864; }
+.la-sl-num { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em; color:#0a7a93; }
+.la-sl-sep { font-size:10px; color:#1d2a4d; }
+.la-sl-title { font-family:'Inter',sans-serif; font-weight:200; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:#AAB4C0; }
 #la-text-block {
   position: fixed; bottom: 88px; left: 44px;
   z-index: 9100; max-width: 440px;
@@ -1095,13 +1095,13 @@ html, body {
   font-family: 'Inter', sans-serif;
   font-size: clamp(26px, 3.4vw, 50px);
   font-weight: 200; line-height: 1.1;
-  letter-spacing: -.025em; color: #edeae2;
+  letter-spacing: -.025em; color: #FFFFFF;
   margin-bottom: 18px;
 }
 #la-description {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 12px; font-weight: 300;
-  line-height: 1.85; color: #6a7864;
+  line-height: 1.85; color: #AAB4C0;
   max-width: 380px;
 }
 .la-node-label {
@@ -1110,12 +1110,12 @@ html, body {
 }
 .la-node-label .nl-name {
   font-family: 'Space Mono', monospace; font-size: 8px; font-weight: 400;
-  letter-spacing: .22em; text-transform: uppercase; color: #a0b89a;
+  letter-spacing: .22em; text-transform: uppercase; color: #AAB4C0;
   display: block;
   text-shadow: 0 0 10px rgba(0,0,0,1);
-  background: rgba(6,8,7,.55);
+  background: rgba(5,8,22,.55);
   padding: 3px 7px;
-  border-left: 1px solid rgba(184,255,60,.25);
+  border-left: 1px solid rgba(0,216,255,.25);
 }
 .la-hud-wrap {
   position:fixed; pointer-events:none; z-index:9045;
@@ -1140,128 +1140,49 @@ html, body {
   z-index:9200; display:flex; flex-direction:column; justify-content:center;
   padding:48px 44px; opacity:0; transform:translateX(40px);
   pointer-events:none;
-  border-left:1px solid rgba(24,36,19,.8);
-  background:linear-gradient(to left,rgba(6,8,7,.95),rgba(6,8,7,.6));
+  border-left:1px solid rgba(22,32,63,.8);
+  background:linear-gradient(to left,rgba(5,8,22,.95),rgba(5,8,22,.6));
   backdrop-filter:blur(12px);
 }
 #la-panel.visible { pointer-events:all; }
-.la-p-section { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.2em; color:#4a7a10; text-transform:uppercase; margin-bottom:6px; }
-.la-p-index   { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.15em; color:#4a7a10; margin-bottom:4px; }
-.la-p-name    { font-family:'Inter',sans-serif; font-weight:200; font-size:36px; letter-spacing:-.02em; line-height:1; margin-bottom:20px; color:#edeae2; }
-.la-p-bar     { height:1px; background:linear-gradient(to right,#4a7a10,transparent); margin-bottom:20px; opacity:.5; }
-.la-p-desc    { font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:300; line-height:1.7; color:#6a7864; margin-bottom:28px; }
-.la-p-conn-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.2em; color:#4a7a10; text-transform:uppercase; margin-bottom:10px; }
+.la-p-section { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.2em; color:#0a7a93; text-transform:uppercase; margin-bottom:6px; }
+.la-p-index   { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.15em; color:#0a7a93; margin-bottom:4px; }
+.la-p-name    { font-family:'Inter',sans-serif; font-weight:200; font-size:36px; letter-spacing:-.02em; line-height:1; margin-bottom:20px; color:#FFFFFF; }
+.la-p-bar     { height:1px; background:linear-gradient(to right,#0a7a93,transparent); margin-bottom:20px; opacity:.5; }
+.la-p-desc    { font-family:'Space Grotesk',sans-serif; font-size:13px; font-weight:300; line-height:1.7; color:#AAB4C0; margin-bottom:28px; }
+.la-p-conn-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.2em; color:#0a7a93; text-transform:uppercase; margin-bottom:10px; }
 .la-p-conn-list  { display:flex; flex-wrap:wrap; gap:6px; }
-.la-p-conn-tag   { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.1em; color:#4a7a10; border:1px solid rgba(74,122,16,.3); padding:3px 8px; border-radius:2px; text-transform:uppercase; }
+.la-p-conn-tag   { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.1em; color:#0a7a93; border:1px solid rgba(10,122,147,.3); padding:3px 8px; border-radius:2px; text-transform:uppercase; }
 #la-statusbar {
   position:fixed; bottom:28px; left:44px; z-index:9100;
   display:flex; align-items:center; gap:12px; opacity:0; pointer-events:none;
 }
-.la-sb-item { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.18em; color:#6a7864; text-transform:uppercase; }
-.la-sb-dot  { color:#2a3a20; font-size:10px; }
-#la-sb-active { color:#b8ff3c; position:relative; padding-left:12px; }
+.la-sb-item { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.18em; color:#AAB4C0; text-transform:uppercase; }
+.la-sb-dot  { color:#1d2a4d; font-size:10px; }
+#la-sb-active { color:#00D8FF; position:relative; padding-left:12px; }
 #la-sb-active::before {
   content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
   width:5px; height:5px; border-radius:50%;
-  background:#b8ff3c; box-shadow:0 0 6px #b8ff3c;
+  background:#00D8FF; box-shadow:0 0 6px #00D8FF;
   animation:blink 2s ease infinite;
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
 #la-close-hint {
-  position:fixed; top:36px; right:44px; z-index:9400;
+  position:fixed; top:84px; right:44px; z-index:9400;
   font-family:'Space Mono',monospace; font-size:9px;
-  letter-spacing:.15em; color:#6a7864; cursor:none; opacity:0;
+  letter-spacing:.15em; color:#AAB4C0; cursor:none; opacity:0;
   display:flex; align-items:center; gap:8px; pointer-events:none;
 }
 #la-close-hint.visible { pointer-events:all; }
 #la-close-hint span {
-  width:16px; height:16px; border:1px solid rgba(106,120,100,.3);
+  width:16px; height:16px; border:1px solid rgba(170,180,192,.3);
   display:inline-flex; align-items:center; justify-content:center;
-  font-size:10px; color:#6a7864; border-radius:2px;
+  font-size:10px; color:#AAB4C0; border-radius:2px;
 }
 
 /* ── LA cursor hover state (from v2) ── */
 body.la-hovering #cursor { width:10px; height:10px; }
-body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,255,60,.5); }
-
-/* ── Living Architecture transition overlay ── */
-#tx-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 10000;
-  background: #060807;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-#tx-overlay.active { pointer-events: all; }
-
-.tx-num {
-  font-family: 'Space Mono', monospace;
-  font-size: 11px;
-  letter-spacing: .22em;
-  color: #4a7a10;
-  margin-bottom: 14px;
-  opacity: 0;
-}
-.tx-rule {
-  width: 120px;
-  height: 1px;
-  background: linear-gradient(to right, #4a7a10, transparent);
-  margin-bottom: 28px;
-  transform-origin: left center;
-  transform: scaleX(0);
-}
-.tx-title-wrap {
-  overflow: hidden;
-  line-height: 1;
-}
-.tx-word {
-  font-family: 'Inter', sans-serif;
-  font-weight: 200;
-  font-size: clamp(52px, 8vw, 96px);
-  letter-spacing: -.02em;
-  color: #edeae2;
-  display: block;
-  transform: translateY(100%);
-}
-.tx-word:first-child { margin-bottom: 4px; }
-.tx-sub {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: 12px;
-  font-weight: 300;
-  letter-spacing: .18em;
-  color: #6a7864;
-  text-transform: uppercase;
-  margin-top: 28px;
-  opacity: 0;
-}
-.tx-prog-wrap {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 1px;
-  background: #182413;
-}
-.tx-prog {
-  height: 100%;
-  background: linear-gradient(to right, #4a7a10, #b8ff3c);
-  transform-origin: left center;
-  transform: scaleX(0);
-}
-#tx-flash {
-  position: fixed;
-  inset: 0;
-  z-index: 10001;
-  background: #060807;
-  opacity: 0;
-  pointer-events: none;
-}
+body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(0,216,255,.5); }
 
 /* ════════════════════════════════════════
    SECTION 6 — SELECTED DEPLOYMENTS
@@ -1274,13 +1195,13 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 #sd-canvas.active { pointer-events: all; }
 
 #sd-section-label {
-  position: fixed; top: 36px; left: 44px;
+  position: fixed; top: 84px; left: 44px;
   z-index: 9600; display: flex; align-items: baseline; gap: 10px;
   opacity: 0; transform: translateY(-8px); pointer-events: none;
 }
-.sd-sl-num   { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em; color:#4a7a10; }
-.sd-sl-sep   { font-size:10px; color:#2a3a20; }
-.sd-sl-title { font-family:'Inter',sans-serif; font-weight:200; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:#6a7864; }
+.sd-sl-num   { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em; color:#0a7a93; }
+.sd-sl-sep   { font-size:10px; color:#1d2a4d; }
+.sd-sl-title { font-family:'Inter',sans-serif; font-weight:200; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:#AAB4C0; }
 
 /* category list */
 #sd-categories {
@@ -1300,7 +1221,7 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 .sd-cat-item.active { border-left-color: var(--accent); }
 .sd-cat-dot {
   width: 5px; height: 5px; border-radius: 50%;
-  background: #2a3a20; flex-shrink: 0;
+  background: #1d2a4d; flex-shrink: 0;
   transition: background .35s, box-shadow .35s;
 }
 .sd-cat-item.active .sd-cat-dot {
@@ -1309,7 +1230,7 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 .sd-cat-name {
   font-family: 'Space Mono', monospace; font-size: 9px;
   letter-spacing: .18em; text-transform: uppercase;
-  color: #3a4e34; transition: color .35s; white-space: nowrap;
+  color: #243356; transition: color .35s; white-space: nowrap;
 }
 .sd-cat-item.active .sd-cat-name { color: var(--text); }
 
@@ -1322,7 +1243,7 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 }
 .sd-copy-num {
   font-family: 'Space Mono', monospace; font-size: 9px;
-  letter-spacing: .22em; color: rgba(184,255,60,.55);
+  letter-spacing: .22em; color: rgba(0,216,255,.55);
   text-transform: uppercase; margin-bottom: 6px;
 }
 .sd-copy-name {
@@ -1332,22 +1253,22 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
   color: var(--text); margin-bottom: 22px;
 }
 .sd-copy-bar {
-  height: 1px; background: linear-gradient(to right, rgba(184,255,60,.4), transparent);
+  height: 1px; background: linear-gradient(to right, rgba(0,216,255,.4), transparent);
   margin-bottom: 22px;
 }
 .sd-copy-body {
   font-family: 'Space Grotesk', sans-serif; font-size: 13px;
-  font-weight: 300; line-height: 1.9; color: rgba(237,234,226,.65); margin-bottom: 24px;
+  font-weight: 300; line-height: 1.9; color: rgba(255,255,255,.65); margin-bottom: 24px;
 }
 .sd-copy-region {
   display: inline-flex; align-items: center; gap: 8px;
   font-family: 'Space Mono', monospace; font-size: 8px;
-  letter-spacing: .22em; color: rgba(184,255,60,.7); text-transform: uppercase;
-  border: 1px solid rgba(184,255,60,.3); padding: 5px 14px; border-radius: 2px;
+  letter-spacing: .22em; color: rgba(0,216,255,.7); text-transform: uppercase;
+  border: 1px solid rgba(0,216,255,.3); padding: 5px 14px; border-radius: 2px;
 }
 .sd-copy-region::before {
   content: ''; width: 5px; height: 5px; border-radius: 50%;
-  background: rgba(184,255,60,.7); flex-shrink: 0;
+  background: rgba(0,216,255,.7); flex-shrink: 0;
 }
 
 /* headline block */
@@ -1358,13 +1279,13 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 #sd-headline {
   font-family: 'Inter', sans-serif; font-weight: 200;
   font-size: clamp(28px, 3.8vw, 58px);
-  letter-spacing: -.03em; color: #edeae2;
+  letter-spacing: -.03em; color: #FFFFFF;
   line-height: 1; margin-bottom: 8px;
 }
 #sd-subline {
   font-size: 10px; font-weight: 300;
   font-family: 'Space Grotesk', sans-serif;
-  color: rgba(237,234,226,.45); letter-spacing: .04em;
+  color: rgba(255,255,255,.45); letter-spacing: .04em;
   line-height: 1.7; max-width: 400px;
 }
 
@@ -1374,13 +1295,13 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
   z-index: 9600; display: flex; align-items: center; gap: 12px;
   opacity: 0; pointer-events: none;
 }
-.sd-sb-item { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.18em; color:rgba(184,255,60,.45); text-transform:uppercase; }
-.sd-sb-sep  { color:rgba(184,255,60,.2); }
-#sd-sb-status { color:#b8ff3c; padding-left:12px; position:relative; }
+.sd-sb-item { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.18em; color:rgba(0,216,255,.45); text-transform:uppercase; }
+.sd-sb-sep  { color:rgba(0,216,255,.2); }
+#sd-sb-status { color:#00D8FF; padding-left:12px; position:relative; }
 #sd-sb-status::before {
   content:''; position:absolute; left:0; top:50%; transform:translateY(-50%);
   width:5px; height:5px; border-radius:50%;
-  background:#b8ff3c; box-shadow:0 0 5px #b8ff3c;
+  background:#00D8FF; box-shadow:0 0 5px #00D8FF;
   animation:blink 2s ease infinite;
 }
 
@@ -1396,7 +1317,7 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 }
 .sd-nav-arrow {
   width: 24px; height: 24px;
-  border: 1px solid rgba(184,255,60,.35);
+  border: 1px solid rgba(0,216,255,.35);
   display: flex; align-items: center; justify-content: center;
   font-size: 11px; color: var(--muted); border-radius: 2px;
   animation: sdNavBounce 1.6s ease-in-out infinite;
@@ -1408,17 +1329,17 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 /* progress ring — fills as user scrolls */
 #sd-nav-progress {
   position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
-  background: rgba(184,255,60,.15);
+  background: rgba(0,216,255,.15);
   transform-origin: left center;
 }
 #sd-nav-progress-fill {
-  height: 100%; width: 0%; background: rgba(184,255,60,.6);
+  height: 100%; width: 0%; background: rgba(0,216,255,.6);
   transition: width .05s linear;
 }
 
 /* back button */
 #sd-back {
-  position: fixed; top: 36px; right: 44px;
+  position: fixed; top: 84px; right: 44px;
   z-index: 9700; opacity: 0; pointer-events: none;
   display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
 }
@@ -1435,53 +1356,11 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 }
 /* scroll-up progress bar */
 #sd-back-progress {
-  width: 100%; height: 1px; background: rgba(184,255,60,.15);
+  width: 100%; height: 1px; background: rgba(0,216,255,.15);
 }
 #sd-back-progress-fill {
-  height: 100%; width: 0%; background: rgba(184,255,60,.6);
+  height: 100%; width: 0%; background: rgba(0,216,255,.6);
   transition: width .05s linear;
-}
-
-/* SD transition overlay */
-#sd-tx-overlay {
-  position: fixed; inset: 0; z-index: 11000;
-  background: var(--bg);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none;
-}
-#sd-tx-overlay.active { pointer-events: all; }
-.sd-tx-num {
-  font-family: 'Space Mono', monospace; font-size: 11px;
-  letter-spacing: .22em; color: #4a7a10; margin-bottom: 14px; opacity: 0;
-}
-.sd-tx-rule {
-  width: 120px; height: 1px;
-  background: linear-gradient(to right, #4a7a10, transparent);
-  margin-bottom: 28px; transform-origin: left center; transform: scaleX(0);
-}
-.sd-tx-title-wrap { overflow: hidden; line-height: 1; }
-.sd-tx-word {
-  font-family: 'Inter', sans-serif; font-weight: 200;
-  font-size: clamp(44px, 7vw, 88px);
-  letter-spacing: -.02em; color: var(--text);
-  display: block; transform: translateY(100%);
-}
-.sd-tx-sub {
-  font-family: 'Space Grotesk', sans-serif; font-size: 12px;
-  font-weight: 300; letter-spacing: .18em; color: #6a7864;
-  text-transform: uppercase; margin-top: 28px; opacity: 0;
-}
-.sd-tx-prog-wrap {
-  position: fixed; bottom: 0; left: 0; width: 100%; height: 1px; background: #182413;
-}
-.sd-tx-prog {
-  height: 100%; background: linear-gradient(to right, #4a7a10, #b8ff3c);
-  transform-origin: left center; transform: scaleX(0);
-}
-#sd-flash {
-  position: fixed; inset: 0; z-index: 11001;
-  background: var(--bg); opacity: 0; pointer-events: none;
 }
 
 /* ════════════════════════════════════════
@@ -1496,18 +1375,18 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 }
 .phil-nav-label {
   font-family: 'Space Mono', monospace; font-size: 9px;
-  letter-spacing: .2em; color: #4a5e3a; text-transform: uppercase;
+  letter-spacing: .2em; color: #243356; text-transform: uppercase;
 }
 .phil-nav-arrow {
-  font-size: 12px; color: #4a5e3a;
+  font-size: 12px; color: #243356;
   animation: phil-bounce 1.3s ease-in-out infinite;
 }
 @keyframes phil-bounce {
   0%, 100% { transform: translateY(0); }
   50%       { transform: translateY(5px); }
 }
-#phil-nav-progress { width: 120px; height: 1px; background: #182413; }
-#phil-nav-fill     { height: 100%; width: 0%; background: linear-gradient(to right, #4a7a10, #b8ff3c); }
+#phil-nav-progress { width: 120px; height: 1px; background: #16203f; }
+#phil-nav-fill     { height: 100%; width: 0%; background: linear-gradient(to right, #0a7a93, #00D8FF); }
 
 #phil-canvas {
   position: fixed; inset: 0; z-index: 9500;
@@ -1516,13 +1395,13 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 #phil-canvas.active { pointer-events: all; }
 
 #phil-section-label {
-  position: fixed; top: 36px; left: 44px;
+  position: fixed; top: 84px; left: 44px;
   z-index: 9600; display: flex; align-items: baseline; gap: 10px;
   opacity: 0; transform: translateY(-8px); pointer-events: none;
 }
-.phil-sl-num   { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em; color:#7ab828; }
-.phil-sl-sep   { font-size:10px; color:#4a7a10; }
-.phil-sl-title { font-family:'Inter',sans-serif; font-weight:200; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:#8a9884; }
+.phil-sl-num   { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em; color:#1f9fc0; }
+.phil-sl-sep   { font-size:10px; color:#0a7a93; }
+.phil-sl-title { font-family:'Inter',sans-serif; font-weight:200; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:#AAB4C0; }
 
 #phil-statement {
   position: fixed; top: 50%; left: 50%;
@@ -1547,64 +1426,20 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
   position: fixed; bottom: 32px; right: 44px;
   z-index: 9600; opacity: 0; pointer-events: none;
   font-family: 'Space Mono', monospace; font-size: 9px;
-  letter-spacing: .18em; color: #2a3a20; text-transform: uppercase;
+  letter-spacing: .18em; color: #1d2a4d; text-transform: uppercase;
   transition: opacity .4s;
 }
 #phil-back-hint.visible { opacity: 1; }
 #phil-back-progress-wrap {
   position: fixed; bottom: 0; left: 0;
-  width: 100%; height: 1px; background: #0e1a0b;
+  width: 100%; height: 1px; background: #070b1e;
   z-index: 9600; opacity: 0; pointer-events: none;
 }
 #phil-back-progress-fill {
   height: 100%; width: 0%;
-  background: linear-gradient(to right, #4a7a10, #b8ff3c);
+  background: linear-gradient(to right, #0a7a93, #00D8FF);
 }
 
-#phil-tx-overlay {
-  position: fixed; inset: 0; z-index: 10000;
-  background: #050508;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  opacity: 0; pointer-events: none;
-}
-#phil-tx-overlay.active { pointer-events: all; }
-.phil-tx-num {
-  font-family: 'Space Mono', monospace; font-size: 11px;
-  letter-spacing: .18em; color: #4a7a10;
-  margin-bottom: 20px; opacity: 0;
-}
-.phil-tx-rule {
-  width: 120px; height: 1px;
-  background: linear-gradient(to right, #7ab828, transparent);
-  margin-bottom: 28px;
-  transform-origin: left center; transform: scaleX(0);
-}
-.phil-tx-title-wrap { overflow: hidden; }
-.phil-tx-word {
-  font-family: 'Space Grotesk', sans-serif;
-  font-size: clamp(36px, 5vw, 72px); font-weight: 200;
-  color: #ffffff; letter-spacing: -0.02em;
-  transform: translateY(100%); display: block;
-}
-.phil-tx-sub {
-  font-family: 'Space Grotesk', sans-serif; font-size: 12px;
-  font-weight: 300; letter-spacing: .18em; color: #8a9884;
-  text-transform: uppercase; margin-top: 28px; opacity: 0;
-}
-.phil-tx-prog-wrap {
-  position: fixed; bottom: 0; left: 0;
-  width: 100%; height: 1px; background: #182413;
-}
-.phil-tx-prog {
-  height: 100%;
-  background: linear-gradient(to right, #4a7a10, #b8ff3c);
-  transform-origin: left center; transform: scaleX(0);
-}
-#phil-flash {
-  position: fixed; inset: 0; z-index: 10001;
-  background: #050508; opacity: 0; pointer-events: none;
-}
 </style>
 </head>
 <body>
@@ -1737,8 +1572,8 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
     <div class="badge-inner">
       <div class="badge-icon">
         <svg width="12" height="12" viewBox="0 0 12 12">
-          <circle cx="6" cy="6" r="4" fill="none" stroke="#060807" stroke-width="1.8"/>
-          <circle cx="6" cy="6" r="1.5" fill="#060807"/>
+          <circle cx="6" cy="6" r="4" fill="none" stroke="#050816" stroke-width="1.8"/>
+          <circle cx="6" cy="6" r="1.5" fill="#050816"/>
         </svg>
       </div>
       <div>
@@ -1758,7 +1593,7 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 
         <!-- circuit traces SVG overlay -->
         <svg id="pcb-traces" viewBox="0 0 1060 760" preserveAspectRatio="xMidYMid slice">
-          <g fill="none" stroke="#b8ff3c" stroke-width=".8" opacity=".6">
+          <g fill="none" stroke="#00D8FF" stroke-width=".8" opacity=".6">
             <!-- trace paths mimicking PCB routing -->
             <polyline points="60,100 200,100 200,180 340,180"/>
             <polyline points="60,140 120,140 120,300 400,300"/>
@@ -1773,7 +1608,7 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
             <polyline points="700,300 700,200 820,200 820,160"/>
           </g>
           <!-- via pads -->
-          <g fill="none" stroke="#b8ff3c" stroke-width="1.2" opacity=".5">
+          <g fill="none" stroke="#00D8FF" stroke-width="1.2" opacity=".5">
             <circle cx="200" cy="100" r="5"/><circle cx="200" cy="180" r="5"/>
             <circle cx="340" cy="180" r="5"/><circle cx="340" cy="240" r="5"/>
             <circle cx="500" cy="240" r="5"/><circle cx="620" cy="160" r="5"/>
@@ -1783,13 +1618,13 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
             <circle cx="560" cy="380" r="5"/>
           </g>
           <!-- filled via centers -->
-          <g fill="#b8ff3c" opacity=".3">
+          <g fill="#00D8FF" opacity=".3">
             <circle cx="200" cy="100" r="2"/><circle cx="340" cy="180" r="2"/>
             <circle cx="500" cy="240" r="2"/><circle cx="780" cy="160" r="2"/>
             <circle cx="320" cy="500" r="2"/><circle cx="500" cy="580" r="2"/>
           </g>
           <!-- cyan accent traces -->
-          <g fill="none" stroke="#00d4ff" stroke-width=".6" opacity=".3">
+          <g fill="none" stroke="#00D8FF" stroke-width=".6" opacity=".3">
             <polyline points="60,220 160,220 160,320 280,320"/>
             <polyline points="800,400 900,400 900,320 1020,320"/>
           </g>
@@ -1810,12 +1645,12 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
         <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg" width="300" height="300">
           <defs>
             <radialGradient id="plateGrad" cx="50%" cy="40%" r="60%">
-              <stop offset="0%" stop-color="#1a2c18"/>
-              <stop offset="100%" stop-color="#0c150a"/>
+              <stop offset="0%" stop-color="#16203f"/>
+              <stop offset="100%" stop-color="#0a1024"/>
             </radialGradient>
             <radialGradient id="gearGrad" cx="30%" cy="30%" r="70%">
-              <stop offset="0%" stop-color="#3d5838"/>
-              <stop offset="100%" stop-color="#182313"/>
+              <stop offset="0%" stop-color="#243356"/>
+              <stop offset="100%" stop-color="#16203f"/>
             </radialGradient>
             <filter id="glow-s">
               <feGaussianBlur stdDeviation="2.5" result="b"/>
@@ -1832,13 +1667,13 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
                   stroke="var(--accent)" stroke-width=".8" opacity=".06" filter="url(#glow-m)"/>
 
           <!-- main plate -->
-          <circle cx="150" cy="150" r="147" fill="#080e06" stroke="#1a2c18" stroke-width="1"/>
-          <circle cx="150" cy="150" r="140" fill="url(#plateGrad)" stroke="#152013" stroke-width="1"/>
+          <circle cx="150" cy="150" r="147" fill="#070b1e" stroke="#16203f" stroke-width="1"/>
+          <circle cx="150" cy="150" r="140" fill="url(#plateGrad)" stroke="#0d1430" stroke-width="1"/>
 
           <!-- engraved rings -->
-          <circle cx="150" cy="150" r="136" fill="none" stroke="#1e2e1a" stroke-width=".5" stroke-dasharray="5 3"/>
-          <circle cx="150" cy="150" r="118" fill="none" stroke="#172213" stroke-width=".5"/>
-          <circle cx="150" cy="150" r="98"  fill="none" stroke="#121c0e" stroke-width=".5" stroke-dasharray="2 5"/>
+          <circle cx="150" cy="150" r="136" fill="none" stroke="#16203f" stroke-width=".5" stroke-dasharray="5 3"/>
+          <circle cx="150" cy="150" r="118" fill="none" stroke="#16203f" stroke-width=".5"/>
+          <circle cx="150" cy="150" r="98"  fill="none" stroke="#0d1430" stroke-width=".5" stroke-dasharray="2 5"/>
 
           <!-- cyan arc detail -->
           <circle cx="150" cy="150" r="130" fill="none"
@@ -1854,8 +1689,8 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 
           <!-- ── MAIN GEAR ── -->
           <g class="gear-main">
-            <circle cx="150" cy="150" r="44" fill="url(#gearGrad)" stroke="#3d5838" stroke-width="1.2"/>
-            <g fill="#3d5838" stroke="#1e2e1a" stroke-width=".6">
+            <circle cx="150" cy="150" r="44" fill="url(#gearGrad)" stroke="#243356" stroke-width="1.2"/>
+            <g fill="#243356" stroke="#16203f" stroke-width=".6">
               <rect x="148" y="102" width="4" height="13" rx="1" transform-origin="150 150"/>
               <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(20 150 150)"/>
               <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(40 150 150)"/>
@@ -1875,19 +1710,19 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
               <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(320 150 150)"/>
               <rect x="148" y="102" width="4" height="13" rx="1" transform="rotate(340 150 150)"/>
             </g>
-            <circle cx="150" cy="150" r="30" fill="#0c150a" stroke="#1e2e1a" stroke-width="1"/>
-            <line x1="150" y1="124" x2="150" y2="176" stroke="#3d5838" stroke-width="1.5"/>
-            <line x1="124" y1="150" x2="176" y2="150" stroke="#3d5838" stroke-width="1.5"/>
-            <line x1="129" y1="129" x2="171" y2="171" stroke="#3d5838" stroke-width="1.2"/>
-            <line x1="171" y1="129" x2="129" y2="171" stroke="#3d5838" stroke-width="1.2"/>
+            <circle cx="150" cy="150" r="30" fill="#0a1024" stroke="#16203f" stroke-width="1"/>
+            <line x1="150" y1="124" x2="150" y2="176" stroke="#243356" stroke-width="1.5"/>
+            <line x1="124" y1="150" x2="176" y2="150" stroke="#243356" stroke-width="1.5"/>
+            <line x1="129" y1="129" x2="171" y2="171" stroke="#243356" stroke-width="1.2"/>
+            <line x1="171" y1="129" x2="129" y2="171" stroke="#243356" stroke-width="1.2"/>
             <circle cx="150" cy="150" r="6" fill="#7a1515" stroke="var(--red)" stroke-width="1"/>
             <circle cx="150" cy="150" r="2.5" fill="#111"/>
           </g>
 
           <!-- ── GEAR B ── -->
           <g class="gear-b">
-            <circle cx="218" cy="112" r="22" fill="url(#gearGrad)" stroke="#3d5838" stroke-width="1"/>
-            <g fill="#3d5838" stroke="#1e2e1a" stroke-width=".5">
+            <circle cx="218" cy="112" r="22" fill="url(#gearGrad)" stroke="#243356" stroke-width="1"/>
+            <g fill="#243356" stroke="#16203f" stroke-width=".5">
               <rect x="216.5" y="88" width="3" height="8" rx=".8" transform-origin="218 112"/>
               <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(26 218 112)"/>
               <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(52 218 112)"/>
@@ -1903,16 +1738,16 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
               <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(312 218 112)"/>
               <rect x="216.5" y="88" width="3" height="8" rx=".8" transform="rotate(338 218 112)"/>
             </g>
-            <circle cx="218" cy="112" r="13" fill="#0c150a"/>
-            <line x1="218" y1="101" x2="218" y2="123" stroke="#3d5838" stroke-width="1.2"/>
-            <line x1="207" y1="112" x2="229" y2="112" stroke="#3d5838" stroke-width="1.2"/>
+            <circle cx="218" cy="112" r="13" fill="#0a1024"/>
+            <line x1="218" y1="101" x2="218" y2="123" stroke="#243356" stroke-width="1.2"/>
+            <line x1="207" y1="112" x2="229" y2="112" stroke="#243356" stroke-width="1.2"/>
             <circle cx="218" cy="112" r="4" fill="#7a1515" stroke="var(--red)" stroke-width=".8"/>
           </g>
 
           <!-- ── GEAR C ── -->
           <g class="gear-c">
-            <circle cx="90" cy="200" r="28" fill="url(#gearGrad)" stroke="#3d5838" stroke-width="1"/>
-            <g fill="#3d5838" stroke="#1e2e1a" stroke-width=".5">
+            <circle cx="90" cy="200" r="28" fill="url(#gearGrad)" stroke="#243356" stroke-width="1"/>
+            <g fill="#243356" stroke="#16203f" stroke-width=".5">
               <rect x="88.5" y="170" width="3" height="9" rx=".8" transform-origin="90 200"/>
               <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(24 90 200)"/>
               <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(48 90 200)"/>
@@ -1929,18 +1764,18 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
               <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(312 90 200)"/>
               <rect x="88.5" y="170" width="3" height="9" rx=".8" transform="rotate(336 90 200)"/>
             </g>
-            <circle cx="90" cy="200" r="18" fill="#0c150a"/>
-            <line x1="90" y1="186" x2="90" y2="214" stroke="#3d5838" stroke-width="1.2"/>
-            <line x1="76" y1="200" x2="104" y2="200" stroke="#3d5838" stroke-width="1.2"/>
-            <line x1="80" y1="190" x2="100" y2="210" stroke="#3d5838" stroke-width=".8"/>
-            <line x1="100" y1="190" x2="80" y2="210" stroke="#3d5838" stroke-width=".8"/>
+            <circle cx="90" cy="200" r="18" fill="#0a1024"/>
+            <line x1="90" y1="186" x2="90" y2="214" stroke="#243356" stroke-width="1.2"/>
+            <line x1="76" y1="200" x2="104" y2="200" stroke="#243356" stroke-width="1.2"/>
+            <line x1="80" y1="190" x2="100" y2="210" stroke="#243356" stroke-width=".8"/>
+            <line x1="100" y1="190" x2="80" y2="210" stroke="#243356" stroke-width=".8"/>
             <circle cx="90" cy="200" r="4" fill="#7a1515" stroke="var(--red)" stroke-width=".8"/>
           </g>
 
           <!-- ── GEAR D ── -->
           <g class="gear-d">
-            <circle cx="225" cy="195" r="16" fill="url(#gearGrad)" stroke="#3d5838" stroke-width=".8"/>
-            <g fill="#3d5838" stroke="#1e2e1a" stroke-width=".4">
+            <circle cx="225" cy="195" r="16" fill="url(#gearGrad)" stroke="#243356" stroke-width=".8"/>
+            <g fill="#243356" stroke="#16203f" stroke-width=".4">
               <rect x="223.5" y="178" width="3" height="7" rx=".6" transform-origin="225 195"/>
               <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(30 225 195)"/>
               <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(60 225 195)"/>
@@ -1954,21 +1789,21 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
               <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(300 225 195)"/>
               <rect x="223.5" y="178" width="3" height="7" rx=".6" transform="rotate(330 225 195)"/>
             </g>
-            <circle cx="225" cy="195" r="9" fill="#0c150a"/>
-            <line x1="225" y1="188" x2="225" y2="202" stroke="#3d5838" stroke-width="1"/>
-            <line x1="218" y1="195" x2="232" y2="195" stroke="#3d5838" stroke-width="1"/>
+            <circle cx="225" cy="195" r="9" fill="#0a1024"/>
+            <line x1="225" y1="188" x2="225" y2="202" stroke="#243356" stroke-width="1"/>
+            <line x1="218" y1="195" x2="232" y2="195" stroke="#243356" stroke-width="1"/>
             <circle cx="225" cy="195" r="3" fill="#7a1515" stroke="var(--red)" stroke-width=".6"/>
           </g>
 
           <!-- ── BALANCE WHEEL ── -->
           <g class="balance">
-            <circle cx="150" cy="78" r="21" fill="none" stroke="#3d5838" stroke-width="2"/>
+            <circle cx="150" cy="78" r="21" fill="none" stroke="#243356" stroke-width="2"/>
             <!-- cyan accent on balance -->
             <circle cx="150" cy="78" r="21" fill="none"
                     stroke="var(--accent2)" stroke-width=".6" opacity=".25"/>
-            <line x1="150" y1="57" x2="150" y2="99" stroke="#3d5838" stroke-width="1.5"/>
-            <line x1="129" y1="78" x2="171" y2="78" stroke="#3d5838" stroke-width="1.5"/>
-            <circle cx="150" cy="78" r="6" fill="#0c150a" stroke="#3d5838" stroke-width="1"/>
+            <line x1="150" y1="57" x2="150" y2="99" stroke="#243356" stroke-width="1.5"/>
+            <line x1="129" y1="78" x2="171" y2="78" stroke="#243356" stroke-width="1.5"/>
+            <circle cx="150" cy="78" r="6" fill="#0a1024" stroke="#243356" stroke-width="1"/>
             <circle cx="150" cy="78" r="3.5" fill="#7a1515" stroke="var(--red)" stroke-width=".8"/>
             <!-- hairspring -->
             <path d="M150,74 C153,69 158,69 160,74 C162,79 160,84 155,86 C150,88 145,86 143,81 C141,76 143,69 150,67"
@@ -1981,9 +1816,9 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
 
           <!-- plate text -->
           <text x="150" y="253" text-anchor="middle" font-family="Space Mono" font-size="7"
-                fill="#1e2e1a" letter-spacing="4">COGNITI · I</text>
+                fill="#16203f" letter-spacing="4">COGNITI · I</text>
           <text x="150" y="264" text-anchor="middle" font-family="Space Mono" font-size="5.5"
-                fill="#152013" letter-spacing="3">INTELLIGENCE SYSTEM</text>
+                fill="#0d1430" letter-spacing="3">INTELLIGENCE SYSTEM</text>
         </svg>
       </div>
 
@@ -1991,8 +1826,8 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
       <!-- caliper -->
       <div class="prop" style="bottom:7%;right:3%;transform:rotate(-7deg)">
         <svg width="230" height="62" viewBox="0 0 230 62">
-          <rect x="0" y="21" width="208" height="18" rx="3" fill="#0e1c0c" stroke="#2d4428" stroke-width=".8"/>
-          <g stroke="#3d5838" stroke-width=".5">
+          <rect x="0" y="21" width="208" height="18" rx="3" fill="#0d1430" stroke="#1d2a4d" stroke-width=".8"/>
+          <g stroke="#243356" stroke-width=".5">
             <line x1="10" y1="23" x2="10" y2="27"/><line x1="20" y1="23" x2="20" y2="26"/>
             <line x1="30" y1="23" x2="30" y2="27"/><line x1="40" y1="23" x2="40" y2="26"/>
             <line x1="50" y1="23" x2="50" y2="27"/><line x1="60" y1="23" x2="60" y2="26"/>
@@ -2004,25 +1839,25 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
             <line x1="170" y1="23" x2="170" y2="27"/><line x1="180" y1="23" x2="180" y2="26"/>
             <line x1="190" y1="23" x2="190" y2="27"/>
           </g>
-          <path d="M2,9 L14,9 L14,21 L2,21 Z" fill="#182813" stroke="#2d4428" stroke-width=".8"/>
-          <path d="M2,39 L14,39 L14,53 L2,53 Z" fill="#182813" stroke="#2d4428" stroke-width=".8"/>
-          <rect x="90" y="16" width="22" height="28" rx="2" fill="#0a1208" stroke="var(--accent2)" stroke-width=".6" opacity=".8"/>
-          <path d="M92,9 L112,9 L112,16 L92,16 Z" fill="#0e1c0c" stroke="#2d4428" stroke-width=".8"/>
-          <path d="M92,44 L112,44 L112,53 L92,53 Z" fill="#0e1c0c" stroke="#2d4428" stroke-width=".8"/>
+          <path d="M2,9 L14,9 L14,21 L2,21 Z" fill="#16203f" stroke="#1d2a4d" stroke-width=".8"/>
+          <path d="M2,39 L14,39 L14,53 L2,53 Z" fill="#16203f" stroke="#1d2a4d" stroke-width=".8"/>
+          <rect x="90" y="16" width="22" height="28" rx="2" fill="#070b1e" stroke="var(--accent2)" stroke-width=".6" opacity=".8"/>
+          <path d="M92,9 L112,9 L112,16 L92,16 Z" fill="#0d1430" stroke="#1d2a4d" stroke-width=".8"/>
+          <path d="M92,44 L112,44 L112,53 L92,53 Z" fill="#0d1430" stroke="#1d2a4d" stroke-width=".8"/>
           <g stroke="var(--accent2)" stroke-width=".4" opacity=".6">
             <line x1="93" y1="18" x2="93" y2="20"/><line x1="96" y1="18" x2="96" y2="21"/>
             <line x1="99" y1="18" x2="99" y2="20"/><line x1="102" y1="18" x2="102" y2="21"/>
             <line x1="105" y1="18" x2="105" y2="20"/>
           </g>
-          <rect x="206" y="25" width="22" height="6" rx="1" fill="#182813" stroke="#2d4428" stroke-width=".8"/>
+          <rect x="206" y="25" width="22" height="6" rx="1" fill="#16203f" stroke="#1d2a4d" stroke-width=".8"/>
         </svg>
       </div>
 
       <!-- mechanical pencil -->
       <div class="prop" style="top:7%;right:7%;transform:rotate(14deg)">
         <svg width="270" height="18" viewBox="0 0 270 18">
-          <rect x="20" y="4" width="80" height="10" rx="2" fill="#0e1c0c"/>
-          <g stroke="#1a2c18" stroke-width="1">
+          <rect x="20" y="4" width="80" height="10" rx="2" fill="#0d1430"/>
+          <g stroke="#16203f" stroke-width="1">
             <line x1="24" y1="4" x2="24" y2="14"/><line x1="28" y1="4" x2="28" y2="14"/>
             <line x1="32" y1="4" x2="32" y2="14"/><line x1="36" y1="4" x2="36" y2="14"/>
             <line x1="40" y1="4" x2="40" y2="14"/><line x1="44" y1="4" x2="44" y2="14"/>
@@ -2034,23 +1869,23 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
             <line x1="88" y1="4" x2="88" y2="14"/><line x1="92" y1="4" x2="92" y2="14"/>
             <line x1="96" y1="4" x2="96" y2="14"/>
           </g>
-          <rect x="100" y="3" width="138" height="12" rx="6" fill="#182813" stroke="#2d4428" stroke-width=".8"/>
+          <rect x="100" y="3" width="138" height="12" rx="6" fill="#16203f" stroke="#1d2a4d" stroke-width=".8"/>
           <rect x="98" y="3" width="6" height="12" rx="2" fill="var(--accent)" opacity=".8"/>
-          <rect x="178" y="1" width="3" height="14" rx="1.5" fill="#0e1c0c"/>
-          <circle cx="179.5" cy="1" r="2.5" fill="#0e1c0c"/>
-          <path d="M100,6 L4,9 L100,12 Z" fill="#2d4428"/>
-          <line x1="4" y1="9" x2="0" y2="9" stroke="#d0ccba" stroke-width="1"/>
+          <rect x="178" y="1" width="3" height="14" rx="1.5" fill="#0d1430"/>
+          <circle cx="179.5" cy="1" r="2.5" fill="#0d1430"/>
+          <path d="M100,6 L4,9 L100,12 Z" fill="#1d2a4d"/>
+          <line x1="4" y1="9" x2="0" y2="9" stroke="#E6EBF2" stroke-width="1"/>
           <rect x="238" y="5" width="20" height="8" rx="2" fill="#3a1010"/>
           <rect x="236" y="5" width="4" height="8" rx="1" fill="#222"/>
-          <circle cx="248" cy="9" r="5" fill="#0e1c0c" stroke="#2d4428" stroke-width=".8"/>
+          <circle cx="248" cy="9" r="5" fill="#0d1430" stroke="#1d2a4d" stroke-width=".8"/>
         </svg>
       </div>
 
       <!-- circuit schematic -->
       <div class="prop" style="top:10%;left:3%;transform:rotate(-4deg)">
         <svg width="150" height="108" viewBox="0 0 150 108">
-          <rect x="0" y="0" width="150" height="108" rx="3" fill="#080e06" stroke="#152013" stroke-width="1"/>
-          <g fill="none" stroke="#1e2e1a" stroke-width="1">
+          <rect x="0" y="0" width="150" height="108" rx="3" fill="#070b1e" stroke="#0d1430" stroke-width="1"/>
+          <g fill="none" stroke="#16203f" stroke-width="1">
             <polyline points="10,22 32,22 32,54 64,54"/>
             <polyline points="64,54 64,74 96,74"/>
             <polyline points="96,22 96,54 128,54 128,32"/>
@@ -2060,11 +1895,11 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
           </g>
           <!-- highlighted trace -->
           <polyline points="64,54 96,54" fill="none" stroke="var(--accent)" stroke-width=".8" opacity=".4"/>
-          <rect x="56" y="50" width="14" height="8" rx="1" fill="#080e06" stroke="#3d5838" stroke-width=".8"/>
-          <line x1="90" y1="50" x2="90" y2="58" stroke="#3d5838" stroke-width="2"/>
-          <line x1="98" y1="50" x2="98" y2="58" stroke="#3d5838" stroke-width="2"/>
-          <rect x="48" y="30" width="24" height="16" rx="1" fill="#0c150a" stroke="#3d5838" stroke-width=".8"/>
-          <g stroke="#2d4428" stroke-width=".8">
+          <rect x="56" y="50" width="14" height="8" rx="1" fill="#070b1e" stroke="#243356" stroke-width=".8"/>
+          <line x1="90" y1="50" x2="90" y2="58" stroke="#243356" stroke-width="2"/>
+          <line x1="98" y1="50" x2="98" y2="58" stroke="#243356" stroke-width="2"/>
+          <rect x="48" y="30" width="24" height="16" rx="1" fill="#0a1024" stroke="#243356" stroke-width=".8"/>
+          <g stroke="#1d2a4d" stroke-width=".8">
             <line x1="48" y1="34" x2="44" y2="34"/><line x1="48" y1="38" x2="44" y2="38"/>
             <line x1="48" y1="42" x2="44" y2="42"/>
             <line x1="72" y1="34" x2="76" y2="34"/><line x1="72" y1="38" x2="76" y2="38"/>
@@ -2074,28 +1909,28 @@ body.la-hovering #cursor-ring { width:42px; height:42px; border-color:rgba(184,2
           <circle cx="10" cy="22" r="2.5" fill="var(--red)" opacity=".7"/>
           <circle cx="10" cy="74" r="2.5" fill="var(--red)" opacity=".7"/>
           <text x="75" y="101" text-anchor="middle" font-family="Space Mono" font-size="6"
-                fill="#1e2e1a" letter-spacing="2">CG-01 · REV 4</text>
+                fill="#16203f" letter-spacing="2">CG-01 · REV 4</text>
         </svg>
       </div>
 
       <!-- loupe -->
       <div class="prop" style="bottom:9%;left:5%">
         <svg width="72" height="72" viewBox="0 0 72 72">
-          <line x1="52" y1="52" x2="68" y2="68" stroke="#1e2e1a" stroke-width="5.5" stroke-linecap="round"/>
-          <circle cx="31" cy="31" r="25" fill="none" stroke="#3d5838" stroke-width="2.5"/>
-          <circle cx="31" cy="31" r="25" fill="rgba(0,212,255,0.03)"/>
+          <line x1="52" y1="52" x2="68" y2="68" stroke="#16203f" stroke-width="5.5" stroke-linecap="round"/>
+          <circle cx="31" cy="31" r="25" fill="none" stroke="#243356" stroke-width="2.5"/>
+          <circle cx="31" cy="31" r="25" fill="rgba(0,216,255,0.03)"/>
           <circle cx="23" cy="23" r="7" fill="none" stroke="var(--accent2)" stroke-width=".5" opacity=".25"/>
-          <line x1="31" y1="12" x2="31" y2="50" stroke="#1e2e1a" stroke-width=".5" stroke-dasharray="2 3"/>
-          <line x1="12" y1="31" x2="50" y2="31" stroke="#1e2e1a" stroke-width=".5" stroke-dasharray="2 3"/>
+          <line x1="31" y1="12" x2="31" y2="50" stroke="#16203f" stroke-width=".5" stroke-dasharray="2 3"/>
+          <line x1="12" y1="31" x2="50" y2="31" stroke="#16203f" stroke-width=".5" stroke-dasharray="2 3"/>
           <circle cx="31" cy="31" r="2" fill="var(--accent)" opacity=".5"/>
         </svg>
       </div>
 
       <!-- hex numbers floating on PCB -->
-      <div class="prop" style="top:18%;left:38%;font-family:'Space Mono',monospace;font-size:7px;color:#1a2c18;letter-spacing:.1em;line-height:1.8">
+      <div class="prop" style="top:18%;left:38%;font-family:'Space Mono',monospace;font-size:7px;color:#16203f;letter-spacing:.1em;line-height:1.8">
         0xA3F1<br/>0x004C<br/>0xFFB2<br/>0x719E
       </div>
-      <div class="prop" style="bottom:20%;right:34%;font-family:'Space Mono',monospace;font-size:7px;color:#0d1c20;letter-spacing:.1em;line-height:1.8">
+      <div class="prop" style="bottom:20%;right:34%;font-family:'Space Mono',monospace;font-size:7px;color:#16203f;letter-spacing:.1em;line-height:1.8">
         0x00D4<br/>0x3C8A<br/>0xB8FF
       </div>
 
@@ -2275,7 +2110,7 @@ function drawParticles() {
       if (d < maxDist) {
         const a = (1 - d / maxDist) * .18;
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(184,255,60,${a})`;
+        ctx.strokeStyle = `rgba(0,216,255,${a})`;
         ctx.lineWidth = .6;
         ctx.moveTo(nodes[i].x, nodes[i].y);
         ctx.lineTo(nodes[j].x, nodes[j].y);
@@ -2283,7 +2118,7 @@ function drawParticles() {
       }
     }
     ctx.beginPath();
-    ctx.fillStyle = 'rgba(184,255,60,0.35)';
+    ctx.fillStyle = 'rgba(0,216,255,0.35)';
     ctx.arc(nodes[i].x, nodes[i].y, nodes[i].r, 0, Math.PI*2);
     ctx.fill();
   }
@@ -2604,7 +2439,7 @@ function initManifesto() {
         // backlight: watch glows bright as text appears, dims as it fades
         gsap.set('#watch-wrap', {
           opacity: .28 + c * .62,
-          filter: `drop-shadow(0 0 ${26 + c * 92}px rgba(184,255,60,${.04 + c * .44})) drop-shadow(0 24px 60px rgba(0,0,0,.9))`
+          filter: `drop-shadow(0 0 ${26 + c * 92}px rgba(0,216,255,${.04 + c * .44})) drop-shadow(0 24px 60px rgba(0,0,0,.9))`
         });
       }
     });
@@ -2623,7 +2458,7 @@ function initManifesto() {
     onUpdate({ progress: p }) {
       gsap.set('#watch-wrap', {
         opacity: .9 + p * .1,
-        filter: `drop-shadow(0 0 ${40 + p * 90}px rgba(184,255,60,${.12 + p * .45})) drop-shadow(0 24px 60px rgba(0,0,0,.9))`
+        filter: `drop-shadow(0 0 ${40 + p * 90}px rgba(0,216,255,${.12 + p * .45})) drop-shadow(0 24px 60px rgba(0,0,0,.9))`
       });
     }
   });
@@ -2740,7 +2575,7 @@ function initChallenge() {
         if (r < R-1 && Math.random() > 0.44) ev.push(pts[i],pts[i+1],pts[i+2], pts[i+C*3],pts[i+C*3+1],pts[i+C*3+2]);
       }
     }
-    grp.add(makeLines(ev, 0x3377ee, 0.22));
+    grp.add(makeLines(ev, 0x00D8FF, 0.22));
     scene.add(grp); return grp;
   }
 
@@ -2789,7 +2624,7 @@ function initChallenge() {
       }
       off += n;
     });
-    grp.add(makeLines(ev, 0x88ff22, 0.22));
+    grp.add(makeLines(ev, 0x00D8FF, 0.22));
     scene.add(grp); return grp;
   }
 
@@ -3014,7 +2849,7 @@ function initShift() {
   const palettes = [
     [0.40, 0.43, 0.38],  // dim warm white — Information
     [0.05, 0.65, 0.78],  // cyan           — Context
-    [0.72, 1.00, 0.24],  // lime #b8ff3c   — Intelligence
+    [0.72, 1.00, 0.24],  // lime #00D8FF   — Intelligence
     [0.30, 0.85, 0.48],  // green-cyan     — Decision
     [0.72, 1.00, 0.24],  // lime bright    — Action
   ];
@@ -3140,13 +2975,12 @@ function initShift() {
     const maxScroll = document.body.scrollHeight - window.innerHeight;
     if (window.scrollY >= maxScroll - 8 && window.scrollY > SHIFT_OUT) {
       _txBottomFired = true;
-      setTimeout(triggerTransition, 500);
+      triggerTransition();
     }
   }, { passive: true });
 
   // Bidirectional: hide LA when scrolling back above The Shift, re-reveal when scrolling down
   window.addEventListener('scroll', () => {
-    if (document.getElementById('tx-overlay').classList.contains('active')) return;
     if (window._sdActive) return;   // Section 6 active — ignore scroll position changes
     const scrollY = window.scrollY;
     if (_laVisible && scrollY < SHIFT_OUT - VH * 0.5) {
@@ -3168,6 +3002,16 @@ function initShift() {
       document.getElementById('shift-content').style.opacity = op;
       document.getElementById('shift-label').style.opacity   = (op * 0.88).toString();
     } else if (_trackingShiftAfterLA && !_laVisible) {
+      // Scrolled back down into LA zone — re-reveal LA (this branch otherwise shadows
+      // the revealLA branch below, leaving section 5 stuck after 5→4→5)
+      if (scrollY >= SHIFT_OUT) {
+        _trackingShiftAfterLA = false;
+        revealLA();
+        gsap.to(['#shift-canvas','#shift-hud','#shift-content','#shift-label'], {
+          opacity: 0, duration: 0.2, overwrite: true
+        });
+        return;
+      }
       // GSAP scrubs for shift are dead (killed by overwrite:true in revealLA) — keep opacity in sync manually
       const fadeInLen = VH * 0.9;
       let op = 0;
@@ -3197,11 +3041,17 @@ runPhase1();
 // ── Living Architecture transition ──
 let _laVisible = false;
 let _trackingShiftAfterLA = false;
+const LA_SETTLE_MS = 800;         // ignore residual scroll momentum after LA reveal
 
 function revealLA() {
   if (_laVisible) return;
   _laVisible = true;
   _trackingShiftAfterLA = false;
+  /* settle window (cross-scope via window): the 5→6 wheel handler lives in a
+     separate module — it reads window._laSettleLock to skip momentum-tail accumulation */
+  window._laSettleLock = true;
+  clearTimeout(window._laSettleT);
+  window._laSettleT = setTimeout(() => { window._laSettleLock = false; }, LA_SETTLE_MS);
   if (typeof window.initLivingArchitecture === 'function') {
     window.initLivingArchitecture();
   }
@@ -3235,46 +3085,14 @@ window.revealLA     = revealLA;
 window.setLaVisible = function(v) { _laVisible = v; };
 
 function triggerTransition() {
-  const overlay = document.getElementById('tx-overlay');
-  if (overlay.classList.contains('active')) return;
   if (_laVisible) return;
-  overlay.classList.add('active');
-
+  /* Cross-fade: Shift fade-out overlaps LA fade-in (revealLA drives both),
+     so 4→5 reads as one continuous flow instead of an interstitial card. */
   gsap.to(['#shift-canvas','#shift-hud','#shift-content','#shift-label'], {
-    opacity: 0, duration: 0.25, overwrite: true
+    opacity: 0, duration: 0.5, ease: 'power2.inOut', overwrite: true
   });
-
-  gsap.set('.tx-num', { y: 10, opacity: 0 });
-  gsap.set('.tx-sub', { opacity: 0, y: 8 });
-  gsap.set('.tx-rule', { scaleX: 0 });
-  gsap.set(['#tx-w1','#tx-w2'], { y: '100%' });
-  gsap.set('.tx-prog', { scaleX: 0 });
-
-  gsap.timeline({
-    onComplete() {
-      gsap.to('#tx-flash', { opacity: 1, duration: 0.25, ease: 'power2.in',
-        onComplete() {
-          // Init + reveal LA now (at flash peak so setup is hidden)
-          revealLA();
-          // Dismiss overlay — no overflow lock
-          gsap.to(['#tx-overlay','#tx-flash'], { opacity: 0, duration: 0.5, ease: 'power2.out',
-            onComplete() {
-              overlay.classList.remove('active');
-              overlay.style.pointerEvents = 'none';
-              document.getElementById('la-close-hint').classList.add('visible');
-            }
-          });
-        }
-      });
-    }
-  })
-    .to('#tx-overlay',  { opacity: 1, duration: 0.55, ease: 'power2.inOut' })
-    .to('.tx-num',      { opacity: 1, y: 0, duration: 0.4, ease: 'power2.out' }, '+=0.15')
-    .to('.tx-rule',     { scaleX: 1, duration: 0.65, ease: 'power2.inOut' }, '+=0.08')
-    .to('#tx-w1',       { y: '0%', duration: 0.6, ease: 'power3.out' }, '+=0.06')
-    .to('#tx-w2',       { y: '0%', duration: 0.6, ease: 'power3.out' }, '-=0.38')
-    .to('.tx-sub',      { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' }, '+=0.12')
-    .to('.tx-prog',     { scaleX: 1, duration: 1.0, ease: 'power2.inOut' }, '+=0.1');
+  revealLA();
+  document.getElementById('la-close-hint').classList.add('visible');
 }
 </script>
 
@@ -3286,25 +3104,25 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass }     from 'three/addons/postprocessing/OutputPass.js';
 
 const NODES = [
-  { id:'intelligence', label:'Intelligence', idx:'00', pos:[0,0,0], color:'#e8f4ff', size:0.44, pulseSpeed:1.4,
+  { id:'intelligence', label:'Intelligence', idx:'00', pos:[0,0,0], color:'#E8F8FF', size:0.44, pulseSpeed:1.4,
     desc:'The cognitive core. Synthesizes all inputs across every domain into unified, real-time organizational understanding.',
     peers:['citizen','operations','knowledge','infrastructure','decision','action'] },
-  { id:'citizen', label:'Citizen', idx:'01', pos:[-3.8,1.8,-0.6], color:'#b8ff3c', size:0.27, pulseSpeed:0.72,
+  { id:'citizen', label:'Citizen', idx:'01', pos:[-3.8,1.8,-0.6], color:'#00D8FF', size:0.27, pulseSpeed:0.72,
     desc:'Direct interface with the community. Captures real-time feedback, service requests, and civic signals at every touchpoint.',
     peers:['intelligence','operations'] },
-  { id:'operations', label:'Operations', idx:'02', pos:[3.6,1.5,0.5], color:'#00d4ff', size:0.30, pulseSpeed:0.88,
+  { id:'operations', label:'Operations', idx:'02', pos:[3.6,1.5,0.5], color:'#00D8FF', size:0.30, pulseSpeed:0.88,
     desc:'Operational intelligence hub. Streamlines workflows, resource allocation, and field coordination with precision.',
     peers:['intelligence','infrastructure','citizen'] },
-  { id:'knowledge', label:'Knowledge', idx:'03', pos:[-3.3,-1.7,0.8], color:'#ffaa33', size:0.27, pulseSpeed:0.61,
+  { id:'knowledge', label:'Knowledge', idx:'03', pos:[-3.3,-1.7,0.8], color:'#5BC8E0', size:0.27, pulseSpeed:0.61,
     desc:'Institutional memory. Stores, indexes, and surfaces critical organizational insights exactly when decisions require them.',
     peers:['intelligence','decision'] },
-  { id:'infrastructure', label:'Infrastructure', idx:'04', pos:[3.2,-2.0,-0.5], color:'#9966ff', size:0.29, pulseSpeed:0.76,
+  { id:'infrastructure', label:'Infrastructure', idx:'04', pos:[3.2,-2.0,-0.5], color:'#8F5CFF', size:0.29, pulseSpeed:0.76,
     desc:'The backbone. Monitors and manages physical and digital assets with predictive intelligence and live telemetry.',
     peers:['intelligence','operations'] },
-  { id:'decision', label:'Decision', idx:'05', pos:[-0.9,3.1,1.2], color:'#ff6b35', size:0.27, pulseSpeed:0.67,
+  { id:'decision', label:'Decision', idx:'05', pos:[-0.9,3.1,1.2], color:'#00D8FF', size:0.27, pulseSpeed:0.67,
     desc:'Strategic synthesis engine. Translates multi-source intelligence into clear, prioritized, accountable action pathways.',
     peers:['intelligence','action','knowledge'] },
-  { id:'action', label:'Action', idx:'06', pos:[1.3,-3.1,0.7], color:'#00ffaa', size:0.27, pulseSpeed:0.93,
+  { id:'action', label:'Action', idx:'06', pos:[1.3,-3.1,0.7], color:'#3FE0FF', size:0.27, pulseSpeed:0.93,
     desc:'Execution layer. Closes the loop from insight to verifiable, measured outcomes — keeping the system alive.',
     peers:['intelligence','decision'] }
 ];
@@ -3373,8 +3191,8 @@ window.initLivingArchitecture = function() {
   renderer.toneMappingExposure = 0.9;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('#060807');
-  scene.fog = new THREE.Fog('#060807', 12, 28);
+  scene.background = new THREE.Color('#050816');
+  scene.fog = new THREE.Fog('#050816', 12, 28);
 
   const camera = new THREE.PerspectiveCamera(55, W / H, 0.1, 50);
   camera.position.set(0, 0, 9);
@@ -3385,7 +3203,7 @@ window.initLivingArchitecture = function() {
   composer.addPass(new OutputPass());
 
   // Grid
-  const grid = new THREE.GridHelper(30, 30, 0x182413, 0x182413);
+  const grid = new THREE.GridHelper(30, 30, 0x16203f, 0x16203f);
   grid.position.y = -5; grid.material.opacity = 0.35; grid.material.transparent = true;
   scene.add(grid);
 
@@ -3398,7 +3216,7 @@ window.initLivingArchitecture = function() {
   }
   const bgGeom = new THREE.BufferGeometry();
   bgGeom.setAttribute('position', new THREE.BufferAttribute(bgPos, 3));
-  const bgMat = new THREE.PointsMaterial({ color:0x4a7a10, size:0.025, transparent:true, opacity:0.18, blending:THREE.AdditiveBlending, depthWrite:false });
+  const bgMat = new THREE.PointsMaterial({ color:0x0a7a93, size:0.025, transparent:true, opacity:0.18, blending:THREE.AdditiveBlending, depthWrite:false });
   scene.add(new THREE.Points(bgGeom, bgMat));
 
   const nodeMap = {};
@@ -3695,17 +3513,6 @@ window.initLivingArchitecture = function() {
   <span class="la-sb-item" id="la-sb-active">SYSTEM ACTIVE</span>
 </div>
 
-<!-- ── Living Architecture transition overlay ── -->
-<div id="tx-overlay">
-  <div class="tx-num">05</div>
-  <div class="tx-rule"></div>
-  <div class="tx-title-wrap"><div class="tx-word" id="tx-w1">Living</div></div>
-  <div class="tx-title-wrap"><div class="tx-word" id="tx-w2">Architecture</div></div>
-  <div class="tx-sub">A unified intelligence ecosystem</div>
-  <div class="tx-prog-wrap"><div class="tx-prog"></div></div>
-</div>
-<div id="tx-flash"></div>
-
 <!-- ══ SECTION 6 — SELECTED DEPLOYMENTS ══ -->
 
 <!-- nav hint shown inside Section 5 — scroll-triggered -->
@@ -3751,17 +3558,6 @@ window.initLivingArchitecture = function() {
   </div>
   <div id="sd-back-progress"><div id="sd-back-progress-fill"></div></div>
 </div>
-
-<!-- SD transition overlay -->
-<div id="sd-tx-overlay">
-  <div class="sd-tx-num">06</div>
-  <div class="sd-tx-rule"></div>
-  <div class="sd-tx-title-wrap"><div class="sd-tx-word">Selected</div></div>
-  <div class="sd-tx-title-wrap"><div class="sd-tx-word">Deployments</div></div>
-  <div class="sd-tx-sub">In the field. Not demos.</div>
-  <div class="sd-tx-prog-wrap"><div class="sd-tx-prog"></div></div>
-</div>
-<div id="sd-flash"></div>
 
 <script type="module">
 import * as THREE from 'three';
@@ -3817,7 +3613,7 @@ renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.1;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color('#060807');
+scene.background = new THREE.Color('#050816');
 
 const cam = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 200);
 cam.position.set(0, 15, 13);
@@ -3875,8 +3671,8 @@ for (let i = 0; i < N; i++) {
 const colAttr = new THREE.BufferAttribute(new Float32Array(N * 3), 3);
 geo.setAttribute('color', colAttr);
 
-const LOW_C  = new THREE.Color('#0b1e12');
-const HIGH_C = new THREE.Color('#b8ff3c');
+const LOW_C  = new THREE.Color('#071026');
+const HIGH_C = new THREE.Color('#00D8FF');
 const tmpC   = new THREE.Color();
 
 function updateColors() {
@@ -3895,7 +3691,7 @@ const solidMesh = new THREE.Mesh(geo,
 scene.add(solidMesh);
 
 const wireMesh = new THREE.Mesh(geo,
-  new THREE.MeshBasicMaterial({ color: '#b8ff3c', wireframe: true, transparent: true, opacity: 0.05 }));
+  new THREE.MeshBasicMaterial({ color: '#00D8FF', wireframe: true, transparent: true, opacity: 0.05 }));
 scene.add(wireMesh);
 
 /* ── deployment pins ── */
@@ -3908,13 +3704,13 @@ const PIN_DEFS = [
 ];
 
 const pinGeo = new THREE.SphereGeometry(0.1, 8, 8);
-const pinMat = new THREE.MeshBasicMaterial({ color: '#b8ff3c' });
+const pinMat = new THREE.MeshBasicMaterial({ color: '#00D8FF' });
 const pinCount = 6;
 const pins      = Array.from({ length: pinCount }, () => {
   const m = new THREE.Mesh(pinGeo, pinMat); m.visible = false; scene.add(m); return m;
 });
 const pinLights = Array.from({ length: pinCount }, () => {
-  const l = new THREE.PointLight('#b8ff3c', 0, 4, 2); scene.add(l); return l;
+  const l = new THREE.PointLight('#00D8FF', 0, 4, 2); scene.add(l); return l;
 });
 
 function placePins(catIdx) {
@@ -4045,36 +3841,6 @@ function concealSD() {
 window.revealSD  = revealSD;
 window.concealSD = concealSD;
 
-/* ── SD transition overlay ── */
-function triggerTransitionSD() {
-  const ov = document.getElementById('sd-tx-overlay');
-  if (ov.classList.contains('active')) return;
-  ov.classList.add('active');
-
-  gsap.set('.sd-tx-word',  { y: '100%' });
-  gsap.set(['.sd-tx-num','.sd-tx-sub'], { opacity:0, y:10 });
-  gsap.set('.sd-tx-rule',  { scaleX: 0 });
-  gsap.set('.sd-tx-prog',  { scaleX: 0 });
-
-  gsap.timeline({
-    onComplete() {
-      gsap.to('#sd-flash', { opacity:1, duration:.2, ease:'power2.in',
-        onComplete() {
-          revealSD();
-          gsap.to(['#sd-tx-overlay','#sd-flash'], { opacity:0, duration:.5, ease:'power2.out',
-            onComplete() { ov.classList.remove('active'); ov.style.pointerEvents = 'none'; }
-          });
-        }
-      });
-    }
-  })
-  .to(ov,            { opacity:1,         duration:.3 })
-  .to('.sd-tx-num',  { opacity:1, y:0,    duration:.4 }, '+=.1')
-  .to('.sd-tx-rule', { scaleX:1,          duration:.6, ease:'power2.out' }, '-=.2')
-  .to('.sd-tx-word', { y:'0%', stagger:.14, duration:.8, ease:'power3.out' }, '-=.3')
-  .to('.sd-tx-sub',  { opacity:1, y:0,    duration:.4 }, '-=.3')
-  .to('.sd-tx-prog', { scaleX:1,          duration:.8, ease:'power2.inOut' }, '-=.6');
-}
 
 /* ── bidirectional scroll: Section 5 ↔ Section 6 ── */
 const SD_THRESHOLD  = 500; // px scroll to enter/exit section (higher = less accidental)
@@ -4091,11 +3857,12 @@ function laToSD() {
   document.body.style.overflow = 'hidden';
   gsap.to('#sd-nav', { opacity:0, duration:.3 });
   const laCvs = document.getElementById('la-canvas');
+  /* fade-out LA overlaps revealSD fade-in → cross-fade, no interstitial card */
   gsap.to([laCvs,'#la-section-label','#la-text-block','#la-statusbar'], {
-    opacity:0, duration:.35,
+    opacity:0, duration:.6, ease:'power2.inOut',
     onComplete() { laCvs.classList.remove('active'); }
   });
-  setTimeout(triggerTransitionSD, 250);
+  revealSD();
 }
 
 function sdToLA() {
@@ -4111,6 +3878,11 @@ window.addEventListener('wheel', (e) => {
   /* Section 5 → scroll down → Section 6 */
   if (document.getElementById('la-canvas').classList.contains('active')) {
     if (_sdScrollLock) return;
+    if (window._laSettleLock) {       // LA just revealed — drain momentum tail, don't accumulate
+      _sdScrollAcc = 0;
+      document.getElementById('sd-nav-progress-fill').style.width = '0%';
+      return;
+    }
     if (e.deltaY > 0) {
       _sdScrollAcc = Math.min(_sdScrollAcc + e.deltaY, SD_THRESHOLD);
       document.getElementById('sd-nav-progress-fill').style.width =
@@ -4243,16 +4015,6 @@ window.addEventListener('resize', () => {
 <div id="phil-back-hint">↑ Scroll back</div>
 <div id="phil-back-progress-wrap"><div id="phil-back-progress-fill"></div></div>
 
-<!-- Philosophy transition overlay -->
-<div id="phil-tx-overlay">
-  <div class="phil-tx-num">07</div>
-  <div class="phil-tx-rule"></div>
-  <div class="phil-tx-title-wrap"><div class="phil-tx-word">Philosophy</div></div>
-  <div class="phil-tx-sub">The interface between intelligence and decision.</div>
-  <div class="phil-tx-prog-wrap"><div class="phil-tx-prog"></div></div>
-</div>
-<div id="phil-flash"></div>
-
 <script type="module">
 import * as THREE from 'three';
 
@@ -4272,10 +4034,10 @@ const STMT_CFG = [
   { breathRate:1.0, color:[0.91,0.93,0.96], glow:0.40 }, // 11–13: cool white
   { breathRate:1.0, color:[0.91,0.93,0.96], glow:0.40 },
   { breathRate:1.0, color:[0.91,0.93,0.96], glow:0.40 },
-  { breathRate:0.8, color:[0.95,0.92,0.88], glow:0.50 }, // 14–15: warm muted
-  { breathRate:0.8, color:[0.95,0.92,0.88], glow:0.50 },
-  { breathRate:0.6, color:[0.98,0.88,0.72], glow:0.70 }, // 16–17: warm amber
-  { breathRate:0.6, color:[0.98,0.88,0.72], glow:0.70 },
+  { breathRate:0.8, color:[0.85,0.93,0.98], glow:0.50 }, // 14–15: cool muted
+  { breathRate:0.8, color:[0.85,0.93,0.98], glow:0.50 },
+  { breathRate:0.6, color:[0.55,0.78,1.0], glow:0.70 }, // 16–17: cyan
+  { breathRate:0.6, color:[0.55,0.78,1.0], glow:0.70 },
 ];
 
 /* ── GLSL shaders ── */
@@ -4461,41 +4223,6 @@ function concealPhil() {
 window.revealPhil  = revealPhil;
 window.concealPhil = concealPhil;
 
-/* ── Transition overlay ── */
-function triggerTransitionPhil() {
-  const ov = document.getElementById('phil-tx-overlay');
-  if (ov.classList.contains('active')) return;
-  ov.classList.add('active');
-  ov.style.pointerEvents = 'all';
-
-  gsap.set('.phil-tx-word',              { y: '100%' });
-  gsap.set(['.phil-tx-num','.phil-tx-sub'], { opacity:0, y:10 });
-  gsap.set('.phil-tx-rule',              { scaleX: 0 });
-  gsap.set('.phil-tx-prog',              { scaleX: 0 });
-
-  gsap.timeline({
-    onComplete() {
-      gsap.to('#phil-flash', { opacity:1, duration:.2, ease:'power2.in',
-        onComplete() {
-          revealPhil();
-          gsap.to(['#phil-tx-overlay','#phil-flash'], { opacity:0, duration:.5, ease:'power2.out',
-            onComplete() {
-              ov.classList.remove('active');
-              ov.style.pointerEvents = 'none';
-            }
-          });
-        }
-      });
-    }
-  })
-    .to('#phil-tx-overlay', { opacity:1, duration:.55, ease:'power2.inOut' })
-    .to('.phil-tx-num',     { opacity:1, y:0, duration:.4, ease:'power2.out' }, '+=0.15')
-    .to('.phil-tx-rule',    { scaleX:1,  duration:.65, ease:'power2.inOut' },   '+=0.08')
-    .to('.phil-tx-word',    { y:'0%',    duration:.6,  ease:'power3.out'  },    '+=0.06')
-    .to('.phil-tx-sub',     { opacity:1, y:0, duration:.45, ease:'power2.out' },'+=0.12')
-    .to('.phil-tx-prog',    { scaleX:1,  duration:1.0, ease:'power2.inOut' },   '+=0.1');
-}
-
 /* ── S6 → S7 ── */
 function sdToPhil() {
   /* concealSD resets _sdVisible + _sdActive; re-lock overflow immediately */
@@ -4503,7 +4230,8 @@ function sdToPhil() {
   document.body.style.overflow = 'hidden';
   gsap.to('#phil-nav', { opacity:0, duration:.2 });
   document.getElementById('phil-nav').classList.remove('visible');
-  setTimeout(triggerTransitionPhil, 320);
+  /* SD fade-out overlaps Phil fade-in → cross-fade, no interstitial card */
+  revealPhil();
 }
 
 /* ── S7 → S6 ── */
@@ -4600,12 +4328,12 @@ window.addEventListener('resize', () => {
 #car-canvas.active { pointer-events:all; }
 
 #car-section-label {
-  position:fixed; top:36px; left:44px; z-index:200;
+  position:fixed; top:84px; left:44px; z-index:200;
   display:flex; align-items:baseline; gap:10px;
   opacity:0; transform:translateY(-8px);
 }
 .car-sl-num   { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em; color:var(--accent-dim); }
-.car-sl-sep   { font-size:10px; color:#2a3a20; }
+.car-sl-sep   { font-size:10px; color:#1d2a4d; }
 .car-sl-title { font-family:'Inter',sans-serif; font-weight:200; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:var(--muted); }
 
 #car-headline {
@@ -4639,12 +4367,12 @@ window.addEventListener('resize', () => {
 .car-role {
   opacity:0;
   padding:18px 22px 16px;
-  border:1px solid rgba(184,255,60,.1);
-  background:rgba(6,8,7,.78);
+  border:1px solid rgba(0,216,255,.1);
+  background:rgba(5,8,22,.78);
   backdrop-filter:blur(8px);
   transition:border-color .3s;
 }
-.car-role:hover { border-color:rgba(184,255,60,.28); }
+.car-role:hover { border-color:rgba(0,216,255,.28); }
 .car-role-num {
   font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.24em;
   color:var(--accent-dim); margin-bottom:8px; text-transform:uppercase;
@@ -4678,7 +4406,7 @@ window.addEventListener('resize', () => {
   display:flex; align-items:center; gap:10px; opacity:0;
 }
 .car-bpw-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.18em; color:var(--muted); }
-#car-back-bar  { width:60px; height:1px; background:rgba(184,255,60,.1); position:relative; }
+#car-back-bar  { width:60px; height:1px; background:rgba(0,216,255,.1); position:relative; }
 #car-back-fill { position:absolute; top:0; left:0; height:100%; width:0%; background:var(--accent-dim); transition:width .08s linear; }
 
 #car-nav {
@@ -4689,36 +4417,10 @@ window.addEventListener('resize', () => {
 .car-nav-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.18em; color:var(--muted); text-transform:uppercase; }
 .car-nav-arrow { font-size:9px; color:var(--accent-dim); animation:carArrow 1.8s ease-in-out infinite; }
 @keyframes carArrow { 0%,100%{opacity:.35} 50%{opacity:.9} }
-#car-nav-bar  { width:80px; height:1px; background:rgba(184,255,60,.1); position:relative; }
+#car-nav-bar  { width:80px; height:1px; background:rgba(0,216,255,.1); position:relative; }
 #car-nav-fill { position:absolute; top:0; left:0; height:100%; width:0%; background:var(--accent); transition:width .08s linear; }
 
-/* Transition overlay */
-#car-tx-overlay {
-  position:fixed; inset:0; z-index:8000;
-  background:var(--bg);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
-  opacity:0; pointer-events:none;
-}
-#car-tx-overlay.active { pointer-events:all; }
-.car-tx-rule { width:80px; height:1px; background:var(--accent-dim); transform:scaleX(0); transform-origin:left; }
-.car-tx-num  { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.24em; color:var(--accent-dim); opacity:0; }
-.car-tx-wrap { overflow:hidden; line-height:1; }
-.car-tx-word { font-family:'Space Grotesk',sans-serif; font-size:clamp(32px,5vw,64px); font-weight:600; letter-spacing:-.03em; color:var(--text); display:block; transform:translateY(100%); }
-.car-tx-sub  { font-family:'Inter',sans-serif; font-size:12px; font-weight:300; color:var(--muted); letter-spacing:.08em; opacity:0; }
-.car-tx-bar  { width:200px; height:1px; background:rgba(255,255,255,.06); overflow:hidden; }
-.car-tx-prog { height:100%; width:100%; background:var(--accent-dim); transform:scaleX(0); transform-origin:left; }
-#car-flash   { position:fixed; inset:0; z-index:8100; background:var(--accent); opacity:0; pointer-events:none; }
 </style>
-
-<!-- ── Transition overlay (S7 → S8) ── -->
-<div id="car-tx-overlay">
-  <div class="car-tx-rule"></div>
-  <div class="car-tx-num">08 / CAREERS</div>
-  <div class="car-tx-wrap"><div class="car-tx-word">Careers</div></div>
-  <div class="car-tx-sub">The interface between potential and purpose.</div>
-  <div class="car-tx-bar"><div class="car-tx-prog"></div></div>
-</div>
-<div id="car-flash"></div>
 
 <!-- ── Canvas ── -->
 <canvas id="car-canvas"></canvas>
@@ -4828,11 +4530,11 @@ for (let i = 0; i < PT; i++) {
 const ptGeo = new THREE.BufferGeometry();
 ptGeo.setAttribute('position', new THREE.BufferAttribute(ptBuf, 3));
 scene.add(new THREE.Points(ptGeo,
-  new THREE.PointsMaterial({ color: 0x4a7a10, size: .05, transparent: true, opacity: .4 })
+  new THREE.PointsMaterial({ color: 0x0a7a93, size: .05, transparent: true, opacity: .4 })
 ));
 
 /* ── Wireframe fragments ── */
-const ACCENT = 0xb8ff3c;
+const ACCENT = 0x00D8FF;
 const mats   = Array.from({ length: 4 }, () =>
   new THREE.LineBasicMaterial({ color: ACCENT, transparent: true, opacity: 0 })
 );
@@ -4993,43 +4695,12 @@ window.carApply = function() {
   _carToContact();
 };
 
-/* ── Transition overlay (S7 → S8) ── */
-function _triggerTransitionCar() {
-  const ov = document.getElementById('car-tx-overlay');
-  if (ov.classList.contains('active')) return;
-  ov.classList.add('active');
-  ov.style.pointerEvents = 'all';
-
-  gsap.set('.car-tx-word', { y: '100%' });
-  gsap.set(['.car-tx-num','.car-tx-sub'], { opacity: 0, y: 10 });
-  gsap.set('.car-tx-rule', { scaleX: 0 });
-  gsap.set('.car-tx-prog', { scaleX: 0 });
-
-  gsap.timeline({
-    onComplete() {
-      gsap.to('#car-flash', { opacity: 1, duration: .2, ease: 'power2.in',
-        onComplete() {
-          revealCar();
-          gsap.to(['#car-tx-overlay','#car-flash'], { opacity: 0, duration: .5, ease: 'power2.out',
-            onComplete() { ov.classList.remove('active'); ov.style.pointerEvents = 'none'; }
-          });
-        }
-      });
-    }
-  })
-    .to('#car-tx-overlay', { opacity: 1, duration: .4,  ease: 'power2.out' })
-    .to('.car-tx-rule',    { scaleX: 1, duration: .6,   ease: 'power2.inOut' }, '+=.05')
-    .to('.car-tx-num',     { opacity: 1, y: 0, duration: .4 }, '+=.08')
-    .to('.car-tx-word',    { y: '0%', duration: .7,     ease: 'power3.out' }, '-=.2')
-    .to('.car-tx-sub',     { opacity: 1, y: 0, duration: .5 }, '-=.3')
-    .to('.car-tx-prog',    { scaleX: 1, duration: 1.0,  ease: 'power2.inOut' }, '+=.1');
-}
-
 /* ── S7 → S8 (called from section-7.html via window.philToCar) ── */
 function philToCar() {
   if (typeof window.concealPhil === 'function') window.concealPhil();
   document.body.style.overflow = 'hidden';
-  setTimeout(_triggerTransitionCar, 320);
+  /* Phil fade-out overlaps Car fade-in → cross-fade, no interstitial card */
+  revealCar();
 }
 
 window.philToCar  = philToCar;
@@ -5072,12 +4743,12 @@ window.addEventListener('resize', () => {
 
 /* Section label */
 #ct-section-label {
-  position:fixed; top:36px; left:44px; z-index:820;
+  position:fixed; top:84px; left:44px; z-index:820;
   display:flex; align-items:baseline; gap:10px;
   opacity:0; transform:translateY(-8px);
 }
 .ct-sl-num   { font-family:'Space Mono',monospace; font-size:10px; letter-spacing:.18em; color:var(--accent-dim); }
-.ct-sl-sep   { font-size:10px; color:#2a3a20; }
+.ct-sl-sep   { font-size:10px; color:#1d2a4d; }
 .ct-sl-title { font-family:'Inter',sans-serif; font-weight:200; font-size:11px; letter-spacing:.28em; text-transform:uppercase; color:var(--muted); }
 
 /* Left copy column */
@@ -5195,25 +4866,8 @@ window.addEventListener('resize', () => {
   display:flex; align-items:center; gap:10px; opacity:0;
 }
 .ct-bpw-label { font-family:'Space Mono',monospace; font-size:8px; letter-spacing:.18em; color:var(--muted); }
-#ct-back-bar  { width:60px; height:1px; background:rgba(184,255,60,.1); position:relative; }
+#ct-back-bar  { width:60px; height:1px; background:rgba(0,216,255,.1); position:relative; }
 #ct-back-fill { position:absolute; top:0; left:0; height:100%; width:0%; background:var(--accent-dim); transition:width .08s linear; }
-
-/* Transition overlay */
-#ct-tx-overlay {
-  position:fixed; inset:0; z-index:8000;
-  background:var(--bg);
-  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px;
-  opacity:0; pointer-events:none;
-}
-#ct-tx-overlay.active { pointer-events:all; }
-.ct-tx-rule { width:80px; height:1px; background:var(--accent-dim); transform:scaleX(0); transform-origin:left; }
-.ct-tx-num  { font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.24em; color:var(--accent-dim); opacity:0; }
-.ct-tx-wrap { overflow:hidden; line-height:1; }
-.ct-tx-word { font-family:'Space Grotesk',sans-serif; font-size:clamp(32px,5vw,64px); font-weight:600; letter-spacing:-.03em; color:var(--text); display:block; transform:translateY(100%); }
-.ct-tx-sub  { font-family:'Inter',sans-serif; font-size:12px; font-weight:300; color:var(--muted); letter-spacing:.08em; opacity:0; }
-.ct-tx-bar  { width:200px; height:1px; background:rgba(255,255,255,.06); overflow:hidden; }
-.ct-tx-prog { height:100%; width:100%; background:var(--accent-dim); transform:scaleX(0); transform-origin:left; }
-#ct-flash   { position:fixed; inset:0; z-index:8100; background:var(--accent); opacity:0; pointer-events:none; }
 
 /* Footer */
 #ct-footer {
@@ -5236,7 +4890,7 @@ window.addEventListener('resize', () => {
   font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.08em;
   color:var(--muted);
 }
-.ct-ft-sep { color:#2a3a20; font-size:9px; }
+.ct-ft-sep { color:#1d2a4d; font-size:9px; }
 .ct-ft-link {
   font-family:'Space Mono',monospace; font-size:9px; letter-spacing:.12em;
   color:var(--muted); text-decoration:none; text-transform:uppercase;
@@ -5261,16 +4915,6 @@ window.addEventListener('resize', () => {
   .ct-ft-right { gap:10px; }
 }
 </style>
-
-<!-- ── Transition overlay (S8 → S9) ── -->
-<div id="ct-tx-overlay">
-  <div class="ct-tx-rule"></div>
-  <div class="ct-tx-num">09 / CONTACT</div>
-  <div class="ct-tx-wrap"><div class="ct-tx-word">Contact</div></div>
-  <div class="ct-tx-sub">Let's talk.</div>
-  <div class="ct-tx-bar"><div class="ct-tx-prog"></div></div>
-</div>
-<div id="ct-flash"></div>
 
 <!-- ── Section label ── -->
 <div id="ct-section-label">
@@ -5412,7 +5056,8 @@ function revealContact() {
   document.querySelectorAll('.ct-pill').forEach(p => p.classList.remove('active'));
   document.getElementById('ct-inquiry').value = '';
 
-  _triggerTransitionCt();
+  /* Car fade-out overlaps Contact fade-in → cross-fade, no interstitial card */
+  _showCtContent();
 }
 
 function _showCtContent() {
@@ -5433,37 +5078,6 @@ function concealContact() {
       onComplete() { container.classList.remove('active'); }
     });
   backHint.classList.remove('visible');
-}
-
-/* ── Transition overlay (S8 → S9) ── */
-function _triggerTransitionCt() {
-  const ov = document.getElementById('ct-tx-overlay');
-  if (ov.classList.contains('active')) return;
-  ov.classList.add('active');
-
-  gsap.set('.ct-tx-word', { y: '100%' });
-  gsap.set(['.ct-tx-num', '.ct-tx-sub'], { opacity: 0, y: 10 });
-  gsap.set('.ct-tx-rule', { scaleX: 0 });
-  gsap.set('.ct-tx-prog', { scaleX: 0 });
-
-  gsap.timeline({
-    onComplete() {
-      gsap.to('#ct-flash', { opacity: 1, duration: .2, ease: 'power2.in',
-        onComplete() {
-          _showCtContent();
-          gsap.to(['#ct-tx-overlay', '#ct-flash'], { opacity: 0, duration: .5, ease: 'power2.out',
-            onComplete() { ov.classList.remove('active'); }
-          });
-        }
-      });
-    }
-  })
-    .to('#ct-tx-overlay', { opacity: 1, duration: .4,  ease: 'power2.out' })
-    .to('.ct-tx-rule',    { scaleX: 1, duration: .6,   ease: 'power2.inOut' }, '+=.05')
-    .to('.ct-tx-num',     { opacity: 1, y: 0, duration: .4 }, '+=.08')
-    .to('.ct-tx-word',    { y: '0%', duration: .7,     ease: 'power3.out' }, '-=.2')
-    .to('.ct-tx-sub',     { opacity: 1, y: 0, duration: .5 }, '-=.3')
-    .to('.ct-tx-prog',    { scaleX: 1, duration: 1.0,  ease: 'power2.inOut' }, '+=.1');
 }
 
 /* ── Wheel handler — back only (terminal section) ── */
